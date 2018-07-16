@@ -1,17 +1,3 @@
-/*
-http://www.cgsoso.com/forum-211-1.html
-
-CG搜搜 Unity3d 每日Unity3d插件免费更新 更有VIP资源！
-
-CGSOSO 主打游戏开发，影视设计等CG资源素材。
-
-插件如若商用，请务必官网购买！
-
-daily assets update for try.
-
-U should buy the asset from home store if u use it in your project!
-*/
-
 using System;
 using UnityEngine;
 using System.Collections;
@@ -261,9 +247,34 @@ namespace UltimateGameTools
           yield break;
         }
 
-        if (nVertices > GetOriginalMeshUniqueVertexCount())
+        if (nVertices >= GetOriginalMeshUniqueVertexCount())
         {
-          nVertices = GetOriginalMeshUniqueVertexCount();
+          // Original vertex count requested
+
+          meshOut.triangles    = new int[0];
+          meshOut.subMeshCount = m_meshOriginal.subMeshCount;
+
+          meshOut.vertices     = m_meshOriginal.vertices;
+          meshOut.normals      = m_meshOriginal.normals;
+          meshOut.tangents     = m_meshOriginal.tangents;
+          meshOut.uv           = m_meshOriginal.uv;
+          meshOut.uv2          = m_meshOriginal.uv2;
+          meshOut.colors32     = m_meshOriginal.colors32;
+          meshOut.boneWeights  = m_meshOriginal.boneWeights;
+          meshOut.bindposes    = m_meshOriginal.bindposes;
+
+          meshOut.triangles    = m_meshOriginal.triangles;
+          meshOut.subMeshCount = m_meshOriginal.subMeshCount;
+
+          for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
+          {
+            meshOut.SetTriangles(m_meshOriginal.GetTriangles(nSubMesh), nSubMesh);
+          }
+
+          meshOut.name = gameObject.name + " simplified mesh";
+
+          CoroutineEnded = true;
+          yield break;
         }
 
         m_listVertices   = new List<Vertex>();

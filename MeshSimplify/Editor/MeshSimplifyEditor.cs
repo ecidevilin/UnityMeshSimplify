@@ -1,18 +1,4 @@
-/*
-http://www.cgsoso.com/forum-211-1.html
-
-CG搜搜 Unity3d 每日Unity3d插件免费更新 更有VIP资源！
-
-CGSOSO 主打游戏开发，影视设计等CG资源素材。
-
-插件如若商用，请务必官网购买！
-
-daily assets update for try.
-
-U should buy the asset from home store if u use it in your project!
-*/
-
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
@@ -150,11 +136,14 @@ public class MeshSimplifyEditor : Editor
           }
         }
 
-        Matrix4x4 mtxHandles = Handles.matrix;
-        Handles.matrix = Matrix4x4.TRS(relevanceSphere.m_v3Position, Quaternion.Euler(relevanceSphere.m_v3Rotation), relevanceSphere.m_v3Scale);
-        Handles.color  = new Color(0.0f, 0.0f, 1.0f, 0.5f);
-        Handles.SphereCap(0, Vector3.zero, Quaternion.identity, 1.0f);
-        Handles.matrix = mtxHandles;
+        if(Event.current.type == EventType.Repaint)
+        { 
+          Matrix4x4 mtxHandles = Handles.matrix;
+          Handles.matrix = Matrix4x4.TRS(relevanceSphere.m_v3Position, Quaternion.Euler(relevanceSphere.m_v3Rotation), relevanceSphere.m_v3Scale);
+          Handles.color  = new Color(0.0f, 0.0f, 1.0f, 0.5f);
+          Handles.SphereHandleCap(0, Vector3.zero, Quaternion.identity, 1.0f, EventType.Repaint);
+          Handles.matrix = mtxHandles;
+        }
       }
     }
   }
@@ -261,6 +250,12 @@ public class MeshSimplifyEditor : Editor
       int nMeshVertexCount = meshSimplify.GetOriginalVertexCount(bIsOverriden == false);
 
       EditorGUILayout.LabelField("Vertex count: " + nSimplifiedMeshVertexCount + "/" + nMeshVertexCount);
+
+      int nSimplifiedMeshTriangleCount = meshSimplify.GetSimplifiedTriangleCount(bIsOverriden == false);
+      int nMeshTriangleCount = meshSimplify.GetOriginalTriangleCount(bIsOverriden == false);
+
+      EditorGUILayout.LabelField("Triangle count: " + nSimplifiedMeshTriangleCount + "/" + nMeshTriangleCount);
+
       //EditorGUILayout.LabelField("Child nodes: " + (meshSimplify.m_listDependentChildren == null ? 0 : meshSimplify.m_listDependentChildren.Count));
 
       EditorGUILayout.Space();
@@ -501,6 +496,11 @@ public class MeshSimplifyEditor : Editor
           }
 
           meshSimplify.AssignSimplifiedMesh(meshSimplify.m_meshSimplifyRoot == null);
+
+          if (meshSimplify.m_strAssetPath != null && meshSimplify.m_bEnablePrefabUsage)
+          {
+            SaveMeshAssets();
+          }
         }
         catch (System.Exception e)
         {
@@ -578,7 +578,7 @@ public class MeshSimplifyEditor : Editor
   {
     MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
 
-    if (meshSimplify.m_meshSimplifyRoot != null)
+    if (meshSimplify != null && meshSimplify.m_meshSimplifyRoot != null)
     {
       if (Application.isEditor && Application.isPlaying == false)
       {
@@ -614,17 +614,24 @@ public class MeshSimplifyEditor : Editor
 
           if (string.IsNullOrEmpty(strMeshAssetPath))
           {
+            //Debug.Log("Showing file selection panel");
+
             strMeshAssetPath = UnityEditor.EditorUtility.SaveFilePanelInProject("Save mesh asset(s)", "mesh_" + gameObject.name + gameObject.GetInstanceID().ToString() + ".asset", "asset", "Please enter a file name to save the mesh asset(s) to");
 
             if (strMeshAssetPath.Length == 0)
             {
+              //Debug.LogWarning("strMeshAssetPath.Length == 0. User cancelled?");
               return;
             }
+
+            //Debug.Log("User selected " + strMeshAssetPath + " using panel.");
 
             meshSimplify.m_strAssetPath = strMeshAssetPath;
           }
 
           int nCounter = 0;
+
+          //Debug.Log("Saving files to " + strMeshAssetPath + ". Exists previously?: " + System.IO.File.Exists(strMeshAssetPath));
           SaveMeshAssetsRecursive(gameObject, gameObject, strMeshAssetPath, true, System.IO.File.Exists(strMeshAssetPath), ref nCounter);
         }
       }
@@ -666,6 +673,8 @@ public class MeshSimplifyEditor : Editor
 
         if (bAssetAlreadyCreated == false && UnityEditor.AssetDatabase.Contains(meshSimplify.m_simplifiedMesh) == false)
         {
+          //Debug.Log("Creating asset " + meshSimplify.m_simplifiedMesh.name);
+
           UnityEditor.AssetDatabase.CreateAsset(meshSimplify.m_simplifiedMesh, strFile);
           bAssetAlreadyCreated = true;
         }
@@ -673,6 +682,8 @@ public class MeshSimplifyEditor : Editor
         {
           if (UnityEditor.AssetDatabase.Contains(meshSimplify.m_simplifiedMesh) == false)
           {
+            //Debug.Log("Adding asset " + meshSimplify.m_simplifiedMesh.name);
+
             UnityEditor.AssetDatabase.AddObjectToAsset(meshSimplify.m_simplifiedMesh, strFile);
             UnityEditor.AssetDatabase.ImportAsset(UnityEditor.AssetDatabase.GetAssetPath(meshSimplify.m_simplifiedMesh));
           }

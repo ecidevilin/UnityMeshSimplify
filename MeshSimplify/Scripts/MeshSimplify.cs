@@ -1,18 +1,4 @@
-/*
-http://www.cgsoso.com/forum-211-1.html
-
-CG搜搜 Unity3d 每日Unity3d插件免费更新 更有VIP资源！
-
-CGSOSO 主打游戏开发，影视设计等CG资源素材。
-
-插件如若商用，请务必官网购买！
-
-daily assets update for try.
-
-U should buy the asset from home store if u use it in your project!
-*/
-
-using UnityEngine;
+﻿using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,6 +6,26 @@ using UltimateGameTools.MeshSimplifier;
 
 public class MeshSimplify : MonoBehaviour
 {
+  public bool RecurseIntoChildren
+  {
+    get
+    {
+      return m_bGenerateIncludeChildren;
+    }
+  }
+
+  public Simplifier MeshSimplifier
+  {
+    get
+    {
+      return m_meshSimplifier;
+    }
+    set
+    {
+      m_meshSimplifier = value;
+    }
+  }
+
   [HideInInspector]
   public Mesh m_originalMesh = null;
 
@@ -217,7 +223,7 @@ public class MeshSimplify : MonoBehaviour
     return false;
   }
 
-  private void ConfigureSimplifier()
+  public void ConfigureSimplifier()
   {
     m_meshSimplifier.UseEdgeLength  = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bUseEdgeLength  : m_bUseEdgeLength;
     m_meshSimplifier.UseCurvature   = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bUseCurvature   : m_bUseCurvature;
@@ -406,7 +412,7 @@ public class MeshSimplify : MonoBehaviour
 
           if (meshSimplify.m_simplifiedMesh == null)
           {
-            meshSimplify.m_simplifiedMesh = new Mesh();
+            meshSimplify.m_simplifiedMesh = CreateNewEmptyMesh(meshSimplify);
           }
 
           meshSimplify.ConfigureSimplifier();
@@ -653,6 +659,37 @@ public class MeshSimplify : MonoBehaviour
     }
   }
 
+  public int GetOriginalTriangleCount(bool bRecurseIntoChildren)
+  {
+    int nTriangleCount = 0;
+    GetOriginalTriangleCountRecursive(this, this.gameObject, ref nTriangleCount, bRecurseIntoChildren);
+    return nTriangleCount;
+  }
+
+  private static void GetOriginalTriangleCountRecursive(MeshSimplify root, GameObject gameObject, ref int nTriangleCount, bool bRecurseIntoChildren)
+  {
+    MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
+
+    if (meshSimplify != null)
+    {
+      if (IsRootOrBelongsToTree(meshSimplify, root))
+      {
+        if (meshSimplify.m_originalMesh != null)
+        {
+          nTriangleCount += meshSimplify.m_originalMesh.triangles.Length / 3;
+        }
+      }
+    }
+
+    if (bRecurseIntoChildren)
+    {
+      for (int nChild = 0; nChild < gameObject.transform.childCount; nChild++)
+      {
+        GetOriginalTriangleCountRecursive(root, gameObject.transform.GetChild(nChild).gameObject, ref nTriangleCount, bRecurseIntoChildren);
+      }
+    }
+  }
+
   public int GetSimplifiedVertexCount(bool bRecurseIntoChildren)
   {
     int nVertexCount = 0;
@@ -680,6 +717,37 @@ public class MeshSimplify : MonoBehaviour
       for (int nChild = 0; nChild < gameObject.transform.childCount; nChild++)
       {
         GetSimplifiedVertexCountRecursive(root, gameObject.transform.GetChild(nChild).gameObject, ref nVertexCount, bRecurseIntoChildren);
+      }
+    }
+  }
+
+  public int GetSimplifiedTriangleCount(bool bRecurseIntoChildren)
+  {
+    int nTriangleCount = 0;
+    GetSimplifiedTriangleCountRecursive(this, this.gameObject, ref nTriangleCount, bRecurseIntoChildren);
+    return nTriangleCount;
+  }
+
+  private static void GetSimplifiedTriangleCountRecursive(MeshSimplify root, GameObject gameObject, ref int nTriangleCount, bool bRecurseIntoChildren)
+  {
+    MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
+
+    if (meshSimplify != null)
+    {
+      if (IsRootOrBelongsToTree(meshSimplify, root))
+      {
+        if (meshSimplify.m_simplifiedMesh != null)
+        {
+          nTriangleCount += meshSimplify.m_simplifiedMesh.triangles.Length / 3;
+        }
+      }
+    }
+
+    if (bRecurseIntoChildren)
+    {
+      for (int nChild = 0; nChild < gameObject.transform.childCount; nChild++)
+      {
+        GetSimplifiedTriangleCountRecursive(root, gameObject.transform.GetChild(nChild).gameObject, ref nTriangleCount, bRecurseIntoChildren);
       }
     }
   }
@@ -739,6 +807,18 @@ public class MeshSimplify : MonoBehaviour
         FreeDataRecursive(root, gameObject.transform.GetChild(nChild).gameObject, bRecurseIntoChildren);
       }
     }
+  }
+
+  private static Mesh CreateNewEmptyMesh(MeshSimplify meshSimplify)
+  {
+    if(meshSimplify.m_originalMesh == null)
+    {
+      return new Mesh();
+    }
+
+    Mesh meshOut = Mesh.Instantiate(meshSimplify.m_originalMesh);
+    meshOut.Clear();
+    return meshOut;
   }
 
 #if UNITY_EDITOR
