@@ -55,19 +55,7 @@ namespace UltimateGameTools
 
         public BoneWeight ToBoneWeight()
         {
-          BoneWeight boneWeight = new BoneWeight();
-
-          boneWeight.boneIndex0 = _boneIndex0;
-          boneWeight.boneIndex1 = _boneIndex1;
-          boneWeight.boneIndex2 = _boneIndex2;
-          boneWeight.boneIndex3 = _boneIndex3;
-
-          boneWeight.weight0    = _boneWeight0;
-          boneWeight.weight1    = _boneWeight1;
-          boneWeight.weight2    = _boneWeight2;
-          boneWeight.weight3    = _boneWeight3;
-
-          return boneWeight;
+          return new BoneWeight() { boneIndex0 = _boneIndex0, boneIndex1 = _boneIndex1, boneIndex2 = _boneIndex2, boneIndex3 = _boneIndex3, weight0 = _boneWeight0, weight1 = _boneWeight1, weight2 = _boneWeight2, weight3 = _boneWeight3 };
         }
 
         public int   _boneIndex0;
@@ -136,18 +124,30 @@ namespace UltimateGameTools
 
         private int CoordToFixed(float fCoord)
         {
-          int nInteger   = Mathf.FloorToInt(fCoord);
-          int nRemainder = Mathf.FloorToInt((fCoord - nInteger) * fDecimalMultiplier);
+          //int nInteger   = Mathf.FloorToInt(fCoord);
+          //int nRemainder = Mathf.FloorToInt((fCoord - nInteger) * fDecimalMultiplier);
 
-          return nInteger << 16 | nRemainder;
+          //return nInteger << 16 | nRemainder;
+            int ret = 0;
+            unsafe
+            {
+                ret= *(int*)(float*) &fCoord;
+            }
+            return ret;
         }
 
         private float FixedToCoord(int nFixed)
         {
-          float fRemainder = (nFixed & 0xFFFF) / fDecimalMultiplier;
-          float fInteger = nFixed >> 16;
+                    //float fRemainder = (nFixed & 0xFFFF) / fDecimalMultiplier;
+                    //float fInteger = nFixed >> 16;
 
-          return fInteger + fRemainder;
+                    //return fInteger + fRemainder;
+            float ret = 0;
+            unsafe
+            {
+                ret= *(float*)(int*) &nFixed;
+            }
+            return ret;
         }
 
         // Private vars
