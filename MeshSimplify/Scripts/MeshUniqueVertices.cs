@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Chaos;
 
 namespace UltimateGameTools
 {
@@ -84,7 +85,7 @@ namespace UltimateGameTools
 
         public override int GetHashCode()
         {
-          return m_nFixedX + (m_nFixedY << 2) + (m_nFixedZ << 4);
+          return (int)(m_nFixedX + (m_nFixedY << 2) + (m_nFixedZ << 4));
         }
 
         // Constructor
@@ -122,37 +123,27 @@ namespace UltimateGameTools
           m_nFixedZ = CoordToFixed(vertex.z);
         }
 
-        private int CoordToFixed(float fCoord)
+        private uint CoordToFixed(float fCoord)
         {
           //int nInteger   = Mathf.FloorToInt(fCoord);
           //int nRemainder = Mathf.FloorToInt((fCoord - nInteger) * fDecimalMultiplier);
 
           //return nInteger << 16 | nRemainder;
-            int ret = 0;
-            unsafe
-            {
-                ret= *(int*)(float*) &fCoord;
-            }
-            return ret;
+            return UnsafeUtil.FloatToUint(fCoord);
         }
 
-        private float FixedToCoord(int nFixed)
+        private float FixedToCoord(uint nFixed)
         {
                     //float fRemainder = (nFixed & 0xFFFF) / fDecimalMultiplier;
                     //float fInteger = nFixed >> 16;
 
                     //return fInteger + fRemainder;
-            float ret = 0;
-            unsafe
-            {
-                ret= *(float*)(int*) &nFixed;
-            }
-            return ret;
+            return UnsafeUtil.UintToFloat(nFixed);
         }
 
         // Private vars
 
-        private int m_nFixedX, m_nFixedY, m_nFixedZ;
+        private uint m_nFixedX, m_nFixedY, m_nFixedZ;
         private const float fDecimalMultiplier = 100000.0f;
       }
 
