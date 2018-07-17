@@ -144,7 +144,6 @@ namespace UltimateGameTools
         // Private vars
 
         private uint m_nFixedX, m_nFixedY, m_nFixedZ;
-        private const float fDecimalMultiplier = 100000.0f;
       }
 
       #endregion
