@@ -106,13 +106,13 @@ namespace UltimateGameTools
       {
         m_meshOriginal = sourceMesh;
 
-        Vector3[] aVerticesWorld = GetWorldVertices(gameObject);
+        //Vector3[] aVerticesWorld = GetWorldVertices(gameObject);
 
-        if (aVerticesWorld == null)
-        {
-          CoroutineEnded = true;
-          yield break;
-        }
+        //if (aVerticesWorld == null)
+        //{
+        //  CoroutineEnded = true;
+        //  yield break;
+        //}
 
         m_listVertexMap             = new List<int>();
         m_listVertexPermutationBack = new List<int>();
@@ -131,7 +131,7 @@ namespace UltimateGameTools
         }
 
         m_meshUniqueVertices = new MeshUniqueVertices();
-        m_meshUniqueVertices.BuildData(m_meshOriginal, aVerticesWorld);
+        m_meshUniqueVertices.BuildData(m_meshOriginal, gameObject);
 
         m_nOriginalMeshVertexCount = m_meshUniqueVertices.ListVertices.Count;
         m_fOriginalMeshSize        = Mathf.Max(m_meshOriginal.bounds.size.x, m_meshOriginal.bounds.size.y, m_meshOriginal.bounds.size.z);

@@ -6,7 +6,6 @@ namespace UltimateGameTools
 {
     namespace MeshSimplifier
     {
-
         /// <summary>
         /// Vertex that has the same position in space as another one, but different vertex data (UV, color...).
         /// </summary>
@@ -17,24 +16,12 @@ namespace UltimateGameTools
             /// <summary>
             /// Face it belongs to. This will be the same index in the source mesh as in the internal created face list.
             /// </summary>
-            public int FaceIndex
-            {
-                get
-                {
-                    return _nFaceIndex;
-                }
-            }
+            public int FaceIndex { get { return _nFaceIndex; } }
 
             /// <summary>
             /// Position in the original vertex array.
             /// </summary>
-            public int OriginalVertexIndex
-            {
-                get
-                {
-                    return _nOriginalVertexIndex;
-                }
-            }
+            public int OriginalVertexIndex { get { return _nOriginalVertexIndex; } }
 
             // Constructor
 

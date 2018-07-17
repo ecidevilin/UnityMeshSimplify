@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Chaos;
 using UltimateGameTools.MeshSimplifier;
 using UnityEngine;
 
@@ -60,7 +61,7 @@ public class RuntimeMeshSimplifier : MonoBehaviour
   {
     Renderer theRenderer = theGameObject.GetComponent<Renderer>();
 
-    if (theRenderer != null && theRenderer.sharedMaterials != null && (MeshSimplify.HasValidMeshData(theGameObject) || theGameObject.GetComponent<MeshSimplify>() != null))
+    if (theRenderer != null && theRenderer.sharedMaterials != null && (MeshUtil.HasValidMeshData(theGameObject) || theGameObject.GetComponent<MeshSimplify>() != null))
     {
       dicMaterials.Add(theGameObject, theRenderer.sharedMaterials);
     }
@@ -112,7 +113,7 @@ public class RuntimeMeshSimplifier : MonoBehaviour
         meshSimplify.ConfigureSimplifier();
       }
 
-      if (meshSimplify && MeshSimplify.HasValidMeshData(pair.Key))
+      if (meshSimplify && MeshUtil.HasValidMeshData(pair.Key))
       {
         Mesh newMesh = null;
 

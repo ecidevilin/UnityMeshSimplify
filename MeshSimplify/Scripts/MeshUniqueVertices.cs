@@ -57,7 +57,7 @@ namespace UltimateGameTools
             /// </summary>
             /// <param name="sourceMesh"></param>
             /// <param name="av3VerticesWorld"</param>
-            public void BuildData(Mesh sourceMesh, Vector3[] av3VerticesWorld)
+            public void BuildData(Mesh sourceMesh, GameObject gameObject)
             {
                 Vector3[]    av3Vertices  = sourceMesh.vertices;
                 BoneWeight[] aBoneWeights = sourceMesh.boneWeights;
@@ -72,6 +72,41 @@ namespace UltimateGameTools
                 m_listVertices.Clear();
                 m_listVerticesWorld.Clear();
                 m_listBoneWeights.Clear();
+
+
+                SkinnedMeshRenderer skin;
+                MeshFilter meshFilter;
+                Matrix4x4[] aBindPoses = null;
+                Transform[] aBones = null;
+                Mesh sharedMesh;
+                Matrix4x4 transformation = Matrix4x4.identity;
+
+                if ((skin = gameObject.GetComponent<SkinnedMeshRenderer>()) != null)
+                {
+                    if ((sharedMesh = skin.sharedMesh) != null)
+                    {
+                        aBoneWeights = sharedMesh.boneWeights;
+                        aBindPoses = sharedMesh.bindposes;
+                        aBones = skin.bones;
+                    }
+
+                    //for (int nVertex = 0; nVertex < aVertices.Length; nVertex++)
+                    //{
+                    //    BoneWeight bw = aBoneWeights[nVertex];
+                    //    Vector4 v = aVertices[nVertex];
+                    //    v.w = 1;
+                    //    Vector3 v3World = aBones[bw.boneIndex0].localToWorldMatrix * aBindPoses[bw.boneIndex0] * v * bw.weight0
+                    //    + aBones[bw.boneIndex1].localToWorldMatrix * aBindPoses[bw.boneIndex1] * v * bw.weight1
+                    //    + aBones[bw.boneIndex2].localToWorldMatrix * aBindPoses[bw.boneIndex2] * v * bw.weight2
+                    //    + aBones[bw.boneIndex3].localToWorldMatrix * aBindPoses[bw.boneIndex3] * v * bw.weight3;
+
+                    //    aVertices[nVertex] = v3World;
+                    //}
+                }
+                else if ((meshFilter = gameObject.GetComponent<MeshFilter>()) != null)
+                {
+                    transformation = gameObject.transform.localToWorldMatrix;
+                }
 
                 for (int nSubMesh = 0; nSubMesh < sourceMesh.subMeshCount; nSubMesh++)
                 {
@@ -90,17 +125,30 @@ namespace UltimateGameTools
                         }
                         else
                         {
+                            int nVertex = anFaces[i];
                             int nNewUniqueIndex = m_listVertices.Count;
-                            repeatedList = new RepeatedVertexList(nNewUniqueIndex, new RepeatedVertex(i/3, anFaces[i]));
+                            repeatedList = new RepeatedVertexList(nNewUniqueIndex, new RepeatedVertex(i/3, nVertex));
                             m_dicRepeatedVertexList.Add(vertex, repeatedList);
-                            m_listVertices.Add(av3Vertices[anFaces[i]]);
-                            m_listVerticesWorld.Add(av3VerticesWorld[anFaces[i]]);
+                            m_listVertices.Add(av3Vertices[nVertex]);
                             m_aSubmeshesFaceList[nSubMesh].m_listIndices.Add(nNewUniqueIndex);
 
-                            if(aBoneWeights != null && aBoneWeights.Length > 0)
+                            Vector4 v = av3Vertices[nVertex];
+                            v.w = 1;
+                            Vector3 wpos;
+                            if (aBoneWeights != null && aBoneWeights.Length > 0)
                             {
-                                m_listBoneWeights.Add(new SerializableBoneWeight(aBoneWeights[anFaces[i]]));
+                                BoneWeight bw = aBoneWeights[nVertex];
+                                m_listBoneWeights.Add(new SerializableBoneWeight(bw));
+                                wpos = aBones[bw.boneIndex0].localToWorldMatrix * aBindPoses[bw.boneIndex0] * v * bw.weight0
+                                + aBones[bw.boneIndex1].localToWorldMatrix * aBindPoses[bw.boneIndex1] * v * bw.weight1
+                                + aBones[bw.boneIndex2].localToWorldMatrix * aBindPoses[bw.boneIndex2] * v * bw.weight2
+                                + aBones[bw.boneIndex3].localToWorldMatrix * aBindPoses[bw.boneIndex3] * v * bw.weight3;
                             }
+                            else
+                            {
+                                wpos = transformation*v;
+                            }
+                            m_listVerticesWorld.Add(wpos);
                         }
                     }
                 }

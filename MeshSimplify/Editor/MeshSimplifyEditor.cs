@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
+using Chaos;
 using UltimateGameTools.MeshSimplifier;
 
 [CustomEditor(typeof(MeshSimplify)), CanEditMultipleObjects]
@@ -466,7 +467,7 @@ public class MeshSimplifyEditor : Editor
         {
           if (PropertyGenerateIncludeChildren.boolValue == false)
           {
-            if (MeshSimplify.HasValidMeshData(meshSimplify.gameObject) == false)
+            if (MeshUtil.HasValidMeshData(meshSimplify.gameObject) == false)
             {
               EditorUtility.DisplayDialog("Error", "Object " + meshSimplify.name + " has no MeshFilter nor Skinned Mesh to process. Please use the \"" + strIncludeChildrenLabel + "\" parameter if you want to process the whole " + meshSimplify.name + " hierarchy for meshes", "OK");
               continue;
@@ -661,7 +662,7 @@ public class MeshSimplifyEditor : Editor
     {
       int nTotalProgressElements = meshSimplify.m_meshSimplifyRoot != null ? (meshSimplify.m_meshSimplifyRoot.m_listDependentChildren.Count + 1) : 1;
 
-      if (meshSimplify.m_simplifiedMesh != null && MeshSimplify.HasValidMeshData(meshSimplify.gameObject))
+      if (meshSimplify.m_simplifiedMesh != null && MeshUtil.HasValidMeshData(meshSimplify.gameObject))
       {
         float fT = (float)nProgressElementsCounter / (float)nTotalProgressElements;
         Progress("Saving meshes to asset file", meshSimplify.name, fT);

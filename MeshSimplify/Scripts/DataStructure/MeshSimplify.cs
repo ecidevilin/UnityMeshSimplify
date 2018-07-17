@@ -2,6 +2,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Chaos;
 using UltimateGameTools.MeshSimplifier;
 
 public class MeshSimplify : MonoBehaviour
@@ -113,7 +114,7 @@ public class MeshSimplify : MonoBehaviour
       return;
     }
 
-    Vector3[] aVerticesWorld = Simplifier.GetWorldVertices(this.gameObject);
+    Vector3[] aVerticesWorld = MeshUtil.GetWorldVertices(this.gameObject);
 
     if(aVerticesWorld == null)
     {
@@ -146,27 +147,6 @@ public class MeshSimplify : MonoBehaviour
   }
 
 #endif
-
-  public static bool HasValidMeshData(GameObject go)
-  {
-    MeshFilter meshFilter = go.GetComponent<MeshFilter>();
-
-    if (meshFilter != null)
-    {
-      return true;
-    }
-    else
-    {
-      SkinnedMeshRenderer skin = go.GetComponent<SkinnedMeshRenderer>();
-
-      if (skin != null)
-      {
-        return true;
-      }
-    }
-
-    return false;
-  }
 
   public static bool IsRootOrBelongsToTree(MeshSimplify meshSimplify, MeshSimplify root)
   {
@@ -207,7 +187,7 @@ public class MeshSimplify : MonoBehaviour
   {
     MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
 
-    if (meshSimplify == null && HasValidMeshData(gameObject))
+    if (meshSimplify == null && MeshUtil.HasValidMeshData(gameObject))
     {
       return true;
     }
@@ -247,7 +227,7 @@ public class MeshSimplify : MonoBehaviour
 
     if (meshSimplify == null && root.m_bGenerateIncludeChildren)
     {
-      if (HasValidMeshData(gameObject))
+      if (MeshUtil.HasValidMeshData(gameObject))
       {
         meshSimplify = gameObject.AddComponent<MeshSimplify>();
         meshSimplify.m_meshSimplifyRoot = root;
@@ -412,7 +392,7 @@ public class MeshSimplify : MonoBehaviour
 
           if (meshSimplify.m_simplifiedMesh == null)
           {
-            meshSimplify.m_simplifiedMesh = CreateNewEmptyMesh(meshSimplify);
+            meshSimplify.m_simplifiedMesh = meshSimplify.CreateNewEmptyMesh();
           }
 
           meshSimplify.ConfigureSimplifier();
@@ -809,14 +789,14 @@ public class MeshSimplify : MonoBehaviour
     }
   }
 
-  private static Mesh CreateNewEmptyMesh(MeshSimplify meshSimplify)
+  private Mesh CreateNewEmptyMesh()
   {
-    if(meshSimplify.m_originalMesh == null)
+    if(m_originalMesh == null)
     {
       return new Mesh();
     }
 
-    Mesh meshOut = Mesh.Instantiate(meshSimplify.m_originalMesh);
+    Mesh meshOut = Mesh.Instantiate(m_originalMesh);
     meshOut.Clear();
     return meshOut;
   }

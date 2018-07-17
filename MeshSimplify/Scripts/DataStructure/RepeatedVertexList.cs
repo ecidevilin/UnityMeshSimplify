@@ -18,21 +18,14 @@ namespace UltimateGameTools
             /// <summary>
             /// Unique vertex index in our array for this list.
             /// </summary>
-            public int UniqueIndex
-            {
-                get
-                {
-                    return m_nUniqueIndex;
-                }
-            }
+            public int UniqueIndex { get { return m_nUniqueIndex; } }
 
             // Public methods
 
             public RepeatedVertexList(int nUniqueIndex, RepeatedVertex repeatedVertex)
             {
                 m_nUniqueIndex = nUniqueIndex;
-                m_listRepeatedVertices = new List<RepeatedVertex>();
-                m_listRepeatedVertices.Add(repeatedVertex);
+                m_listRepeatedVertices = new List<RepeatedVertex> {repeatedVertex};
             }
 
             public void Add(RepeatedVertex repeatedVertex)
