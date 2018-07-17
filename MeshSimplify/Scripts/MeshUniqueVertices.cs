@@ -25,7 +25,7 @@ namespace UltimateGameTools
             /// For each submesh, a list of faces. ListIndices has 3 indices for each face.
             /// Each index is a vertex in ListVertices.
             /// </summary>
-            public ListIndices[] SubmeshesFaceList { get { return m_aFaceList; } }
+            public ListIndices[] SubmeshesFaceList { get { return m_aSubmeshesFaceList; } }
 
             /// <summary>
             /// Our list of vertices. Vertices are unique, so no vertex shares the same position in space.
@@ -67,12 +67,12 @@ namespace UltimateGameTools
                 m_listVertices      = new List<Vector3>();
                 m_listVerticesWorld = new List<Vector3>();
                 m_listBoneWeights   = new List<SerializableBoneWeight>();
-                m_aFaceList         = new ListIndices[sourceMesh.subMeshCount];
+                m_aSubmeshesFaceList= new ListIndices[sourceMesh.subMeshCount];
 
                 for (int nSubMesh = 0; nSubMesh < sourceMesh.subMeshCount; nSubMesh++)
                 {
                     int[] anFaces = sourceMesh.GetTriangles(nSubMesh);
-                    m_aFaceList[nSubMesh] = new ListIndices(anFaces.Length);
+                    m_aSubmeshesFaceList[nSubMesh] = new ListIndices(anFaces.Length);
 
                     for (int i = 0; i < anFaces.Length; i++)
                     {
@@ -81,7 +81,7 @@ namespace UltimateGameTools
                         if (dicUniqueVertex2RepeatedVertexList.ContainsKey(vertex))
                         {
                             dicUniqueVertex2RepeatedVertexList[vertex].Add(new RepeatedVertex(i / 3, anFaces[i]));
-                            m_aFaceList[nSubMesh].m_listIndices.Add(dicUniqueVertex2RepeatedVertexList[vertex].UniqueIndex);
+                            m_aSubmeshesFaceList[nSubMesh].m_listIndices.Add(dicUniqueVertex2RepeatedVertexList[vertex].UniqueIndex);
                         }
                         else
                         {
@@ -89,7 +89,7 @@ namespace UltimateGameTools
                             dicUniqueVertex2RepeatedVertexList.Add(vertex, new RepeatedVertexList(nNewUniqueIndex, new RepeatedVertex(i / 3, anFaces[i])));
                             m_listVertices.Add(av3Vertices[anFaces[i]]);
                             m_listVerticesWorld.Add(av3VerticesWorld[anFaces[i]]);
-                            m_aFaceList[nSubMesh].m_listIndices.Add(nNewUniqueIndex);
+                            m_aSubmeshesFaceList[nSubMesh].m_listIndices.Add(nNewUniqueIndex);
 
                             if(aBoneWeights != null && aBoneWeights.Length > 0)
                             {
@@ -113,7 +113,7 @@ namespace UltimateGameTools
             [SerializeField] private List<Vector3> m_listVertices;
             [SerializeField] private List<Vector3> m_listVerticesWorld;
             [SerializeField] private List<SerializableBoneWeight> m_listBoneWeights;
-            [SerializeField] private ListIndices[] m_aFaceList;
+            [SerializeField] private ListIndices[] m_aSubmeshesFaceList;
 
             #endregion // Private vars
         }
