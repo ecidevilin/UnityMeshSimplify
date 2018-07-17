@@ -25,47 +25,23 @@ namespace UltimateGameTools
             /// For each submesh, a list of faces. ListIndices has 3 indices for each face.
             /// Each index is a vertex in ListVertices.
             /// </summary>
-            public ListIndices[] SubmeshesFaceList
-            {
-                get
-                {
-                    return m_aFaceList;
-                }
-            }
+            public ListIndices[] SubmeshesFaceList { get { return m_aFaceList; } }
 
             /// <summary>
             /// Our list of vertices. Vertices are unique, so no vertex shares the same position in space.
             /// </summary>
-            public List<Vector3> ListVertices
-            {
-                get
-                {
-                    return m_listVertices;
-                }
-            }
+            public List<Vector3> ListVertices { get { return m_listVertices; } }
 
             /// <summary>
             /// Our list of vertices in world space.
             /// Vertices are unique, so no vertex shares the same position in space.
             /// </summary>
-            public List<Vector3> ListVerticesWorld
-            {
-                get
-                {
-                    return m_listVerticesWorld;
-                }
-            }
+            public List<Vector3> ListVerticesWorld { get { return m_listVerticesWorld; } }
 
             /// <summary>
             /// Our list of vertex bone weights
             /// </summary>
-            public List<SerializableBoneWeight> ListBoneWeights
-            {
-                get
-                {
-                    return m_listBoneWeights;
-                }
-            }
+            public List<SerializableBoneWeight> ListBoneWeights { get { return m_listBoneWeights; } }
 
             #endregion // Public properties
             #region Public methods
@@ -95,8 +71,8 @@ namespace UltimateGameTools
 
                 for (int nSubMesh = 0; nSubMesh < sourceMesh.subMeshCount; nSubMesh++)
                 {
-                    m_aFaceList[nSubMesh] = new ListIndices();
                     int[] anFaces = sourceMesh.GetTriangles(nSubMesh);
+                    m_aFaceList[nSubMesh] = new ListIndices(anFaces.Length);
 
                     for (int i = 0; i < anFaces.Length; i++)
                     {
@@ -134,14 +110,10 @@ namespace UltimateGameTools
             // Private vars
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
-            [SerializeField]
-            private List<Vector3> m_listVertices;
-            [SerializeField]
-            private List<Vector3> m_listVerticesWorld;
-            [SerializeField]
-            private List<SerializableBoneWeight> m_listBoneWeights;
-            [SerializeField]
-            private ListIndices[] m_aFaceList;
+            [SerializeField] private List<Vector3> m_listVertices;
+            [SerializeField] private List<Vector3> m_listVerticesWorld;
+            [SerializeField] private List<SerializableBoneWeight> m_listBoneWeights;
+            [SerializeField] private ListIndices[] m_aFaceList;
 
             #endregion // Private vars
         }

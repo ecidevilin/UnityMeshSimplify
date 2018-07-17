@@ -14,9 +14,9 @@ namespace UltimateGameTools
         [Serializable]
         public class ListIndices
         {
-            public ListIndices()
+            public ListIndices(int capacity)
             {
-                m_listIndices = new List<int>();
+                m_listIndices = new List<int>(capacity);
             }
 
             public List<int> m_listIndices;
