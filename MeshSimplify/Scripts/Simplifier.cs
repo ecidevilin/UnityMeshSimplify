@@ -404,29 +404,12 @@ namespace UltimateGameTools
           for (int nVertex = 0; nVertex < aVertices.Length; nVertex++)
           {
             BoneWeight bw = aBoneWeights[nVertex];
-            Vector3 v3World = Vector3.zero;
-            Vector3 v3LocalVertex;
-
-            if (Math.Abs(bw.weight0) > 0.00001f)
-            {
-              v3LocalVertex = aBindPoses[bw.boneIndex0].MultiplyPoint3x4(aVertices[nVertex]);
-              v3World += aBones[bw.boneIndex0].transform.localToWorldMatrix.MultiplyPoint3x4(v3LocalVertex) * bw.weight0;
-            }
-            if (Math.Abs(bw.weight1) > 0.00001f)
-            {
-              v3LocalVertex = aBindPoses[bw.boneIndex1].MultiplyPoint3x4(aVertices[nVertex]);
-              v3World += aBones[bw.boneIndex1].transform.localToWorldMatrix.MultiplyPoint3x4(v3LocalVertex) * bw.weight1;
-            }
-            if (Math.Abs(bw.weight2) > 0.00001f)
-            {
-              v3LocalVertex = aBindPoses[bw.boneIndex2].MultiplyPoint3x4(aVertices[nVertex]);
-              v3World += aBones[bw.boneIndex2].transform.localToWorldMatrix.MultiplyPoint3x4(v3LocalVertex) * bw.weight2;
-            }
-            if (Math.Abs(bw.weight3) > 0.00001f)
-            {
-              v3LocalVertex = aBindPoses[bw.boneIndex3].MultiplyPoint3x4(aVertices[nVertex]);
-              v3World += aBones[bw.boneIndex3].transform.localToWorldMatrix.MultiplyPoint3x4(v3LocalVertex) * bw.weight3;
-            }
+              Vector4 v = aVertices[nVertex];
+              v.w = 1;
+              Vector3 v3World = aBones[bw.boneIndex0].localToWorldMatrix * aBindPoses[bw.boneIndex0]*v * bw.weight0
+                            + aBones[bw.boneIndex1].localToWorldMatrix * aBindPoses[bw.boneIndex1] * v * bw.weight1
+                            + aBones[bw.boneIndex2].localToWorldMatrix * aBindPoses[bw.boneIndex2] * v * bw.weight2
+                            + aBones[bw.boneIndex3].localToWorldMatrix * aBindPoses[bw.boneIndex3] * v * bw.weight3;
 
             aVertices[nVertex] = v3World;
           }
