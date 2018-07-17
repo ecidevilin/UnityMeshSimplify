@@ -65,10 +65,13 @@ namespace UltimateGameTools
                 m_dicRepeatedVertexList = m_dicRepeatedVertexList ?? new Dictionary<UniqueVertex, RepeatedVertexList>();
                 m_dicRepeatedVertexList.Clear();
 
-                m_listVertices      = new List<Vector3>();
-                m_listVerticesWorld = new List<Vector3>();
-                m_listBoneWeights   = new List<SerializableBoneWeight>();
-                m_aSubmeshesFaceList= new ListIndices[sourceMesh.subMeshCount];
+                m_listVertices      = m_listVertices ?? new List<Vector3>();
+                m_listVerticesWorld = m_listVerticesWorld ?? new List<Vector3>();
+                m_listBoneWeights   = m_listBoneWeights ?? new List<SerializableBoneWeight>();
+                m_aSubmeshesFaceList= new ListIndices[sourceMesh.subMeshCount];//FIXME: memory pool
+                m_listVertices.Clear();
+                m_listVerticesWorld.Clear();
+                m_listBoneWeights.Clear();
 
                 for (int nSubMesh = 0; nSubMesh < sourceMesh.subMeshCount; nSubMesh++)
                 {
