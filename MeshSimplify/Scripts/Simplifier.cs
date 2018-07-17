@@ -811,7 +811,7 @@ namespace UltimateGameTools
         }
       }
 
-      void AddVertices(List<Vector3> listVertices, List<Vector3> listVerticesWorld, List<MeshUniqueVertices.SerializableBoneWeight> listBoneWeights)
+      void AddVertices(List<Vector3> listVertices, List<Vector3> listVerticesWorld, List<SerializableBoneWeight> listBoneWeights)
       {
         bool bHasBoneWeights = listBoneWeights != null && listBoneWeights.Count > 0;
 
@@ -1367,8 +1367,8 @@ namespace UltimateGameTools
           _v2Mapping1   = v2Mapping1;
           _v2Mapping2   = v2Mapping2;
           _color        = color;
-          _uniqueVertex = new MeshUniqueVertices.UniqueVertex(v3Vertex);
-          //_uniqueNormal = new MeshUniqueVertices.UniqueVertex(v3Normal);
+          _uniqueVertex = new UniqueVertex(v3Vertex);
+          //_uniqueNormal = new UniqueVertex(v3Normal);
         }
 
         public override bool Equals(object obj)
@@ -1401,8 +1401,8 @@ namespace UltimateGameTools
         private Vector2 _v2Mapping1;
         private Vector2 _v2Mapping2;
         private Color32 _color;
-        private MeshUniqueVertices.UniqueVertex _uniqueVertex;
-        //private MeshUniqueVertices.UniqueVertex _uniqueNormal;
+        private UniqueVertex _uniqueVertex;
+        //private UniqueVertex _uniqueNormal;
       }  
 
       #endregion // Private types
