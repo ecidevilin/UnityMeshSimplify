@@ -1,0 +1,3 @@
+[submodule "MeshSimplify/Scripts/MeshSimplify/Scripts/DataStructureUtility"]
+	path = MeshSimplify/Scripts/MeshSimplify/Scripts/DataStructureUtility
+	url = https://github.com/ecidevilin/DataStructureUtility
