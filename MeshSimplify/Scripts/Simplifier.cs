@@ -371,71 +371,66 @@ namespace UltimateGameTools
         return m_meshOriginal.triangles.Length / 3;
       }
 
-      public static Vector3[] GetWorldVertices(GameObject gameObject)
-      {
-        Vector3[] aVertices = null;
-
-        SkinnedMeshRenderer skin       = gameObject.GetComponent<SkinnedMeshRenderer>();
-        MeshFilter          meshFilter = gameObject.GetComponent<MeshFilter>();
-
-        if (skin != null)
+        public static Vector3[] GetWorldVertices(GameObject gameObject)
         {
-          if (skin.sharedMesh == null)
-          {
-            return null;
-          }
+            Vector3[] aVertices = null;
+            SkinnedMeshRenderer skin;
+            MeshFilter          meshFilter;
+            Mesh sharedMesh;
 
-          aVertices = skin.sharedMesh.vertices;
+            if ((skin = gameObject.GetComponent<SkinnedMeshRenderer>()) != null)
+            {
+                if ((sharedMesh=skin.sharedMesh) == null)
+                {
+                    return null;
+                }
 
-          BoneWeight[] aBoneWeights = skin.sharedMesh.boneWeights;
-          Matrix4x4[]  aBindPoses   = skin.sharedMesh.bindposes;
-          Transform[]  aBones       = skin.bones;
+                aVertices = sharedMesh.vertices;
 
-          if (aVertices == null || aBoneWeights == null || aBindPoses == null || aBones == null)
-          {
-            return null;
-          }
+                BoneWeight[] aBoneWeights = sharedMesh.boneWeights;
+                Matrix4x4[]  aBindPoses   = sharedMesh.bindposes;
+                Transform[]  aBones       = skin.bones;
 
-          if(aBoneWeights.Length == 0 || aBindPoses.Length == 0 || aBones.Length == 0)
-          {
-            return null;
-          }
+                if (aVertices == null || aBoneWeights == null || aBindPoses == null || aBones == null || aBoneWeights.Length == 0 || aBindPoses.Length == 0 || aBones.Length == 0)
+                {
+                    return null;
+                }
 
-          for (int nVertex = 0; nVertex < aVertices.Length; nVertex++)
-          {
-            BoneWeight bw = aBoneWeights[nVertex];
-              Vector4 v = aVertices[nVertex];
-              v.w = 1;
-              Vector3 v3World = aBones[bw.boneIndex0].localToWorldMatrix * aBindPoses[bw.boneIndex0]*v * bw.weight0
-                            + aBones[bw.boneIndex1].localToWorldMatrix * aBindPoses[bw.boneIndex1] * v * bw.weight1
-                            + aBones[bw.boneIndex2].localToWorldMatrix * aBindPoses[bw.boneIndex2] * v * bw.weight2
-                            + aBones[bw.boneIndex3].localToWorldMatrix * aBindPoses[bw.boneIndex3] * v * bw.weight3;
+                for (int nVertex = 0; nVertex < aVertices.Length; nVertex++)
+                {
+                    BoneWeight bw = aBoneWeights[nVertex];
+                    Vector4 v = aVertices[nVertex];
+                    v.w = 1;
+                    Vector3 v3World = aBones[bw.boneIndex0].localToWorldMatrix * aBindPoses[bw.boneIndex0]*v * bw.weight0
+                    + aBones[bw.boneIndex1].localToWorldMatrix * aBindPoses[bw.boneIndex1] * v * bw.weight1
+                    + aBones[bw.boneIndex2].localToWorldMatrix * aBindPoses[bw.boneIndex2] * v * bw.weight2
+                    + aBones[bw.boneIndex3].localToWorldMatrix * aBindPoses[bw.boneIndex3] * v * bw.weight3;
 
-            aVertices[nVertex] = v3World;
-          }
+                    aVertices[nVertex] = v3World;
+                }
+            }
+            else if((meshFilter = gameObject.GetComponent<MeshFilter>()) != null)
+            {
+                if ((sharedMesh=meshFilter.sharedMesh) == null)
+                {
+                    return null;
+                }
+
+                aVertices = sharedMesh.vertices;
+
+                if (aVertices == null)
+                {
+                    return null;
+                }
+
+                for (int nVertex = 0; nVertex < aVertices.Length; nVertex++)
+                {
+                    aVertices[nVertex] = gameObject.transform.TransformPoint(aVertices[nVertex]);
+                }
+            }
+
+            return aVertices;
         }
-        else if(meshFilter != null)
-        {
-          if (meshFilter.sharedMesh == null)
-          {
-            return null;
-          }
-
-          aVertices = meshFilter.sharedMesh.vertices;
-
-          if (aVertices == null)
-          {
-            return null;
-          }
-
-          for (int nVertex = 0; nVertex < aVertices.Length; nVertex++)
-          {
-            aVertices[nVertex] = gameObject.transform.TransformPoint(aVertices[nVertex]);
-          }
-        }
-
-        return aVertices;
-      }
 
       #endregion // Public methods
 
@@ -445,138 +440,138 @@ namespace UltimateGameTools
       // Private methods
       /////////////////////////////////////////////////////////////////////////////////////////////////
 
-      IEnumerator ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, TriangleList[] aListTriangles, Vector3[] av3Vertices, string strProgressDisplayObjectName = "", ProgressDelegate progress = null)
-      {
-        Vector3[]    av3NormalsIn  = meshIn.normals;
-        Vector4[]    av4TangentsIn = meshIn.tangents;
-        Vector2[]    av2Mapping1In = meshIn.uv;
-        Vector2[]    av2Mapping2In = meshIn.uv2;
-        Color[]      acolColorsIn  = meshIn.colors;
-        Color32[]    aColors32In   = meshIn.colors32;
-
-        List<List<int>>  listlistIndicesOut = new List<List<int>>();
-        List<Vector3>    listVerticesOut    = new List<Vector3>();
-        List<Vector3>    listNormalsOut     = new List<Vector3>();
-        List<Vector4>    listTangentsOut    = new List<Vector4>();
-        List<Vector2>    listMapping1Out    = new List<Vector2>();
-        List<Vector2>    listMapping2Out    = new List<Vector2>();
-        List<Color32>    listColors32Out    = new List<Color32>();
-        List<BoneWeight> listBoneWeightsOut = new List<BoneWeight>();
-
-        Dictionary<VertexDataHash, int> dicVertexDataHash2Index = new Dictionary<VertexDataHash, int>(new VertexDataHashComparer());
-
-        bool bUV1     = av2Mapping1In != null && av2Mapping1In.Length > 0;
-        bool bUV2     = av2Mapping2In != null && av2Mapping2In.Length > 0;
-        bool bNormal  = av3NormalsIn  != null && av3NormalsIn.Length  > 0;
-        bool bTangent = av4TangentsIn != null && av4TangentsIn.Length > 0;
-
-        Stopwatch sw = Stopwatch.StartNew();
-
-        for(int nSubMesh = 0; nSubMesh < aListTriangles.Length; nSubMesh++)
+        IEnumerator ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, TriangleList[] aListTriangles, Vector3[] av3Vertices, string strProgressDisplayObjectName = "", ProgressDelegate progress = null)
         {
-          List<int> listIndicesOut = new List<int>();
+            Vector3[]    av3NormalsIn  = meshIn.normals;
+            Vector4[]    av4TangentsIn = meshIn.tangents;
+            Vector2[]    av2Mapping1In = meshIn.uv;
+            Vector2[]    av2Mapping2In = meshIn.uv2;
+            Color[]      acolColorsIn  = meshIn.colors;
+            Color32[]    aColors32In   = meshIn.colors32;
 
-          string strMesh = aListTriangles.Length > 1 ? ("Consolidating submesh " + (nSubMesh + 1)) : "Consolidating mesh";
+            bool bUV1 = av2Mapping1In != null && av2Mapping1In.Length > 0;
+            bool bUV2 = av2Mapping2In != null && av2Mapping2In.Length > 0;
+            bool bNormal = av3NormalsIn != null && av3NormalsIn.Length > 0;
+            bool bTangent = av4TangentsIn != null && av4TangentsIn.Length > 0;
 
-          for (int i = 0; i < aListTriangles[nSubMesh].m_listTriangles.Count; i++)
-          {
-            if (progress != null && ((i & 0xFF) == 0))
+            bool bColor = (acolColorsIn != null && acolColorsIn.Length > 0) || (aColors32In != null && aColors32In.Length > 0);
+
+            List<List<int>>  listlistIndicesOut = new List<List<int>>();
+            List<Vector3>    listVerticesOut    = new List<Vector3>();
+            List<Vector3>    listNormalsOut     = bNormal ? new List<Vector3>() : null;
+            List<Vector4>    listTangentsOut    = bTangent ? new List<Vector4>() : null;
+            List<Vector2>    listMapping1Out    = bUV1? new List<Vector2>() : null;
+            List<Vector2>    listMapping2Out    = bUV2 ? new List<Vector2>() : null;
+            List<Color32>    listColors32Out    = bColor ? new List<Color32>() : null;
+            List<BoneWeight> listBoneWeightsOut = new List<BoneWeight>();
+
+            Dictionary<VertexDataHash, int> dicVertexDataHash2Index = new Dictionary<VertexDataHash, int>(new VertexDataHashComparer());
+
+            Stopwatch sw = Stopwatch.StartNew();
+
+            for(int nSubMesh = 0; nSubMesh < aListTriangles.Length; nSubMesh++)
             {
-              float fT = aListTriangles[nSubMesh].m_listTriangles.Count == 1 ? 1.0f : ((float)i / (float)(aListTriangles[nSubMesh].m_listTriangles.Count - 1));
+                List<int> listIndicesOut = new List<int>();
 
-              progress("Simplifying mesh: " + strProgressDisplayObjectName, strMesh, fT);
+                string strMesh = aListTriangles.Length > 1 ? ("Consolidating submesh " + (nSubMesh + 1)) : "Consolidating mesh";
 
-              if (Cancelled)
-              {
-                yield break;
-              }
-            }
-
-            if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
-            {
-              yield return null;
-              sw = Stopwatch.StartNew();
-            }
-
-            for (int v = 0; v < 3; v++)
-            {
-              int nMappingIndex = aListTriangles[nSubMesh].m_listTriangles[i].IndicesUV[v];
-              int nVertexIndex  = aListTriangles[nSubMesh].m_listTriangles[i].Indices[v];
-
-              bool bColor = false;
-
-              Vector3 v3Vertex  = aListTriangles[nSubMesh].m_listTriangles[i].Vertices[v].m_v3Position;
-              Vector3 v3Normal  = bNormal  ? av3NormalsIn [nVertexIndex]  : Vector3.zero;
-              Vector4 v4Tangent = bTangent ? av4TangentsIn[nVertexIndex]  : Vector4.zero;
-              Vector2 uv1       = bUV1     ? av2Mapping1In[nMappingIndex] : Vector2.zero;
-              Vector2 uv2       = bUV2     ? av2Mapping2In[nVertexIndex]  : Vector2.zero;
-              Color32 color32   = new Color32(0, 0, 0, 0);
-         
-              if(acolColorsIn  != null && acolColorsIn.Length > 0)
-              {
-                color32 = acolColorsIn[nVertexIndex];
-                bColor  = true;
-              }
-              else if(aColors32In  != null && aColors32In.Length > 0)
-              {
-                color32 = aColors32In[nVertexIndex];
-                bColor  = true;
-              }
-
-              VertexDataHash vdata = new VertexDataHash(v3Vertex, v3Normal, uv1, uv2, color32);
-
-              if (dicVertexDataHash2Index.ContainsKey(vdata))
-              {
-                // Already exists -> Index
-                listIndicesOut.Add(dicVertexDataHash2Index[vdata]);
-              }
-              else
-              {
-                // Does not exist -> Create + index
-
-                dicVertexDataHash2Index.Add(vdata, listVerticesOut.Count);
-                listVerticesOut.Add(vdata.Vertex);
-
-                if (bNormal)     listNormalsOut.Add(v3Normal);
-                if (bUV1)        listMapping1Out.Add(uv1);
-                if (bUV2)        listMapping2Out.Add(uv2);
-                if (bTangent)    listTangentsOut.Add(v4Tangent);
-                if (bColor)      listColors32Out.Add(color32);
-
-                if (aListTriangles[nSubMesh].m_listTriangles[i].Vertices[v].m_bHasBoneWeight)
+                for (int i = 0; i < aListTriangles[nSubMesh].m_listTriangles.Count; i++)
                 {
-                  listBoneWeightsOut.Add(aListTriangles[nSubMesh].m_listTriangles[i].Vertices[v].m_boneWeight);
+                    if (progress != null && ((i & 0xFF) == 0))
+                    {
+                        float fT = aListTriangles[nSubMesh].m_listTriangles.Count == 1 ? 1.0f : ((float)i / (float)(aListTriangles[nSubMesh].m_listTriangles.Count - 1));
+
+                        progress("Simplifying mesh: " + strProgressDisplayObjectName, strMesh, fT);
+
+                        if (Cancelled)
+                        {
+                            yield break;
+                        }
+                    }
+
+                    if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
+                    {
+                        yield return null;
+                        sw = Stopwatch.StartNew();
+                    }
+
+                    for (int v = 0; v < 3; v++)
+                    {
+                        int nMappingIndex = aListTriangles[nSubMesh].m_listTriangles[i].IndicesUV[v];
+                        int nVertexIndex  = aListTriangles[nSubMesh].m_listTriangles[i].Indices[v];
+
+                        Vector3 v3Vertex  = aListTriangles[nSubMesh].m_listTriangles[i].Vertices[v].m_v3Position;
+                        Vector3 v3Normal  = bNormal  ? av3NormalsIn [nVertexIndex]  : Vector3.zero;
+                        Vector4 v4Tangent = bTangent ? av4TangentsIn[nVertexIndex]  : Vector4.zero;
+                        Vector2 uv1       = bUV1     ? av2Mapping1In[nMappingIndex] : Vector2.zero;
+                        Vector2 uv2       = bUV2     ? av2Mapping2In[nVertexIndex]  : Vector2.zero;
+                        Color32 color32   = new Color32(0, 0, 0, 0);
+
+                        if (bColor)
+                        {
+                            if (acolColorsIn != null && acolColorsIn.Length > 0)
+                            {
+                                color32 = acolColorsIn[nVertexIndex];
+                            }
+                            else if (aColors32In != null && aColors32In.Length > 0)
+                            {
+                                color32 = aColors32In[nVertexIndex];
+                            }
+                        }
+
+                        VertexDataHash vdata = new VertexDataHash(v3Vertex, v3Normal, uv1, uv2, color32);
+
+                        if (dicVertexDataHash2Index.ContainsKey(vdata))
+                        {
+                            // Already exists -> Index
+                            listIndicesOut.Add(dicVertexDataHash2Index[vdata]);
+                        }
+                        else
+                        {
+                            // Does not exist -> Create + index
+
+                            dicVertexDataHash2Index.Add(vdata, listVerticesOut.Count);
+                            listVerticesOut.Add(vdata.Vertex);
+
+                            if (bNormal)     listNormalsOut.Add(v3Normal);
+                            if (bUV1)        listMapping1Out.Add(uv1);
+                            if (bUV2)        listMapping2Out.Add(uv2);
+                            if (bTangent)    listTangentsOut.Add(v4Tangent);
+                            if (bColor)      listColors32Out.Add(color32);
+
+                            if (aListTriangles[nSubMesh].m_listTriangles[i].Vertices[v].m_bHasBoneWeight)
+                            {
+                                listBoneWeightsOut.Add(aListTriangles[nSubMesh].m_listTriangles[i].Vertices[v].m_boneWeight);
+                            }
+
+                            listIndicesOut.Add(listVerticesOut.Count - 1);
+                        }
+                    }
                 }
 
-                listIndicesOut.Add(listVerticesOut.Count - 1);
-              }
+                listlistIndicesOut.Add(listIndicesOut);
             }
-          }
 
-          listlistIndicesOut.Add(listIndicesOut);
+            meshOut.triangles    = new int[0];
+            meshOut.vertices     = listVerticesOut.ToArray();
+            meshOut.normals      = listNormalsOut.Count     > 0 ? listNormalsOut.ToArray()     : null;
+            meshOut.tangents     = listTangentsOut.Count    > 0 ? listTangentsOut.ToArray()    : null;
+            meshOut.uv           = listMapping1Out.Count    > 0 ? listMapping1Out.ToArray()    : null;
+            meshOut.uv2          = listMapping2Out.Count    > 0 ? listMapping2Out.ToArray()    : null;
+            meshOut.colors32     = listColors32Out.Count    > 0 ? listColors32Out.ToArray()    : null;
+            meshOut.boneWeights  = listBoneWeightsOut.Count > 0 ? listBoneWeightsOut.ToArray() : null;
+            meshOut.bindposes    = meshIn.bindposes;
+            meshOut.subMeshCount = listlistIndicesOut.Count;
+
+            for (int nSubMesh = 0; nSubMesh < listlistIndicesOut.Count; nSubMesh++)
+            {
+                meshOut.SetTriangles(listlistIndicesOut[nSubMesh].ToArray(), nSubMesh);
+            }
+
+            meshOut.name = gameObject.name + " simplified mesh";
+
+            progress("Simplifying mesh: " + strProgressDisplayObjectName, "Mesh consolidation done", 1.0f);
         }
-
-        meshOut.triangles    = new int[0];
-        meshOut.vertices     = listVerticesOut.ToArray();
-        meshOut.normals      = listNormalsOut.Count     > 0 ? listNormalsOut.ToArray()     : null;
-        meshOut.tangents     = listTangentsOut.Count    > 0 ? listTangentsOut.ToArray()    : null;
-        meshOut.uv           = listMapping1Out.Count    > 0 ? listMapping1Out.ToArray()    : null;
-        meshOut.uv2          = listMapping2Out.Count    > 0 ? listMapping2Out.ToArray()    : null;
-        meshOut.colors32     = listColors32Out.Count    > 0 ? listColors32Out.ToArray()    : null;
-        meshOut.boneWeights  = listBoneWeightsOut.Count > 0 ? listBoneWeightsOut.ToArray() : null;
-        meshOut.bindposes    = meshIn.bindposes;
-        meshOut.subMeshCount = listlistIndicesOut.Count;
-
-        for (int nSubMesh = 0; nSubMesh < listlistIndicesOut.Count; nSubMesh++)
-        {
-          meshOut.SetTriangles(listlistIndicesOut[nSubMesh].ToArray(), nSubMesh);
-        }
-
-        meshOut.name = gameObject.name + " simplified mesh";
-        ;
-
-        progress("Simplifying mesh: " + strProgressDisplayObjectName, "Mesh consolidation done", 1.0f);
-      }
 
       int MapVertex(int nVertex, int nMax)
       {
