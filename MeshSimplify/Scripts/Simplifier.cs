@@ -531,11 +531,11 @@ namespace UltimateGameTools
 
             meshOut.triangles    = new int[0];
             meshOut.vertices     = listVerticesOut.ToArray();
-            meshOut.normals      = listNormalsOut.Count     > 0 ? listNormalsOut.ToArray()     : null;
-            meshOut.tangents     = listTangentsOut.Count    > 0 ? listTangentsOut.ToArray()    : null;
-            meshOut.uv           = listMapping1Out.Count    > 0 ? listMapping1Out.ToArray()    : null;
-            meshOut.uv2          = listMapping2Out.Count    > 0 ? listMapping2Out.ToArray()    : null;
-            meshOut.colors32     = listColors32Out.Count    > 0 ? listColors32Out.ToArray()    : null;
+            meshOut.normals      = bNormal ? listNormalsOut.ToArray()     : null;
+            meshOut.tangents     = bTangent ? listTangentsOut.ToArray()    : null;
+            meshOut.uv           = bUV1 ? listMapping1Out.ToArray()    : null;
+            meshOut.uv2          = bUV2 ? listMapping2Out.ToArray()    : null;
+            meshOut.colors32     = bColor ? listColors32Out.ToArray()    : null;
             meshOut.boneWeights  = listBoneWeightsOut.Count > 0 ? listBoneWeightsOut.ToArray() : null;
             meshOut.bindposes    = meshIn.bindposes;
             meshOut.subMeshCount = listlistIndicesOut.Count;

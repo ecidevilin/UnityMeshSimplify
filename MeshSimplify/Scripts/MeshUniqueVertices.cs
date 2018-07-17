@@ -62,7 +62,8 @@ namespace UltimateGameTools
                 Vector3[]    av3Vertices  = sourceMesh.vertices;
                 BoneWeight[] aBoneWeights = sourceMesh.boneWeights;
 
-                Dictionary<UniqueVertex, RepeatedVertexList> dicUniqueVertex2RepeatedVertexList = new Dictionary<UniqueVertex, RepeatedVertexList>();
+                m_dicRepeatedVertexList = m_dicRepeatedVertexList ?? new Dictionary<UniqueVertex, RepeatedVertexList>();
+                m_dicRepeatedVertexList.Clear();
 
                 m_listVertices      = new List<Vector3>();
                 m_listVerticesWorld = new List<Vector3>();
@@ -78,15 +79,17 @@ namespace UltimateGameTools
                     {
                         UniqueVertex vertex = new UniqueVertex(av3Vertices[anFaces[i]]);
 
-                        if (dicUniqueVertex2RepeatedVertexList.ContainsKey(vertex))
+                        RepeatedVertexList repeatedList = null;
+                        if (m_dicRepeatedVertexList.TryGetValue(vertex, out repeatedList))
                         {
-                            dicUniqueVertex2RepeatedVertexList[vertex].Add(new RepeatedVertex(i / 3, anFaces[i]));
-                            m_aSubmeshesFaceList[nSubMesh].m_listIndices.Add(dicUniqueVertex2RepeatedVertexList[vertex].UniqueIndex);
+                            repeatedList.Add(new RepeatedVertex(i / 3, anFaces[i]));
+                            m_aSubmeshesFaceList[nSubMesh].m_listIndices.Add(repeatedList.UniqueIndex);
                         }
                         else
                         {
                             int nNewUniqueIndex = m_listVertices.Count;
-                            dicUniqueVertex2RepeatedVertexList.Add(vertex, new RepeatedVertexList(nNewUniqueIndex, new RepeatedVertex(i / 3, anFaces[i])));
+                            repeatedList = new RepeatedVertexList(nNewUniqueIndex, new RepeatedVertex(i/3, anFaces[i]));
+                            m_dicRepeatedVertexList.Add(vertex, repeatedList);
                             m_listVertices.Add(av3Vertices[anFaces[i]]);
                             m_listVerticesWorld.Add(av3VerticesWorld[anFaces[i]]);
                             m_aSubmeshesFaceList[nSubMesh].m_listIndices.Add(nNewUniqueIndex);
@@ -114,6 +117,7 @@ namespace UltimateGameTools
             [SerializeField] private List<Vector3> m_listVerticesWorld;
             [SerializeField] private List<SerializableBoneWeight> m_listBoneWeights;
             [SerializeField] private ListIndices[] m_aSubmeshesFaceList;
+            Dictionary<UniqueVertex, RepeatedVertexList> m_dicRepeatedVertexList;
 
             #endregion // Private vars
         }
