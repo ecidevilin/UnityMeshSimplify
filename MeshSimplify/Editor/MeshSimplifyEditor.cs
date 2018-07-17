@@ -99,7 +99,7 @@ public class MeshSimplifyEditor : Editor
         if (Tools.current == Tool.Move)
         {
           EditorGUI.BeginChangeCheck();
-          Vector3 v3Position = Handles.PositionHandle(relevanceSphere.m_v3Position, Quaternion.Euler(relevanceSphere.m_v3Rotation));
+          Vector3 v3Position = Handles.PositionHandle(relevanceSphere.m_v3Position, relevanceSphere.m_q4Rotation);
           if (EditorGUI.EndChangeCheck())
           {
             Undo.RecordObject(meshSimplify, "Move Relevance Sphere");
@@ -112,11 +112,11 @@ public class MeshSimplifyEditor : Editor
         else if (Tools.current == Tool.Rotate)
         {
           EditorGUI.BeginChangeCheck();
-          Quaternion qRotation = Handles.RotationHandle(Quaternion.Euler(relevanceSphere.m_v3Rotation), relevanceSphere.m_v3Position);
+          Quaternion qRotation = Handles.RotationHandle(relevanceSphere.m_q4Rotation, relevanceSphere.m_v3Position);
           if (EditorGUI.EndChangeCheck())
           {
             Undo.RecordObject(meshSimplify, "Rotate Relevance Sphere");
-            relevanceSphere.m_v3Rotation = qRotation.eulerAngles;
+            relevanceSphere.m_q4Rotation = qRotation;
             meshSimplify.RestoreOriginalMesh(false, true);
             meshSimplify.SetDataDirty(true);
             EditorUtility.SetDirty(target);
@@ -125,7 +125,7 @@ public class MeshSimplifyEditor : Editor
         else if (Tools.current == Tool.Scale)
         {
           EditorGUI.BeginChangeCheck();
-          Vector3 v3Scale = Handles.ScaleHandle(relevanceSphere.m_v3Scale, relevanceSphere.m_v3Position, Quaternion.Euler(relevanceSphere.m_v3Rotation), HandleUtility.GetHandleSize(relevanceSphere.m_v3Position) * 1.0f);
+          Vector3 v3Scale = Handles.ScaleHandle(relevanceSphere.m_v3Scale, relevanceSphere.m_v3Position, relevanceSphere.m_q4Rotation, HandleUtility.GetHandleSize(relevanceSphere.m_v3Position) * 1.0f);
           if (EditorGUI.EndChangeCheck())
           {
             Undo.RecordObject(meshSimplify, "Scale Relevance Sphere");
@@ -139,7 +139,7 @@ public class MeshSimplifyEditor : Editor
         if(Event.current.type == EventType.Repaint)
         { 
           Matrix4x4 mtxHandles = Handles.matrix;
-          Handles.matrix = Matrix4x4.TRS(relevanceSphere.m_v3Position, Quaternion.Euler(relevanceSphere.m_v3Rotation), relevanceSphere.m_v3Scale);
+          Handles.matrix = Matrix4x4.TRS(relevanceSphere.m_v3Position, relevanceSphere.m_q4Rotation, relevanceSphere.m_v3Scale);
           Handles.color  = new Color(0.0f, 0.0f, 1.0f, 0.5f);
           Handles.SphereHandleCap(0, Vector3.zero, Quaternion.identity, 1.0f, EventType.Repaint);
           Handles.matrix = mtxHandles;
@@ -314,7 +314,7 @@ public class MeshSimplifyEditor : Editor
 
           SerializedProperty elementExpanded  = elementProperty.FindPropertyRelative("m_bExpanded");
           SerializedProperty elementPosition  = elementProperty.FindPropertyRelative("m_v3Position");
-          SerializedProperty elementRotation  = elementProperty.FindPropertyRelative("m_v3Rotation");
+          SerializedProperty elementRotation  = elementProperty.FindPropertyRelative("m_q4Rotation");
           SerializedProperty elementScale     = elementProperty.FindPropertyRelative("m_v3Scale");
           SerializedProperty elementRelevance = elementProperty.FindPropertyRelative("m_fRelevance");
 

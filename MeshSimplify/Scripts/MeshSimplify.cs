@@ -124,7 +124,7 @@ public class MeshSimplify : MonoBehaviour
 
     for (int nSphere = 0; nSphere < aRelevanceSpheres.Length; nSphere++)
     {
-      aSphereMatrices[nSphere] = Matrix4x4.TRS(aRelevanceSpheres[nSphere].m_v3Position, Quaternion.Euler(aRelevanceSpheres[nSphere].m_v3Rotation), aRelevanceSpheres[nSphere].m_v3Scale).inverse;
+      aSphereMatrices[nSphere] = Matrix4x4.TRS(aRelevanceSpheres[nSphere].m_v3Position, aRelevanceSpheres[nSphere].m_q4Rotation, aRelevanceSpheres[nSphere].m_v3Scale).inverse;
     }
 
     for (int nVertex = 0; nVertex < aVerticesWorld.Length; nVertex++)

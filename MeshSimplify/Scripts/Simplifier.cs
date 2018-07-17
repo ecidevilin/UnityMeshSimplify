@@ -8,29 +8,6 @@ namespace UltimateGameTools
 {
   namespace MeshSimplifier
   {
-    [Serializable]
-    public class RelevanceSphere
-    {
-      public RelevanceSphere()
-      {
-        m_v3Scale = Vector3.one;
-      }
-
-      public void SetDefault(Transform target, float fRelevance)
-      {
-        m_bExpanded  = true;
-        m_v3Position = target.position + Vector3.up;
-        m_v3Rotation = target.rotation.eulerAngles;
-        m_v3Scale    = Vector3.one;
-        m_fRelevance = fRelevance;
-      }
-
-      public bool    m_bExpanded;
-      public Vector3 m_v3Position;
-      public Vector3 m_v3Rotation;
-      public Vector3 m_v3Scale;
-      public float   m_fRelevance;
-    }
 
     public class Simplifier : MonoBehaviour
     {
@@ -685,7 +662,7 @@ namespace UltimateGameTools
         {
           for (int nSphere = 0; nSphere < aRelevanceSpheres.Length; nSphere++)
           {
-            Matrix4x4 mtxSphere = Matrix4x4.TRS(aRelevanceSpheres[nSphere].m_v3Position, Quaternion.Euler(aRelevanceSpheres[nSphere].m_v3Rotation), aRelevanceSpheres[nSphere].m_v3Scale);
+            Matrix4x4 mtxSphere = Matrix4x4.TRS(aRelevanceSpheres[nSphere].m_v3Position,aRelevanceSpheres[nSphere].m_q4Rotation, aRelevanceSpheres[nSphere].m_v3Scale);
 
             Vector3 v3World = v.m_v3PositionWorld;
             Vector3 v3Local = mtxSphere.inverse.MultiplyPoint(v3World);
