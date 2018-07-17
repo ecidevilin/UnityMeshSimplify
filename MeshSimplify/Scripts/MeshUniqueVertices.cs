@@ -15,15 +15,6 @@ namespace UltimateGameTools
     [Serializable]
     public class MeshUniqueVertices
     {
-      #region Public types
-
-      /////////////////////////////////////////////////////////////////////////////////////////////////
-      // Public types
-      /////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-      #endregion
       #region Public properties
 
       /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -136,94 +127,7 @@ namespace UltimateGameTools
       }
 
       #endregion // Public methods
-      #region Private types
 
-      /////////////////////////////////////////////////////////////////////////////////////////////////
-      // Private types
-      /////////////////////////////////////////////////////////////////////////////////////////////////
-
-      /// <summary>
-      /// Vertex that has the same position in space as another one, but different vertex data (UV, color...).
-      /// </summary>
-      private class RepeatedVertex
-      {
-        // Public properties
-
-        /// <summary>
-        /// Face it belongs to. This will be the same index in the source mesh as in the internal created face list.
-        /// </summary>
-        public int FaceIndex
-        {
-          get
-          {
-            return _nFaceIndex;
-          }
-        }
-
-        /// <summary>
-        /// Position in the original vertex array.
-        /// </summary>
-        public int OriginalVertexIndex
-        {
-          get
-          {
-            return _nOriginalVertexIndex;
-          }
-        }
-
-        // Constructor
-
-        public RepeatedVertex(int nFaceIndex, int nOriginalVertexIndex)
-        {
-          _nFaceIndex           = nFaceIndex;
-          _nOriginalVertexIndex = nOriginalVertexIndex;
-        }
-
-        // Private vars
-
-        private int _nFaceIndex;
-        private int _nOriginalVertexIndex;
-      }
-
-      /// <summary>
-      /// List of vertices that have the same position in space but different vertex data (UV, color...).
-      /// </summary>
-      private class RepeatedVertexList
-      {
-        // Public properties
-
-        /// <summary>
-        /// Unique vertex index in our array for this list.
-        /// </summary>
-        public int UniqueIndex
-        {
-          get
-          {
-            return m_nUniqueIndex;
-          }
-        }
-
-        // Public methods
-
-        public RepeatedVertexList(int nUniqueIndex, RepeatedVertex repeatedVertex)
-        {
-          m_nUniqueIndex = nUniqueIndex;
-          m_listRepeatedVertices = new List<RepeatedVertex>();
-          m_listRepeatedVertices.Add(repeatedVertex);
-        }
-
-        public void Add(RepeatedVertex repeatedVertex)
-        {
-          m_listRepeatedVertices.Add(repeatedVertex);
-        }
-
-        // Private vars
-
-        private int m_nUniqueIndex;
-        private List<RepeatedVertex> m_listRepeatedVertices;
-      }
-
-      #endregion // Private types
       #region Private vars
 
       /////////////////////////////////////////////////////////////////////////////////////////////////
