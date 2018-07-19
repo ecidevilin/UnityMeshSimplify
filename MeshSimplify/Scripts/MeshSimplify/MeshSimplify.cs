@@ -59,7 +59,11 @@ public partial class MeshSimplify : MonoBehaviour
             m_meshSimplifier.LockBorder = m_bLockBorder;
         }
     }
-    
+    public bool HasData()
+    {
+        return (m_meshSimplifier != null && m_simplifiedMesh != null) || (m_listDependentChildren != null && m_listDependentChildren.Count != 0);
+    }
+
     public bool HasNonMeshSimplifyGameObjectsInTree()
     {
         return HasNonMeshSimplifyGameObjectsInTreeRecursive(this, this.gameObject);
@@ -68,12 +72,6 @@ public partial class MeshSimplify : MonoBehaviour
     public void ComputeData(bool bRecurseIntoChildren, Simplifier.ProgressDelegate progress = null)
     {
         ComputeDataRecursive(this, this.gameObject, bRecurseIntoChildren, progress);
-    }
-
-
-    public bool HasData()
-    {
-        return (m_meshSimplifier != null && m_simplifiedMesh != null) || (m_listDependentChildren != null && m_listDependentChildren.Count != 0);
     }
 
     public void ComputeMesh(bool bRecurseIntoChildren, Simplifier.ProgressDelegate progress = null)
@@ -127,6 +125,7 @@ public partial class MeshSimplify : MonoBehaviour
     {
         FreeDataRecursive(this, this.gameObject, bRecurseIntoChildren);
     }
+
     public void RemoveFromTree()
     {
         if (m_meshSimplifyRoot != null)
