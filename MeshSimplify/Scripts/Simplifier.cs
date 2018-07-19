@@ -196,7 +196,7 @@ namespace UltimateGameTools
             sw = Stopwatch.StartNew();
           }
 
-          Vertex mn = MinimumCostEdge();
+          Vertex mn = m_heap.ExtractTop();
 
           m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
           m_listVertexMap[mn.m_nID] = mn.m_collapse != null ? mn.m_collapse.m_nID : -1;
@@ -823,15 +823,6 @@ namespace UltimateGameTools
             }
           }
         }
-      }
-
-      Vertex MinimumCostEdge()
-      {
-        // Find the edge that when collapsed will affect model the least.
-        // This funtion actually returns a Vertex, the second vertex
-        // of the edge (collapse candidate) is stored in the vertex data.
-        Vertex hp = m_heap.ExtractTop();
-        return hp;
       }
 
       #endregion Private methods
