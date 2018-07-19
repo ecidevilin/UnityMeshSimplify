@@ -104,23 +104,23 @@ public class RuntimeMeshSimplifier : MonoBehaviour
 
                 if (meshSimplify.HasData() == false)
                 {
-                    meshSimplify.GetMeshSimplifier().CoroutineEnded = false;
+                    meshSimplify.MeshSimplifier.CoroutineEnded = false;
 
-                    StartCoroutine(meshSimplify.GetMeshSimplifier().ProgressiveMesh(pair.Key, meshFilter != null ? meshFilter.sharedMesh : skin.sharedMesh, null, meshSimplify.name, Progress));
+                    StartCoroutine(meshSimplify.MeshSimplifier.ProgressiveMesh(pair.Key, meshFilter != null ? meshFilter.sharedMesh : skin.sharedMesh, null, meshSimplify.name, Progress));
 
-                    while (meshSimplify.GetMeshSimplifier().CoroutineEnded == false)
+                    while (meshSimplify.MeshSimplifier.CoroutineEnded == false)
                     {
                         yield return null;
                     }
                 }
 
-                if (meshSimplify.GetMeshSimplifier() != null)
+                if (meshSimplify.MeshSimplifier != null)
                 {
-                    meshSimplify.GetMeshSimplifier().CoroutineEnded = false;
+                    meshSimplify.MeshSimplifier.CoroutineEnded = false;
 
-                    StartCoroutine(meshSimplify.GetMeshSimplifier().ComputeMeshWithVertexCount(pair.Key, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.GetMeshSimplifier().GetOriginalMeshUniqueVertexCount()), meshSimplify.name, Progress));
+                    StartCoroutine(meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(pair.Key, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()), meshSimplify.name, Progress));
 
-                    while (meshSimplify.GetMeshSimplifier().CoroutineEnded == false)
+                    while (meshSimplify.MeshSimplifier.CoroutineEnded == false)
                     {
                         yield return null;
                     }

@@ -277,13 +277,13 @@ public class SimplifyMeshPreview : MonoBehaviour
           newMesh = Mesh.Instantiate(skin.sharedMesh);
         }
 
-        if (meshSimplify.GetMeshSimplifier() != null)
+        if (meshSimplify.MeshSimplifier != null)
         {
-          meshSimplify.GetMeshSimplifier().CoroutineEnded = false;
+          meshSimplify.MeshSimplifier.CoroutineEnded = false;
 
-          StartCoroutine(meshSimplify.GetMeshSimplifier().ComputeMeshWithVertexCount(pair.Key, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.GetMeshSimplifier().GetOriginalMeshUniqueVertexCount()), meshSimplify.name, Progress));
+          StartCoroutine(meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(pair.Key, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()), meshSimplify.name, Progress));
 
-          while (meshSimplify.GetMeshSimplifier().CoroutineEnded == false)
+          while (meshSimplify.MeshSimplifier.CoroutineEnded == false)
           {
             yield return null;
           }

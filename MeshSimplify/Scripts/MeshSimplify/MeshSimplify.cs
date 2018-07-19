@@ -9,22 +9,13 @@ public partial class MeshSimplify : MonoBehaviour
 {
     public bool RecurseIntoChildren
     {
-        get
-        {
-            return m_bGenerateIncludeChildren;
-        }
+        get { return m_bGenerateIncludeChildren; }
     }
 
     public Simplifier MeshSimplifier
     {
-        get
-        {
-            return m_meshSimplifier;
-        }
-        set
-        {
-            m_meshSimplifier = value;
-        }
+        get { return m_meshSimplifier; }
+        set { m_meshSimplifier = value; }
     }
 
     [HideInInspector]
@@ -71,26 +62,9 @@ public partial class MeshSimplify : MonoBehaviour
     [SerializeField, HideInInspector]
     private bool m_bExcludedFromTree = false;
 
-
-
-    public bool IsGenerateIncludeChildrenActive()
-    {
-        return m_bGenerateIncludeChildren;
-    }
-
-    public bool HasDependentChildren()
-    {
-        return m_listDependentChildren != null && m_listDependentChildren.Count > 0;
-    }
-
-    public bool HasDataDirty()
-    {
-        return m_bDataDirty;
-    }
-
-    public bool SetDataDirty(bool bDirty)
-    {
-        return m_bDataDirty = bDirty;
+    public bool DataDirty {
+        get { return m_bDataDirty; }
+        set { m_bDataDirty = value; }
     }
 
     public bool HasNonMeshSimplifyGameObjectsInTree()
@@ -124,11 +98,6 @@ public partial class MeshSimplify : MonoBehaviour
         m_meshSimplifier.UseCurvature   = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bUseCurvature   : m_bUseCurvature;
         m_meshSimplifier.ProtectTexture = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bProtectTexture : m_bProtectTexture;
         m_meshSimplifier.LockBorder     = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bLockBorder     : m_bLockBorder;
-    }
-
-    public Simplifier GetMeshSimplifier()
-    {
-        return m_meshSimplifier;
     }
 
     public void ComputeData(bool bRecurseIntoChildren, Simplifier.ProgressDelegate progress = null)

@@ -106,7 +106,7 @@ public class MeshSimplifyEditor : Editor
             Undo.RecordObject(meshSimplify, "Move Relevance Sphere");
             relevanceSphere.m_v3Position = v3Position;
             meshSimplify.RestoreOriginalMesh(false, true);
-            meshSimplify.SetDataDirty(true);
+            meshSimplify.DataDirty = true;
             EditorUtility.SetDirty(target);
           }
         }
@@ -119,7 +119,7 @@ public class MeshSimplifyEditor : Editor
             Undo.RecordObject(meshSimplify, "Rotate Relevance Sphere");
             relevanceSphere.m_q4Rotation = qRotation;
             meshSimplify.RestoreOriginalMesh(false, true);
-            meshSimplify.SetDataDirty(true);
+            meshSimplify.DataDirty = true;
             EditorUtility.SetDirty(target);
           }
         }
@@ -132,7 +132,7 @@ public class MeshSimplifyEditor : Editor
             Undo.RecordObject(meshSimplify, "Scale Relevance Sphere");
             relevanceSphere.m_v3Scale = v3Scale;
             meshSimplify.RestoreOriginalMesh(false, true);
-            meshSimplify.SetDataDirty(true);
+            meshSimplify.DataDirty = true;
             EditorUtility.SetDirty(target);
           }
         }
@@ -477,7 +477,7 @@ public class MeshSimplifyEditor : Editor
 
         try
         {
-          if (meshSimplify.HasDataDirty() || meshSimplify.HasData() == false || meshSimplify.HasNonMeshSimplifyGameObjectsInTree())
+          if (meshSimplify.DataDirty || meshSimplify.HasData() == false || meshSimplify.HasNonMeshSimplifyGameObjectsInTree())
           {
             meshSimplify.RestoreOriginalMesh(true, meshSimplify.m_meshSimplifyRoot == null);
             meshSimplify.ComputeData(meshSimplify.m_meshSimplifyRoot == null, Progress);
@@ -722,9 +722,9 @@ public class MeshSimplifyEditor : Editor
   {
     MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
 
-    if (meshSimplify && meshSimplify.GetMeshSimplifier())
+    if (meshSimplify && meshSimplify.MeshSimplifier)
     {
-      meshSimplify.GetMeshSimplifier().hideFlags = HideFlags.HideInInspector;
+      meshSimplify.MeshSimplifier.hideFlags = HideFlags.HideInInspector;
     }
 
     if (bRecurseIntoChildren)
