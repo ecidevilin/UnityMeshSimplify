@@ -18,80 +18,37 @@ namespace UltimateGameTools
             /////////////////////////////////////////////////////////////////////////////////////////////////
             public delegate void ProgressDelegate(string strTitle, string strProgressMessage, float fT);
 
-            public static bool Cancelled
-            {
-                get;
-                set;
-            }
-
-            public static int CoroutineFrameMiliseconds
-            {
-                get
-                {
-                    return m_nCoroutineFrameMiliseconds;
-                }
-                set
-                {
-                    m_nCoroutineFrameMiliseconds = value;
-                }
-            }
-
             #endregion // Types
 
             #region Properties
 
-            public bool CoroutineEnded
+            public static bool Cancelled { get; set; }
+            public static int CoroutineFrameMiliseconds
             {
-                get;
-                set;
+                get { return m_nCoroutineFrameMiliseconds; }
+                set { m_nCoroutineFrameMiliseconds = value; }
             }
 
-            public bool UseEdgeLength
-            {
-                get
-                {
-                    return m_bUseEdgeLength;
-                }
-                set
-                {
-                    m_bUseEdgeLength = value;
-                }
+            public bool CoroutineEnded { get; set; }
+
+            public bool UseEdgeLength {
+                get { return m_bUseEdgeLength; }
+                set { m_bUseEdgeLength = value; }
             }
 
-            public bool UseCurvature
-            {
-                get
-                {
-                    return m_bUseCurvature;
-                }
-                set
-                {
-                    m_bUseCurvature = value;
-                }
+            public bool UseCurvature {
+                get { return m_bUseCurvature; }
+                set { m_bUseCurvature = value; }
             }
 
-            public bool ProtectTexture
-            {
-                get
-                {
-                    return m_bProtectTexture;
-                }
-                set
-                {
-                    m_bProtectTexture = value;
-                }
+            public bool ProtectTexture {
+                get { return m_bProtectTexture; }
+                set { m_bProtectTexture = value; }
             }
 
-            public bool LockBorder
-            {
-                get
-                {
-                    return m_bLockBorder;
-                }
-                set
-                {
-                    m_bLockBorder = value;
-                }
+            public bool LockBorder {
+                get { return m_bLockBorder; }
+                set { m_bLockBorder = value; }
             }
 
             #endregion // Properties
@@ -486,21 +443,6 @@ namespace UltimateGameTools
                 progress("Simplifying mesh: " + strProgressDisplayObjectName, "Mesh consolidation done", 1.0f);
             }
 
-            int MapVertex(int nVertex, int nMax)
-            {
-                if (nMax <= 0)
-                {
-                    return 0;
-                }
-
-                while (nVertex >= nMax)
-                {
-                    nVertex = m_listVertexMap[nVertex];
-                }
-
-                return nVertex;
-            }
-
             float ComputeEdgeCollapseCost(Vertex u, Vertex v, float fRelevanceBias)
             {
                 bool bUseEdgeLength = m_bUseEdgeLength;
@@ -839,24 +781,14 @@ namespace UltimateGameTools
             public List<Vertex> m_listVertices;
             private Heap<Vertex> m_heap;
             public TriangleList[] m_aListTriangles;
-            [SerializeField, HideInInspector]
-            private int m_nOriginalMeshVertexCount = -1;
-            [SerializeField, HideInInspector]
-            private float m_fOriginalMeshSize = 1.0f;
-
-            [SerializeField, HideInInspector]
-            private List<int> m_listVertexMap;
-            [SerializeField, HideInInspector]
-            private List<int> m_listVertexPermutationBack;
-
-            [SerializeField, HideInInspector]
-            private MeshUniqueVertices m_meshUniqueVertices;
-
-            [SerializeField, HideInInspector]
-            private Mesh m_meshOriginal;
-
-            [SerializeField, HideInInspector]
-            bool m_bUseEdgeLength = true, m_bUseCurvature = true, m_bProtectTexture = true, m_bLockBorder = true;
+            [SerializeField, HideInInspector] private int m_nOriginalMeshVertexCount = -1;
+            [SerializeField, HideInInspector] private float m_fOriginalMeshSize = 1.0f;
+            [SerializeField, HideInInspector] private List<int> m_listVertexMap;
+            [SerializeField, HideInInspector] private List<int> m_listVertexPermutationBack;
+            [SerializeField, HideInInspector] private MeshUniqueVertices m_meshUniqueVertices;
+            [SerializeField, HideInInspector] private Mesh m_meshOriginal;
+            [SerializeField, HideInInspector] private bool m_bUseEdgeLength = true;
+            [SerializeField, HideInInspector] bool m_bUseCurvature = true, m_bProtectTexture = true, m_bLockBorder = true;
 
 
             #endregion // Private vars
