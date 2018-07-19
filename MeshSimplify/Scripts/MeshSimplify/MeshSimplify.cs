@@ -207,7 +207,10 @@ public partial class MeshSimplify : MonoBehaviour
         return nTriangleCount;
     }
 
-
+    public void FreeData(bool bRecurseIntoChildren)
+    {
+        FreeDataRecursive(this, this.gameObject, bRecurseIntoChildren);
+    }
     public void RemoveFromTree()
     {
         if (m_meshSimplifyRoot != null)
@@ -219,23 +222,4 @@ public partial class MeshSimplify : MonoBehaviour
 
         m_bExcludedFromTree = true;
     }
-
-    public void FreeData(bool bRecurseIntoChildren)
-    {
-        FreeDataRecursive(this, this.gameObject, bRecurseIntoChildren);
-    }
-
-
-    private Mesh CreateNewEmptyMesh()
-    {
-        if(m_originalMesh == null)
-        {
-            return new Mesh();
-        }
-
-        Mesh meshOut = Mesh.Instantiate(m_originalMesh);
-        meshOut.Clear();
-        return meshOut;
-    }
-
 }

@@ -170,7 +170,7 @@ public partial class MeshSimplify : MonoBehaviour
 
                     if (meshSimplify.m_simplifiedMesh == null)
                     {
-                        meshSimplify.m_simplifiedMesh = meshSimplify.CreateNewEmptyMesh();
+                        meshSimplify.m_simplifiedMesh = CreateNewEmptyMesh(meshSimplify);
                     }
 
                     meshSimplify.ConfigureSimplifier();
@@ -492,5 +492,20 @@ public partial class MeshSimplify : MonoBehaviour
                 FreeDataRecursive(root, gameObject.transform.GetChild(nChild).gameObject, bRecurseIntoChildren);
             }
         }
+    }
+
+
+
+
+    private static Mesh CreateNewEmptyMesh(MeshSimplify meshSimplify)
+    {
+        if (meshSimplify.m_originalMesh == null)
+        {
+            return new Mesh();
+        }
+
+        Mesh meshOut = Mesh.Instantiate(meshSimplify.m_originalMesh);
+        meshOut.Clear();
+        return meshOut;
     }
 }
