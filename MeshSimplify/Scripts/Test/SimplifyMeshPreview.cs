@@ -237,8 +237,8 @@ public class SimplifyMeshPreview : MonoBehaviour
         {
             GameObject go = pair.Key;
             MeshSimplify meshSimplify = go.GetComponent<MeshSimplify>();
-            MeshFilter meshFilter = go.GetComponent<MeshFilter>();
-            SkinnedMeshRenderer skin = go.GetComponent<SkinnedMeshRenderer>();
+            MeshFilter meshFilter = null;
+            SkinnedMeshRenderer skin;
 
             if (meshSimplify && ((skin = go.GetComponent<SkinnedMeshRenderer>()) != null || (meshFilter = go.GetComponent<MeshFilter>()) != null))
             {
