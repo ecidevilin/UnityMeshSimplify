@@ -131,7 +131,7 @@ namespace UltimateGameTools
 
                 if (m_v3Normal.magnitude == 0.0f) return;
 
-                m_v3Normal = m_v3Normal.normalized;
+                m_v3Normal = m_v3Normal / m_v3Normal.magnitude;
             }
 
             public int TexAt(Vertex vertex)
