@@ -44,10 +44,20 @@ public partial class MeshSimplify : MonoBehaviour
     public RelevanceSphere[] m_aRelevanceSpheres = null;
     public void ConfigureSimplifier()
     {
-        m_meshSimplifier.UseEdgeLength  = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bUseEdgeLength  : m_bUseEdgeLength;
-        m_meshSimplifier.UseCurvature   = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bUseCurvature   : m_bUseCurvature;
-        m_meshSimplifier.ProtectTexture = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bProtectTexture : m_bProtectTexture;
-        m_meshSimplifier.LockBorder     = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bLockBorder     : m_bLockBorder;
+        if (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false)
+        {
+            m_meshSimplifier.UseEdgeLength = m_meshSimplifyRoot.m_bUseEdgeLength;
+            m_meshSimplifier.UseCurvature = m_meshSimplifyRoot.m_bUseCurvature;
+            m_meshSimplifier.ProtectTexture = m_meshSimplifyRoot.m_bProtectTexture;
+            m_meshSimplifier.LockBorder = m_meshSimplifyRoot.m_bLockBorder;
+        }
+        else
+        {
+            m_meshSimplifier.UseEdgeLength = m_bUseEdgeLength;
+            m_meshSimplifier.UseCurvature = m_bUseCurvature;
+            m_meshSimplifier.ProtectTexture = m_bProtectTexture;
+            m_meshSimplifier.LockBorder = m_bLockBorder;
+        }
     }
     
     public bool HasNonMeshSimplifyGameObjectsInTree()
