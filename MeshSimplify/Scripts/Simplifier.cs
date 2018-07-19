@@ -256,6 +256,7 @@ namespace UltimateGameTools
                     Vertex mn = listVertices[listVertices.Count - 1];
                     listVertices.RemoveAt(listVertices.Count - 1);
                     Collapse(mn, mn.m_collapse, false, null, null);
+                    m_listVertices.Remove(mn);
 
                     if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
                     {
@@ -596,16 +597,23 @@ namespace UltimateGameTools
             {
                 if (v == null)
                 {
-                    u.Destructor(this);
+                    if (bRecompute)
+                    {
+                        u.Destructor(this);
+                    }
                     return;
                 }
 
                 int i;
-                List<Vertex> tmp = new List<Vertex>();
-
-                for (i = 0; i < u.m_listNeighbors.Count; i++)
+                List<Vertex> tmp = null;
+                if (bRecompute)
                 {
-                    tmp.Add(u.m_listNeighbors[i]);
+                    tmp = new List<Vertex>();
+
+                    for (i = 0; i < u.m_listNeighbors.Count; i++)
+                    {
+                        tmp.Add(u.m_listNeighbors[i]);
+                    }
                 }
 
                 List<Triangle> sides = new List<Triangle>();
@@ -674,7 +682,10 @@ namespace UltimateGameTools
                     u.m_listFaces[i].ReplaceVertex(u, v);
                 }
 
-                u.Destructor(this);
+                if (bRecompute)
+                {
+                    u.Destructor(this);
+                }
 
                 // Recompute the edge collapse costs for neighboring vertices
 
