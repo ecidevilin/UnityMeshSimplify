@@ -18,86 +18,41 @@ public partial class MeshSimplify : MonoBehaviour
         set { m_meshSimplifier = value; }
     }
 
-    [HideInInspector]
-    public Mesh m_originalMesh = null;
-
-    [HideInInspector]
-    public Mesh m_simplifiedMesh = null;
-
-    [HideInInspector]
-    public bool m_bEnablePrefabUsage = false;
-
-    [HideInInspector]
-    public float m_fVertexAmount = 1.0f;
-
-    [HideInInspector]
-    public string m_strAssetPath = null;
-
-    [HideInInspector]
-    public MeshSimplify m_meshSimplifyRoot;
-
-    [HideInInspector]
-    public List<MeshSimplify> m_listDependentChildren = new List<MeshSimplify>();
-
-    [HideInInspector]
-    public bool m_bExpandRelevanceSpheres = true;
-
-    public RelevanceSphere[] m_aRelevanceSpheres = null;
-
-    [SerializeField, HideInInspector]
-    private Simplifier m_meshSimplifier = null;
-
-    [SerializeField, HideInInspector]
-    private bool m_bGenerateIncludeChildren = true;
-
-    [SerializeField, HideInInspector]
-    private bool m_bOverrideRootSettings = false;
-
-    [SerializeField, HideInInspector]
-    private bool m_bUseEdgeLength = true, m_bUseCurvature = true, m_bProtectTexture = true, m_bLockBorder = true;
-
-    [SerializeField, HideInInspector]
-    private bool m_bDataDirty = true;
-
-    [SerializeField, HideInInspector]
-    private bool m_bExcludedFromTree = false;
-
-    public bool DataDirty {
+    public bool DataDirty
+    {
         get { return m_bDataDirty; }
         set { m_bDataDirty = value; }
     }
 
-    public bool HasNonMeshSimplifyGameObjectsInTree()
-    {
-        return HasNonMeshSimplifyGameObjectsInTreeRecursive(this, this.gameObject);
-    }
-
-    private bool HasNonMeshSimplifyGameObjectsInTreeRecursive(MeshSimplify root, GameObject gameObject)
-    {
-        MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
-
-        if (meshSimplify == null && MeshUtil.HasValidMeshData(gameObject))
-        {
-            return true;
-        }
-
-        for (int nChild = 0; nChild < gameObject.transform.childCount; nChild++)
-        {
-            if(HasNonMeshSimplifyGameObjectsInTreeRecursive(root, gameObject.transform.GetChild(nChild).gameObject))
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
+    [HideInInspector] public Mesh m_originalMesh = null;
+    [HideInInspector] public Mesh m_simplifiedMesh = null;
+    [HideInInspector] public bool m_bEnablePrefabUsage = false;
+    [HideInInspector] public float m_fVertexAmount = 1.0f;
+    [HideInInspector] public string m_strAssetPath = null;
+    [HideInInspector] public MeshSimplify m_meshSimplifyRoot;
+    [HideInInspector] public List<MeshSimplify> m_listDependentChildren = new List<MeshSimplify>();
+    [HideInInspector] public bool m_bExpandRelevanceSpheres = true;
+    [SerializeField, HideInInspector] private Simplifier m_meshSimplifier = null;
+    [SerializeField, HideInInspector] private bool m_bGenerateIncludeChildren = true;
+    [SerializeField, HideInInspector] private bool m_bOverrideRootSettings = false;
+    [SerializeField, HideInInspector] private bool m_bUseEdgeLength = true;
+    [SerializeField, HideInInspector] private bool m_bUseCurvature = true;
+    [SerializeField, HideInInspector] private bool m_bProtectTexture = true;
+    [SerializeField, HideInInspector] private bool m_bLockBorder = true;
+    [SerializeField, HideInInspector] private bool m_bDataDirty = true;
+    [SerializeField, HideInInspector] private bool m_bExcludedFromTree = false;
+    public RelevanceSphere[] m_aRelevanceSpheres = null;
     public void ConfigureSimplifier()
     {
         m_meshSimplifier.UseEdgeLength  = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bUseEdgeLength  : m_bUseEdgeLength;
         m_meshSimplifier.UseCurvature   = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bUseCurvature   : m_bUseCurvature;
         m_meshSimplifier.ProtectTexture = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bProtectTexture : m_bProtectTexture;
         m_meshSimplifier.LockBorder     = (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false) ? m_meshSimplifyRoot.m_bLockBorder     : m_bLockBorder;
+    }
+    
+    public bool HasNonMeshSimplifyGameObjectsInTree()
+    {
+        return HasNonMeshSimplifyGameObjectsInTreeRecursive(this, this.gameObject);
     }
 
     public void ComputeData(bool bRecurseIntoChildren, Simplifier.ProgressDelegate progress = null)
@@ -109,11 +64,6 @@ public partial class MeshSimplify : MonoBehaviour
     public bool HasData()
     {
         return (m_meshSimplifier != null && m_simplifiedMesh != null) || (m_listDependentChildren != null && m_listDependentChildren.Count != 0);
-    }
-
-    public bool HasSimplifiedMesh()
-    {
-        return m_simplifiedMesh != null && m_simplifiedMesh.vertexCount > 0;
     }
 
     public void ComputeMesh(bool bRecurseIntoChildren, Simplifier.ProgressDelegate progress = null)
@@ -131,19 +81,6 @@ public partial class MeshSimplify : MonoBehaviour
     {
         RestoreOriginalMeshRecursive(this, this.gameObject, bDeleteData, bRecurseIntoChildren);
     }
-
-
-    public bool HasOriginalMeshActive(bool bRecurseIntoChildren)
-    {
-        return HasOriginalMeshActiveRecursive(this, this.gameObject, bRecurseIntoChildren);
-    }
-
-
-    public bool HasVertexData(bool bRecurseIntoChildren)
-    {
-        return HasVertexDataRecursive(this, this.gameObject, bRecurseIntoChildren);
-    }
-
 
     public int GetOriginalVertexCount(bool bRecurseIntoChildren)
     {
@@ -191,4 +128,12 @@ public partial class MeshSimplify : MonoBehaviour
 
         m_bExcludedFromTree = true;
     }
+    //public bool HasVertexData(bool bRecurseIntoChildren)
+    //{
+    //    return HasVertexDataRecursive(this, this.gameObject, bRecurseIntoChildren);
+    //}
+    //public bool HasOriginalMeshActive(bool bRecurseIntoChildren)
+    //{
+    //    return HasOriginalMeshActiveRecursive(this, this.gameObject, bRecurseIntoChildren);
+    //}
 }

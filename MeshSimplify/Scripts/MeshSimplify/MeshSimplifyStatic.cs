@@ -6,6 +6,25 @@ using UnityEngine;
 
 public partial class MeshSimplify : MonoBehaviour
 {
+    private static bool HasNonMeshSimplifyGameObjectsInTreeRecursive(MeshSimplify root, GameObject gameObject)
+    {
+        MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
+
+        if (meshSimplify == null && MeshUtil.HasValidMeshData(gameObject))
+        {
+            return true;
+        }
+
+        for (int nChild = 0; nChild < gameObject.transform.childCount; nChild++)
+        {
+            if (HasNonMeshSimplifyGameObjectsInTreeRecursive(root, gameObject.transform.GetChild(nChild).gameObject))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
     public static bool IsRootOrBelongsToTree(MeshSimplify meshSimplify, MeshSimplify root)
     {
         if (meshSimplify == null)
@@ -287,81 +306,81 @@ public partial class MeshSimplify : MonoBehaviour
             }
         }
     }
-    private static bool HasOriginalMeshActiveRecursive(MeshSimplify root, GameObject gameObject, bool bRecurseIntoChildren)
-    {
-        MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
+    //private static bool HasOriginalMeshActiveRecursive(MeshSimplify root, GameObject gameObject, bool bRecurseIntoChildren)
+    //{
+    //    MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
 
-        bool bHasOriginalMeshActive = false;
+    //    bool bHasOriginalMeshActive = false;
 
-        if (meshSimplify != null)
-        {
-            if (IsRootOrBelongsToTree(meshSimplify, root))
-            {
-                if (meshSimplify.m_originalMesh != null)
-                {
-                    MeshFilter meshFilter = meshSimplify.GetComponent<MeshFilter>();
+    //    if (meshSimplify != null)
+    //    {
+    //        if (IsRootOrBelongsToTree(meshSimplify, root))
+    //        {
+    //            if (meshSimplify.m_originalMesh != null)
+    //            {
+    //                MeshFilter meshFilter = meshSimplify.GetComponent<MeshFilter>();
 
-                    if (meshFilter != null)
-                    {
-                        if (meshFilter.sharedMesh == meshSimplify.m_originalMesh)
-                        {
-                            bHasOriginalMeshActive = true;
-                        }
-                    }
-                    else
-                    {
-                        SkinnedMeshRenderer skin = meshSimplify.GetComponent<SkinnedMeshRenderer>();
+    //                if (meshFilter != null)
+    //                {
+    //                    if (meshFilter.sharedMesh == meshSimplify.m_originalMesh)
+    //                    {
+    //                        bHasOriginalMeshActive = true;
+    //                    }
+    //                }
+    //                else
+    //                {
+    //                    SkinnedMeshRenderer skin = meshSimplify.GetComponent<SkinnedMeshRenderer>();
 
-                        if (skin != null)
-                        {
-                            if (skin.sharedMesh == meshSimplify.m_originalMesh)
-                            {
-                                bHasOriginalMeshActive = true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    //                    if (skin != null)
+    //                    {
+    //                        if (skin.sharedMesh == meshSimplify.m_originalMesh)
+    //                        {
+    //                            bHasOriginalMeshActive = true;
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
 
-        if (bRecurseIntoChildren)
-        {
-            for (int nChild = 0; nChild < gameObject.transform.childCount; nChild++)
-            {
-                bHasOriginalMeshActive = bHasOriginalMeshActive || HasOriginalMeshActiveRecursive(root, gameObject.transform.GetChild(nChild).gameObject, bRecurseIntoChildren);
-            }
-        }
+    //    if (bRecurseIntoChildren)
+    //    {
+    //        for (int nChild = 0; nChild < gameObject.transform.childCount; nChild++)
+    //        {
+    //            bHasOriginalMeshActive = bHasOriginalMeshActive || HasOriginalMeshActiveRecursive(root, gameObject.transform.GetChild(nChild).gameObject, bRecurseIntoChildren);
+    //        }
+    //    }
 
-        return bHasOriginalMeshActive;
-    }
-    private static bool HasVertexDataRecursive(MeshSimplify root, GameObject gameObject, bool bRecurseIntoChildren)
-    {
-        MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
+    //    return bHasOriginalMeshActive;
+    //}
+    //private static bool HasVertexDataRecursive(MeshSimplify root, GameObject gameObject, bool bRecurseIntoChildren)
+    //{
+    //    MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
 
-        if (meshSimplify != null)
-        {
-            if (IsRootOrBelongsToTree(meshSimplify, root))
-            {
-                if (meshSimplify.m_simplifiedMesh && meshSimplify.m_simplifiedMesh.vertexCount > 0)
-                {
-                    return true;
-                }
-            }
-        }
+    //    if (meshSimplify != null)
+    //    {
+    //        if (IsRootOrBelongsToTree(meshSimplify, root))
+    //        {
+    //            if (meshSimplify.m_simplifiedMesh && meshSimplify.m_simplifiedMesh.vertexCount > 0)
+    //            {
+    //                return true;
+    //            }
+    //        }
+    //    }
 
-        if (bRecurseIntoChildren)
-        {
-            for (int nChild = 0; nChild < gameObject.transform.childCount; nChild++)
-            {
-                if (HasVertexDataRecursive(root, gameObject.transform.GetChild(nChild).gameObject, bRecurseIntoChildren))
-                {
-                    return true;
-                }
-            }
-        }
+    //    if (bRecurseIntoChildren)
+    //    {
+    //        for (int nChild = 0; nChild < gameObject.transform.childCount; nChild++)
+    //        {
+    //            if (HasVertexDataRecursive(root, gameObject.transform.GetChild(nChild).gameObject, bRecurseIntoChildren))
+    //            {
+    //                return true;
+    //            }
+    //        }
+    //    }
 
-        return false;
-    }
+    //    return false;
+    //}
     private static void GetOriginalVertexCountRecursive(MeshSimplify root, GameObject gameObject, ref int nVertexCount, bool bRecurseIntoChildren)
     {
         MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
