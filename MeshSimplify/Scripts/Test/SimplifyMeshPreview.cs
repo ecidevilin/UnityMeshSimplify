@@ -138,10 +138,10 @@ public class SimplifyMeshPreview : MonoBehaviour
 
             GUILayout.Space(20);
 
-            int nSimplifiedVertices = m_selectedMeshSimplify.GetSimplifiedVertexCount(true);
-            int nTotalVertices = m_selectedMeshSimplify.GetOriginalVertexCount(true);
+            int nSimplifiedVertices = m_selectedMeshSimplify.GetSimplifiedTriangleCount(true);
+            int nTotalVertices = m_selectedMeshSimplify.GetOriginalTriangleCount(true);
 
-            GUILayout.Label("Vertex count: " + nSimplifiedVertices + "/" + nTotalVertices + " " + (Mathf.RoundToInt(((float)nSimplifiedVertices / (float)nTotalVertices) * 100.0f).ToString() + "% from original"));
+            GUILayout.Label("Triangle count: " + nSimplifiedVertices + "/" + nTotalVertices + " " + (Mathf.RoundToInt(((float)nSimplifiedVertices / (float)nTotalVertices) * 100.0f).ToString() + "% from original"));
 
             GUILayout.Space(20);
 
