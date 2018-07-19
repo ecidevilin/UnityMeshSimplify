@@ -14,7 +14,7 @@ public class SimplifyMeshPreview : MonoBehaviour
         public Vector3 m_position;
         public Vector3 m_angles;
         public Vector3 m_rotationAxis = Vector3.up;
-        public string m_description;
+        //public string m_description;
     }
 
     public ShowcaseObject[] ShowcaseObjects;
@@ -24,12 +24,12 @@ public class SimplifyMeshPreview : MonoBehaviour
 
     void Start()
     {
-        if (ShowcaseObjects != null && ShowcaseObjects.Length > 0)
+        if (ShowcaseObjects != null)
         {
-            for (int i = 0; i < ShowcaseObjects.Length; i++)
-            {
-                ShowcaseObjects[i].m_description = ShowcaseObjects[i].m_description.Replace("\\n", Environment.NewLine);
-            }
+            //for (int i = 0; i < ShowcaseObjects.Length; i++)
+            //{
+            //    ShowcaseObjects[i].m_description = ShowcaseObjects[i].m_description.Replace("\\n", Environment.NewLine);
+            //}
 
             SetActiveObject(0);
         }
@@ -85,26 +85,6 @@ public class SimplifyMeshPreview : MonoBehaviour
 
     void OnGUI()
     {
-        // Exit menu
-
-        int BoxWidth = 150;
-        int BoxHeight = 50;
-        int MarginH = 20;
-        int MarginV = 10;
-
-        Rect boxRect = new Rect((Screen.width / 2) - (BoxWidth / 2), 0, BoxWidth, BoxHeight);
-        Rect areaRect = new Rect(boxRect.x + MarginH, boxRect.y + MarginV, BoxWidth - (MarginH * 2), BoxHeight - (MarginV * 2));
-        //GUI.Box(boxRect, "");
-        //GUI.Box(boxRect, "");
-        GUILayout.BeginArea(areaRect);
-
-        if (GUILayout.Button("Exit"))
-        {
-            Application.Quit();
-        }
-
-        GUILayout.EndArea();
-
         // Main menu
 
         if (m_bGUIEnabled == false)
@@ -119,15 +99,10 @@ public class SimplifyMeshPreview : MonoBehaviour
             return;
         }
 
-        bool bAllowInteract = true;
+        bool bAllowInteract = (string.IsNullOrEmpty(m_strLastTitle) || string.IsNullOrEmpty(m_strLastMessage));
 
-        if (!string.IsNullOrEmpty(m_strLastTitle) && !string.IsNullOrEmpty(m_strLastMessage))
-        {
-            bAllowInteract = false;
-        }
-
-        GUI.Box(new Rect(0, 0, nWidth + 10, 400), "");
-
+        GUI.Box(new Rect(0, 0, nWidth + 10, 240), "");
+        GUILayout.Space(20);
         GUILayout.Label("Select model:", GUILayout.Width(nWidth));
 
         GUILayout.BeginHorizontal();
@@ -149,9 +124,9 @@ public class SimplifyMeshPreview : MonoBehaviour
 
         if (m_selectedMeshSimplify != null)
         {
-            GUILayout.Space(20);
-            GUILayout.Label(ShowcaseObjects[m_nSelectedIndex].m_description);
-            GUILayout.Space(20);
+            //GUILayout.Space(20);
+            //GUILayout.Label(ShowcaseObjects[m_nSelectedIndex].m_description);
+            //GUILayout.Space(20);
 
             GUI.changed = false;
             m_bWireframe = GUILayout.Toggle(m_bWireframe, "Show wireframe");
@@ -260,41 +235,40 @@ public class SimplifyMeshPreview : MonoBehaviour
     {
         foreach (KeyValuePair<GameObject, Material[]> pair in m_objectMaterials)
         {
-            MeshSimplify meshSimplify = pair.Key.GetComponent<MeshSimplify>();
-            MeshFilter meshFilter = pair.Key.GetComponent<MeshFilter>();
-            SkinnedMeshRenderer skin = pair.Key.GetComponent<SkinnedMeshRenderer>();
+            GameObject go = pair.Key;
+            MeshSimplify meshSimplify = go.GetComponent<MeshSimplify>();
+            MeshFilter meshFilter = go.GetComponent<MeshFilter>();
+            SkinnedMeshRenderer skin = go.GetComponent<SkinnedMeshRenderer>();
 
-            if (meshSimplify && (meshFilter != null || skin != null))
+            if (meshSimplify && ((skin = go.GetComponent<SkinnedMeshRenderer>()) != null || (meshFilter = go.GetComponent<MeshFilter>()) != null))
             {
                 Mesh newMesh = null;
-
-                if (meshFilter != null)
-                {
-                    newMesh = Mesh.Instantiate(meshFilter.sharedMesh);
-                }
-                else if (skin != null)
+                if (skin != null)
                 {
                     newMesh = Mesh.Instantiate(skin.sharedMesh);
+                }
+                else// if (meshFilter != null)
+                {
+                    newMesh = Mesh.Instantiate(meshFilter.sharedMesh);
                 }
 
                 if (meshSimplify.MeshSimplifier != null)
                 {
                     meshSimplify.MeshSimplifier.CoroutineEnded = false;
 
-                    StartCoroutine(meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(pair.Key, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()), meshSimplify.name, Progress));
+                    StartCoroutine(meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(go, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()), meshSimplify.name, Progress));
 
                     while (meshSimplify.MeshSimplifier.CoroutineEnded == false)
                     {
                         yield return null;
                     }
-
-                    if (meshFilter != null)
-                    {
-                        meshFilter.mesh = newMesh;
-                    }
-                    else if (skin != null)
+                    if (skin != null)
                     {
                         skin.sharedMesh = newMesh;
+                    }
+                    else// if (meshFilter != null)
+                    {
+                        meshFilter.mesh = newMesh;
                     }
 
                     meshSimplify.m_simplifiedMesh = newMesh;
