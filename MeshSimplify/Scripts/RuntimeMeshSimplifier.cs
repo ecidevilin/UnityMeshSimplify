@@ -8,11 +8,8 @@ using UnityEngine;
 public class RuntimeMeshSimplifier : MonoBehaviour
 {
     public string ProgressTitle{ get { return m_strLastTitle; } }
-
     public string ProgressMessage{ get { return m_strLastMessage; } }
-
     public int ProgressPercent{ get { return m_nLastProgress; } }
-
     public bool Finished{ get { return m_bFinished; } }
 
     public void Simplify(float percent)
@@ -60,7 +57,6 @@ public class RuntimeMeshSimplifier : MonoBehaviour
             m_strLastTitle   = strTitle;
             m_strLastMessage = strMessage;
             m_nLastProgress  = nPercent;
-
             //Debug.Log(strTitle + " " + strMessage + " " + nPercent);
         }
     }
@@ -71,13 +67,14 @@ public class RuntimeMeshSimplifier : MonoBehaviour
 
         foreach (KeyValuePair<GameObject, Material[]> pair in m_objectMaterials)
         {
-            MeshSimplify        meshSimplify = pair.Key.GetComponent<MeshSimplify>();
-            MeshFilter          meshFilter   = pair.Key.GetComponent<MeshFilter>();
-            SkinnedMeshRenderer skin         = pair.Key.GetComponent<SkinnedMeshRenderer>();
+            GameObject go = pair.Key;
+            MeshSimplify        meshSimplify = go.GetComponent<MeshSimplify>();
+            MeshFilter          meshFilter   = null;
+            SkinnedMeshRenderer skin         = null;
 
             if(meshSimplify == null)
             {
-                meshSimplify = pair.Key.AddComponent<MeshSimplify>();
+                meshSimplify = go.AddComponent<MeshSimplify>();
                 meshSimplify.m_meshSimplifyRoot = m_selectedMeshSimplify;
                 m_selectedMeshSimplify.m_listDependentChildren.Add(meshSimplify);
             }
@@ -89,24 +86,24 @@ public class RuntimeMeshSimplifier : MonoBehaviour
                 meshSimplify.ConfigureSimplifier();
             }
 
-            if (meshSimplify && MeshUtil.HasValidMeshData(pair.Key))
+            if (meshSimplify && ((skin = go.GetComponent<SkinnedMeshRenderer>()) != null || (meshFilter = go.GetComponent<MeshFilter>()) != null))
             {
                 Mesh newMesh = null;
-
-                if (meshFilter != null)
-                {
-                    newMesh = Mesh.Instantiate(meshFilter.sharedMesh);
-                }
-                else if (skin != null)
+                if (null != skin)
                 {
                     newMesh = Mesh.Instantiate(skin.sharedMesh);
                 }
+                else// if(null != meshFilter)
+                {
+                    newMesh = Mesh.Instantiate(meshFilter.sharedMesh);
+                }
+                 
 
                 if (meshSimplify.HasData() == false)
                 {
                     meshSimplify.MeshSimplifier.CoroutineEnded = false;
 
-                    StartCoroutine(meshSimplify.MeshSimplifier.ProgressiveMesh(pair.Key, meshFilter != null ? meshFilter.sharedMesh : skin.sharedMesh, null, meshSimplify.name, Progress));
+                    StartCoroutine(meshSimplify.MeshSimplifier.ProgressiveMesh(go, meshFilter != null ? meshFilter.sharedMesh : skin.sharedMesh, null, meshSimplify.name, Progress));
 
                     while (meshSimplify.MeshSimplifier.CoroutineEnded == false)
                     {
@@ -118,20 +115,20 @@ public class RuntimeMeshSimplifier : MonoBehaviour
                 {
                     meshSimplify.MeshSimplifier.CoroutineEnded = false;
 
-                    StartCoroutine(meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(pair.Key, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()), meshSimplify.name, Progress));
+                    StartCoroutine(meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(go, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()), meshSimplify.name, Progress));
 
                     while (meshSimplify.MeshSimplifier.CoroutineEnded == false)
                     {
                         yield return null;
                     }
 
-                    if (meshFilter != null)
-                    {
-                        meshFilter.mesh = newMesh;
-                    }
-                    else if (skin != null)
+                    if (skin != null)
                     {
                         skin.sharedMesh = newMesh;
+                    }
+                    else// if (meshFilter != null)
+                    {
+                        meshFilter.mesh = newMesh;
                     }
 
                     meshSimplify.m_simplifiedMesh = newMesh;
