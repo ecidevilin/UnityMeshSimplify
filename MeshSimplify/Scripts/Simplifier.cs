@@ -668,7 +668,7 @@ namespace UltimateGameTools
                 {
                     if (i < u.m_listFaces.Count && i >= 0 && u.m_listFaces[i].HasVertex(v))
                     {
-                        u.m_listFaces[i].Destructor(this);
+                        u.m_listFaces[i].Destructor(this, bRecompute);
                     }
                 }
 
@@ -676,18 +676,15 @@ namespace UltimateGameTools
 
                 for (i = u.m_listFaces.Count - 1; i >= 0; i--)
                 {
-                    u.m_listFaces[i].ReplaceVertex(u, v);
+                    u.m_listFaces[i].ReplaceVertex(u, v, bRecompute);
                 }
 
                 if (bRecompute)
                 {
                     u.Destructor(this);
-                }
 
                 // Recompute the edge collapse costs for neighboring vertices
-
-                if (bRecompute)
-                {
+                
                     for (i = 0; i < tmp.Count; i++)
                     {
                         ComputeEdgeCostAtVertex(tmp[i], transform, aRelevanceSpheres);

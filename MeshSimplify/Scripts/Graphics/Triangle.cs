@@ -92,7 +92,7 @@ namespace UltimateGameTools
                 }
             }
 
-            public void Destructor(Simplifier simplifier)
+            public void Destructor(Simplifier simplifier, bool recompute)
             {
                 int i;
                 simplifier.m_aListTriangles[m_nSubMesh].m_listTriangles.Remove(this);
@@ -103,6 +103,10 @@ namespace UltimateGameTools
                     {
                         m_aVertices[i].m_listFaces.Remove(this);
                     }
+                }
+                if (false == recompute)
+                {
+                    return;
                 }
 
                 for (i = 0; i < 3; i++)
@@ -172,7 +176,7 @@ namespace UltimateGameTools
                 m_aUV[i] = uv;
             }
 
-            public void ReplaceVertex(Vertex vold, Vertex vnew)
+            public void ReplaceVertex(Vertex vold, Vertex vnew, bool recompute)
             {
                 if (vold == m_aVertices[0])
                 {
@@ -186,11 +190,14 @@ namespace UltimateGameTools
                 {
                     m_aVertices[2] = vnew;
                 }
-
-                int i;
-
                 vold.m_listFaces.Remove(this);
                 vnew.m_listFaces.Add(this);
+
+                if (false == recompute)
+                {
+                    return;
+                }
+                int i;
 
                 for (i = 0; i < 3; i++)
                 {
