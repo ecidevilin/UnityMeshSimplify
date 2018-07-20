@@ -860,11 +860,12 @@ namespace UltimateGameTools
                 }
 
                 List<Triangle> list = m_aListTriangles[nSubMesh].m_listTriangles;
-                for (int i = 0; i < listTriangles.Count / 3; i++)
+                for (int i = 0; i < listTriangles.Count; i += 3)
                 {
                     Triangle tri = new Triangle(nSubMesh, list.Count,
-                                                m_listVertices[listTriangles[i * 3]], m_listVertices[listTriangles[i * 3 + 1]], m_listVertices[listTriangles[i * 3 + 2]],
-                                                bUVData, anIndices[i * 3], anIndices[i * 3 + 1], anIndices[i * 3 + 2], true);
+                                                m_listVertices[listTriangles[i]], m_listVertices[listTriangles[i + 1]], m_listVertices[listTriangles[i + 2]],
+                                                bUVData, anIndices[i], anIndices[i + 1], anIndices[i + 2], true);
+
 
                     list.Add(tri);
                     ShareUV(v2Mapping, tri);
