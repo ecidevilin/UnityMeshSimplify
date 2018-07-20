@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using UnityEngine.Profiling;
 
 namespace UltimateGameTools
 {
@@ -232,7 +233,6 @@ namespace UltimateGameTools
                 int nTotalVertices = listVertices.Count;
 
                 Stopwatch sw = Stopwatch.StartNew();
-
                 while (listVertices.Count > nVertices)
                 {
                     if (progress != null)
@@ -590,6 +590,9 @@ namespace UltimateGameTools
                 }
             }
 
+            List<Triangle> tmpTriangles = new List<Triangle>(); 
+            List<Vertex> tmpVertices = new List<Vertex>(); 
+
             void Collapse(Vertex u, Vertex v, bool bRecompute, Transform transform, RelevanceSphere[] aRelevanceSpheres)
             {
                 if (v == null)
@@ -602,24 +605,23 @@ namespace UltimateGameTools
                 }
 
                 int i;
-                List<Vertex> tmp = null;
                 if (bRecompute)
                 {
-                    tmp = new List<Vertex>();
+                    tmpVertices.Clear();
 
                     for (i = 0; i < u.m_listNeighbors.Count; i++)
                     {
-                        tmp.Add(u.m_listNeighbors[i]);
+                        tmpVertices.Add(u.m_listNeighbors[i]);
                     }
                 }
 
-                List<Triangle> sides = new List<Triangle>();
+                tmpTriangles.Clear();
 
                 for (i = 0; i < u.m_listFaces.Count; i++)
                 {
                     if (u.m_listFaces[i].HasVertex(v))
                     {
-                        sides.Add(u.m_listFaces[i]);
+                        tmpTriangles.Add(u.m_listFaces[i]);
                     }
                 }
 
@@ -636,11 +638,11 @@ namespace UltimateGameTools
 
                     if (u.m_listFaces[i].HasUVData)
                     {
-                        for (j = 0; j < sides.Count; j++)
+                        for (j = 0; j < tmpTriangles.Count; j++)
                         {
-                            if (u.m_listFaces[i].TexAt(u) == sides[j].TexAt(u))
+                            if (u.m_listFaces[i].TexAt(u) == tmpTriangles[j].TexAt(u))
                             {
-                                u.m_listFaces[i].SetTexAt(u, sides[j].TexAt(v));
+                                u.m_listFaces[i].SetTexAt(u, tmpTriangles[j].TexAt(v));
                                 break; // only change tex coords once!
                             }
                         }
@@ -685,10 +687,10 @@ namespace UltimateGameTools
 
                 // Recompute the edge collapse costs for neighboring vertices
                 
-                    for (i = 0; i < tmp.Count; i++)
+                    for (i = 0; i < tmpVertices.Count; i++)
                     {
-                        ComputeEdgeCostAtVertex(tmp[i], transform, aRelevanceSpheres);
-                        m_heap.ModifyValue(tmp[i].m_nHeapSpot, tmp[i]);
+                        ComputeEdgeCostAtVertex(tmpVertices[i], transform, aRelevanceSpheres);
+                        m_heap.ModifyValue(tmpVertices[i].m_nHeapSpot, tmpVertices[i]);
                     }
                 }
             }
