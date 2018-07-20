@@ -160,8 +160,6 @@ namespace UltimateGameTools
                     Collapse(mn, mn.m_collapse, true, gameObject.transform, aRelevanceSpheres);
                 }
 
-                UnityEngine.Profiling.Profiler.EndSample();
-
                 CoroutineEnded = true;
             }
 
