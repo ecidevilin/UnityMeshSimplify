@@ -213,8 +213,9 @@ namespace UltimateGameTools
 
                 m_listVertices = new List<Vertex>();
                 m_aListTriangles = new TriangleList[m_meshOriginal.subMeshCount];
-
+#if false
                 List<Vertex> listVertices = new List<Vertex>();
+#endif
                 Profiler.BeginSample("AddVertices");
                 AddVerticesRuntime(m_meshUniqueVertices.ListVertices, m_meshUniqueVertices.ListBoneWeights);
 
@@ -222,7 +223,9 @@ namespace UltimateGameTools
                 {
                     m_listVertices[i].m_collapse = (m_listVertexMap[i] == -1) ? null : m_listVertices[m_listVertexMap[i]];
                     Vertex v = m_listVertices[m_listVertexPermutationBack[i]];
+#if false
                     listVertices.Add(v);
+#endif
                     v.m_bRuntimeCollapsed = i >= nVertices;
                 }
                 Profiler.EndSample();
@@ -240,7 +243,7 @@ namespace UltimateGameTools
                 Profiler.EndSample();
 
                 //int nTotalVertices = listVertices.Count;
-
+#if false
                 Profiler.BeginSample("Collapse");
                 //Stopwatch sw = Stopwatch.StartNew();
                 while (listVertices.Count > nVertices)
@@ -273,6 +276,7 @@ namespace UltimateGameTools
                     //}
                 }
                 Profiler.EndSample();
+#endif
 
                 for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
                 {
@@ -299,9 +303,9 @@ namespace UltimateGameTools
             {
                 return m_meshOriginal.triangles.Length / 3;
             }
-            #endregion // Public methods
+#endregion // Public methods
 
-            #region Private methods
+#region Private methods
 
             /////////////////////////////////////////////////////////////////////////////////////////////////
             // Private methods
