@@ -194,16 +194,8 @@ public partial class MeshSimplify : MonoBehaviour
 
                     meshSimplify.ConfigureSimplifier();
 
-                    IEnumerator enumerator = meshSimplify.m_meshSimplifier.ComputeMeshWithVertexCount(gameObject, meshSimplify.m_simplifiedMesh, Mathf.RoundToInt(fAmount * meshSimplify.m_meshSimplifier.GetOriginalMeshUniqueVertexCount()), meshSimplify.name + " Simplified", progress);
-
-                    while (enumerator.MoveNext())
-                    {
-                        if (Simplifier.Cancelled)
-                        {
-                            return;
-                        }
-                    }
-
+                    meshSimplify.m_meshSimplifier.ComputeMeshWithVertexCount(gameObject, meshSimplify.m_simplifiedMesh, Mathf.RoundToInt(fAmount * meshSimplify.m_meshSimplifier.GetOriginalMeshUniqueVertexCount()));
+                    
                     if (Simplifier.Cancelled)
                     {
                         return;

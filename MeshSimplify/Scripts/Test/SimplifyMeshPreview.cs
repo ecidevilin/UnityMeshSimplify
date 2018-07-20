@@ -164,7 +164,7 @@ public class SimplifyMeshPreview : MonoBehaviour
 
                 if (GUILayout.Button("Compute simplified mesh", GUILayout.Width(200)))
                 {
-                    StartCoroutine(ComputeMeshWithVertices(m_fVertexAmount));
+                    ComputeMeshWithVertices(m_fVertexAmount);
                 }
 
                 GUILayout.FlexibleSpace();
@@ -231,7 +231,7 @@ public class SimplifyMeshPreview : MonoBehaviour
         }
     }
 
-    private IEnumerator ComputeMeshWithVertices(float fAmount)
+    private void ComputeMeshWithVertices(float fAmount)
     {
         foreach (KeyValuePair<GameObject, Material[]> pair in m_objectMaterials)
         {
@@ -256,12 +256,8 @@ public class SimplifyMeshPreview : MonoBehaviour
                 {
                     meshSimplify.MeshSimplifier.CoroutineEnded = false;
 
-                    StartCoroutine(meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(go, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()), meshSimplify.name, Progress));
-
-                    while (meshSimplify.MeshSimplifier.CoroutineEnded == false)
-                    {
-                        yield return null;
-                    }
+                    meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(go, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()));
+                    
                     if (skin != null)
                     {
                         skin.sharedMesh = newMesh;

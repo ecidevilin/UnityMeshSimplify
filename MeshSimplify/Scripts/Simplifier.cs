@@ -168,18 +168,16 @@ namespace UltimateGameTools
                 CoroutineEnded = true;
             }
 
-            public IEnumerator ComputeMeshWithVertexCount(GameObject gameObject, Mesh meshOut, int nVertices, string strProgressDisplayObjectName = "", ProgressDelegate progress = null)
+            public void ComputeMeshWithVertexCount(GameObject gameObject, Mesh meshOut, int nVertices)
             {
                 if (GetOriginalMeshUniqueVertexCount() == -1)
                 {
-                    CoroutineEnded = true;
-                    yield break;
+                    return;
                 }
 
                 if (nVertices < 3)
                 {
-                    CoroutineEnded = true;
-                    yield break;
+                    return;
                 }
 
                 if (nVertices >= GetOriginalMeshUniqueVertexCount())
@@ -208,8 +206,7 @@ namespace UltimateGameTools
 
                     meshOut.name = gameObject.name + " simplified mesh";
 
-                    CoroutineEnded = true;
-                    yield break;
+                    return;
                 }
 
                 m_listVertices = new List<Vertex>();
@@ -234,37 +231,37 @@ namespace UltimateGameTools
                     AddFaceListSubMesh(nSubMesh, m_meshUniqueVertices.SubmeshesFaceList[nSubMesh].m_listIndices, anIndices, av2Mapping);
                 }
 
-                int nTotalVertices = listVertices.Count;
+                //int nTotalVertices = listVertices.Count;
 
-                Stopwatch sw = Stopwatch.StartNew();
+                //Stopwatch sw = Stopwatch.StartNew();
                 while (listVertices.Count > nVertices)
                 {
-                    if (progress != null)
-                    {
-                        float fT = 1.0f;
-                        if (nTotalVertices != nVertices && ((listVertices.Count & 0xFF) == 0))
-                        {
-                            fT = 1.0f - ((float)(listVertices.Count - nVertices) / (float)(nTotalVertices - nVertices));
-                            progress("Simplifying mesh: " + strProgressDisplayObjectName, "Collapsing edges", fT);
+                    //if (progress != null)
+                    //{
+                    //    float fT = 1.0f;
+                    //    if (nTotalVertices != nVertices && ((listVertices.Count & 0xFF) == 0))
+                    //    {
+                    //        fT = 1.0f - ((float)(listVertices.Count - nVertices) / (float)(nTotalVertices - nVertices));
+                    //        progress("Simplifying mesh: " + strProgressDisplayObjectName, "Collapsing edges", fT);
 
-                            if (Cancelled)
-                            {
-                                CoroutineEnded = true;
-                                yield break;
-                            }
-                        }
-                    }
+                    //        if (Cancelled)
+                    //        {
+                    //            CoroutineEnded = true;
+                    //            yield break;
+                    //        }
+                    //    }
+                    //}
 
                     Vertex mn = listVertices[listVertices.Count - 1];
                     listVertices.RemoveAt(listVertices.Count - 1);
                     Collapse(mn, mn.m_collapse, false, null, null);
                     //m_listVertices.Remove(mn);
 
-                    if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
-                    {
-                        yield return null;
-                        sw = Stopwatch.StartNew();
-                    }
+                    //if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
+                    //{
+                    //    yield return null;
+                    //    sw = Stopwatch.StartNew();
+                    //}
                 }
 
                 for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
@@ -278,25 +275,7 @@ namespace UltimateGameTools
                 //    av3Vertices[i] = m_listVertices[i].m_v3Position;
                 //}
 
-                if (Application.isEditor && !Application.isPlaying)
-                {
-                    IEnumerator enumerator = ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListTriangles, strProgressDisplayObjectName, progress);
-
-                    while (enumerator.MoveNext())
-                    {
-                        if (Simplifier.Cancelled)
-                        {
-                            CoroutineEnded = true;
-                            yield break;
-                        }
-                    }
-                }
-                else
-                {
-                    yield return StartCoroutine(ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListTriangles, strProgressDisplayObjectName, progress));
-                }
-
-                CoroutineEnded = true;
+                ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListTriangles);
             }
 
             public int GetOriginalMeshUniqueVertexCount()
@@ -316,7 +295,7 @@ namespace UltimateGameTools
             // Private methods
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
-            IEnumerator ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, TriangleList[] aListTriangles, string strProgressDisplayObjectName = "", ProgressDelegate progress = null)
+            void ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, TriangleList[] aListTriangles)
             {
                 Vector3[] av3NormalsIn = meshIn.normals;
                 Vector4[] av4TangentsIn = meshIn.tangents;
@@ -343,33 +322,33 @@ namespace UltimateGameTools
 
                 Dictionary<VertexDataHash, int> dicVertexDataHash2Index = new Dictionary<VertexDataHash, int>(new VertexDataHashComparer());
 
-                Stopwatch sw = Stopwatch.StartNew();
+                //Stopwatch sw = Stopwatch.StartNew();
 
                 for (int nSubMesh = 0; nSubMesh < aListTriangles.Length; nSubMesh++)
                 {
                     List<int> listIndicesOut = new List<int>();
 
-                    string strMesh = aListTriangles.Length > 1 ? ("Consolidating submesh " + (nSubMesh + 1)) : "Consolidating mesh";
+                    //string strMesh = aListTriangles.Length > 1 ? ("Consolidating submesh " + (nSubMesh + 1)) : "Consolidating mesh";
 
                     for (int i = 0; i < aListTriangles[nSubMesh].m_listTriangles.Count; i++)
                     {
-                        if (progress != null && ((i & 0xFF) == 0))
-                        {
-                            float fT = aListTriangles[nSubMesh].m_listTriangles.Count == 1 ? 1.0f : ((float)i / (float)(aListTriangles[nSubMesh].m_listTriangles.Count - 1));
+                        //if (progress != null && ((i & 0xFF) == 0))
+                        //{
+                        //    float fT = aListTriangles[nSubMesh].m_listTriangles.Count == 1 ? 1.0f : ((float)i / (float)(aListTriangles[nSubMesh].m_listTriangles.Count - 1));
 
-                            progress("Simplifying mesh: " + strProgressDisplayObjectName, strMesh, fT);
+                        //    progress("Simplifying mesh: " + strProgressDisplayObjectName, strMesh, fT);
 
-                            if (Cancelled)
-                            {
-                                yield break;
-                            }
-                        }
+                        //    if (Cancelled)
+                        //    {
+                        //        yield break;
+                        //    }
+                        //}
 
-                        if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
-                        {
-                            yield return null;
-                            sw = Stopwatch.StartNew();
-                        }
+                        //if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
+                        //{
+                        //    yield return null;
+                        //    sw = Stopwatch.StartNew();
+                        //}
 
                         for (int v = 0; v < 3; v++)
                         {
@@ -445,8 +424,6 @@ namespace UltimateGameTools
                 }
 
                 meshOut.name = gameObject.name + " simplified mesh";
-
-                progress("Simplifying mesh: " + strProgressDisplayObjectName, "Mesh consolidation done", 1.0f);
             }
 
             float ComputeEdgeCollapseCost(Vertex u, Vertex v, float fRelevanceBias)
@@ -702,7 +679,7 @@ namespace UltimateGameTools
                     for (i = 0; i < tmpVertices.Count; i++)
                     {
                         ComputeEdgeCostAtVertex(tmpVertices[i], transform, aRelevanceSpheres);
-                        m_heap.ModifyValue(tmpVertices[i].m_nHeapSpot, tmpVertices[i]);
+                        m_heap.ModifyValue(tmpVertices[i].HeapIndex, tmpVertices[i]);
                     }
                 }
             }

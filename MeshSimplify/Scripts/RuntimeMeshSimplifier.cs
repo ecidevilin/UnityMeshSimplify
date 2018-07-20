@@ -115,7 +115,7 @@ public class RuntimeMeshSimplifier : MonoBehaviour
                 {
                     meshSimplify.MeshSimplifier.CoroutineEnded = false;
 
-                    StartCoroutine(meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(go, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()), meshSimplify.name, Progress));
+                    meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(go, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()));
 
                     while (meshSimplify.MeshSimplifier.CoroutineEnded == false)
                     {
