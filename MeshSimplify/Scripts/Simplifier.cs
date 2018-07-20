@@ -265,8 +265,7 @@ namespace UltimateGameTools
                     }
                 }
 
-                Vector3[] av3Vertices = null; //new Vector3[m_listVertices.Count];
-
+                //Vector3[] av3Vertices = new Vector3[m_listVertices.Count];
                 //for (int i = 0; i < m_listVertices.Count; i++)
                 //{
                 //    m_listVertices[i].m_nID = i;  // reassign id's
@@ -275,7 +274,7 @@ namespace UltimateGameTools
 
                 if (Application.isEditor && !Application.isPlaying)
                 {
-                    IEnumerator enumerator = ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListTriangles, av3Vertices, strProgressDisplayObjectName, progress);
+                    IEnumerator enumerator = ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListTriangles, strProgressDisplayObjectName, progress);
 
                     while (enumerator.MoveNext())
                     {
@@ -288,7 +287,7 @@ namespace UltimateGameTools
                 }
                 else
                 {
-                    yield return StartCoroutine(ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListTriangles, av3Vertices, strProgressDisplayObjectName, progress));
+                    yield return StartCoroutine(ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListTriangles, strProgressDisplayObjectName, progress));
                 }
 
                 CoroutineEnded = true;
@@ -311,7 +310,7 @@ namespace UltimateGameTools
             // Private methods
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
-            IEnumerator ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, TriangleList[] aListTriangles, Vector3[] av3Vertices, string strProgressDisplayObjectName = "", ProgressDelegate progress = null)
+            IEnumerator ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, TriangleList[] aListTriangles, string strProgressDisplayObjectName = "", ProgressDelegate progress = null)
             {
                 Vector3[] av3NormalsIn = meshIn.normals;
                 Vector4[] av4TangentsIn = meshIn.tangents;
