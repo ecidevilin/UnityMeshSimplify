@@ -106,11 +106,13 @@ namespace UltimateGameTools
 
                 AddVertices(m_meshUniqueVertices.ListVertices, m_meshUniqueVertices.ListVerticesWorld, m_meshUniqueVertices.ListBoneWeights);
 
+                ListIndices[] faceList = m_meshUniqueVertices.SubmeshesFaceList;
                 for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
                 {
                     int[] anIndices = m_meshOriginal.GetTriangles(nSubMesh);
-                    m_aListTriangles[nSubMesh] = new TriangleList();
-                    AddFaceListSubMesh(nSubMesh, m_meshUniqueVertices.SubmeshesFaceList[nSubMesh].m_listIndices, anIndices, av2Mapping);
+                    List<int> listIndices = faceList[nSubMesh].m_listIndices;
+                    m_aListTriangles[nSubMesh] = new TriangleList(listIndices.Count);
+                    AddFaceListSubMesh(nSubMesh, listIndices, anIndices, av2Mapping);
                 }
 
                 if (Application.isEditor && !Application.isPlaying)
@@ -225,11 +227,13 @@ namespace UltimateGameTools
                 Profiler.BeginSample("AddFaceListSubMesh");
                 Vector2[] av2Mapping = m_meshOriginal.uv;
 
+                ListIndices[] faceList = m_meshUniqueVertices.SubmeshesFaceList;
                 for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
                 {
                     int[] anIndices = m_meshOriginal.GetTriangles(nSubMesh);
-                    m_aListTriangles[nSubMesh] = new TriangleList();
-                    AddFaceListSubMeshRuntime(nSubMesh, m_meshUniqueVertices.SubmeshesFaceList[nSubMesh].m_listIndices, anIndices, av2Mapping);
+                    List<int> listIndices = faceList[nSubMesh].m_listIndices;
+                    m_aListTriangles[nSubMesh] = new TriangleList(listIndices.Count);
+                    AddFaceListSubMeshRuntime(nSubMesh, listIndices, anIndices, av2Mapping);
                 }
                 Profiler.EndSample();
 

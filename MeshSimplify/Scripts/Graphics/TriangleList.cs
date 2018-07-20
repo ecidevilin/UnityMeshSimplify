@@ -12,9 +12,9 @@ namespace UltimateGameTools
         /// </summary>
         public class TriangleList
         {
-            public TriangleList()
+            public TriangleList(int capacity)
             {
-                m_listTriangles = new List<Triangle>();
+                m_listTriangles = new List<Triangle>(capacity);
             }
 
             public List<Triangle> m_listTriangles;
