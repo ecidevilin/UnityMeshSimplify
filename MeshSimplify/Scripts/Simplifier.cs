@@ -723,7 +723,10 @@ namespace UltimateGameTools
                                                 bUVData, anIndices[i * 3], anIndices[i * 3 + 1], anIndices[i * 3 + 2], compute);
 
                     list.Add(tri);
-                    ShareUV(v2Mapping, tri);
+                    if (compute) // NOTE: if need share uv at runtime
+                    {
+                        ShareUV(v2Mapping, tri);
+                    }
                 }
             }
 
@@ -756,7 +759,7 @@ namespace UltimateGameTools
                             continue;
                         }
 
-                        int tx1 = t.TexAt(t.Vertices[nCurrentVert]);
+                        int tx1 = t.TexAt(nCurrentVert);
                         int tx2 = n.TexAt(t.Vertices[nCurrentVert]);
 
                         if (tx1 == tx2)
@@ -769,7 +772,7 @@ namespace UltimateGameTools
 
                         if (uv1 == uv2)
                         {
-                            t.SetTexAt(t.Vertices[nCurrentVert], tx2);
+                            t.SetTexAt(nCurrentVert, tx2);
                         }
                     }
                 }
