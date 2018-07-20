@@ -259,8 +259,6 @@ public class SimplifyMeshPreview : MonoBehaviour
 
                 if (meshSimplify.MeshSimplifier != null)
                 {
-                    meshSimplify.MeshSimplifier.CoroutineEnded = false;
-
                     meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(go, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()));
                     
                     if (skin != null)
