@@ -161,6 +161,10 @@ namespace UltimateGameTools
                     Collapse(mn, mn.m_collapse, true, gameObject.transform, aRelevanceSpheres);
                 }
 
+                for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
+                {
+                    m_aListTriangles[nSubMesh].RemoveNull();
+                }
                 CoroutineEnded = true;
             }
 
@@ -263,6 +267,10 @@ namespace UltimateGameTools
                     }
                 }
 
+                for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
+                {
+                    m_aListTriangles[nSubMesh].RemoveNull();
+                }
                 //Vector3[] av3Vertices = new Vector3[m_listVertices.Count];
                 //for (int i = 0; i < m_listVertices.Count; i++)
                 //{
@@ -592,7 +600,6 @@ namespace UltimateGameTools
 
             List<Triangle> tmpTriangles = new List<Triangle>(); 
             List<Vertex> tmpVertices = new List<Vertex>(); 
-            List<int> trianglesToRemove = new List<int>(); 
 
             void Collapse(Vertex u, Vertex v, bool bRecompute, Transform transform, RelevanceSphere[] aRelevanceSpheres)
             {
@@ -673,7 +680,7 @@ namespace UltimateGameTools
                     if (u.m_listFaces[i].HasVertex(v))
                     {
                         Triangle t = u.m_listFaces[i];
-                        m_aListTriangles[t.SubMeshIndex].m_listTriangles.Remove(t);
+                        m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
                         t.Destructor(bRecompute);
                     }
                 }
@@ -723,13 +730,14 @@ namespace UltimateGameTools
                     }
                 }
 
+                List<Triangle> list = m_aListTriangles[nSubMesh].m_listTriangles;
                 for (int i = 0; i < listTriangles.Count / 3; i++)
                 {
-                    Triangle tri = new Triangle(nSubMesh,
+                    Triangle tri = new Triangle(nSubMesh, list.Count,
                                                 m_listVertices[listTriangles[i * 3]], m_listVertices[listTriangles[i * 3 + 1]], m_listVertices[listTriangles[i * 3 + 2]],
                                                 bUVData, anIndices[i * 3], anIndices[i * 3 + 1], anIndices[i * 3 + 2]);
 
-                    m_aListTriangles[nSubMesh].m_listTriangles.Add(tri);
+                    list.Add(tri);
                     ShareUV(v2Mapping, tri);
                 }
             }

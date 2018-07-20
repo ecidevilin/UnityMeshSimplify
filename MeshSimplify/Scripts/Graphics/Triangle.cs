@@ -42,14 +42,20 @@ namespace UltimateGameTools
                 get { return m_nSubMesh; }
             }
 
+            public int Index
+            {
+                get { return m_nIndex; }
+            }
+
             private Vertex[] m_aVertices;
             private bool m_bUVData;
             private int[] m_aUV;
             private int[] m_aIndices;
             private Vector3 m_v3Normal;
             private int m_nSubMesh;
+            private int m_nIndex;
 
-            public Triangle(int nSubMesh, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
+            public Triangle(int nSubMesh, int nIndex, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
                 int nIndex1, int nIndex2, int nIndex3)
             {
                 m_aVertices = new Vertex[3];
@@ -61,6 +67,7 @@ namespace UltimateGameTools
                 m_aVertices[2] = v2;
 
                 m_nSubMesh = nSubMesh;
+                m_nIndex = nIndex;
 
                 m_bUVData = bUVData;
 
