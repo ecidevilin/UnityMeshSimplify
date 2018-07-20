@@ -54,6 +54,7 @@ namespace UltimateGameTools
             private Vector3 m_v3Normal;
             private int m_nSubMesh;
             private int m_nIndex;
+            public bool DestructedRuntime = false;
 
             public Triangle(int nSubMesh, int nIndex, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
                 int nIndex1, int nIndex2, int nIndex3, bool compute)
@@ -129,18 +130,18 @@ namespace UltimateGameTools
                     m_aVertices[i2].RemoveIfNonNeighbor(m_aVertices[i]);
                 }
             }
-            public void DestructorRuntime()
-            {
-                int i;
+            //public void DestructorRuntime()
+            //{
+            //    int i;
 
-                for (i = 0; i < 3; i++)
-                {
-                    if (m_aVertices[i] != null)
-                    {
-                        m_aVertices[i].m_listFaces.Remove(this);
-                    }
-                }
-            }
+            //    for (i = 0; i < 3; i++)
+            //    {
+            //        if (m_aVertices[i] != null)
+            //        {
+            //            m_aVertices[i].m_listFaces.Remove(this);
+            //        }
+            //    }
+            //}
 
             public bool HasVertex(Vertex v)
             {

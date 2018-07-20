@@ -745,9 +745,14 @@ namespace UltimateGameTools
 
                 for (i = 0; i < u.m_listFaces.Count; i++)
                 {
-                    if (u.m_listFaces[i].HasVertex(v))
+                    Triangle t = u.m_listFaces[i];
+                    if (t.DestructedRuntime)
                     {
-                        tmpTriangles.Add(u.m_listFaces[i]);
+                        continue;
+                    }
+                    if (t.HasVertex(v))
+                    {
+                        tmpTriangles.Add(t);
                     }
                 }
 
@@ -755,20 +760,24 @@ namespace UltimateGameTools
 
                 for (i = 0; i < u.m_listFaces.Count; i++)
                 {
-                    int j;
-
-                    if (u.m_listFaces[i].HasVertex(v))
+                    Triangle t = u.m_listFaces[i];
+                    if (t.DestructedRuntime)
+                    {
+                        continue;
+                    }
+                    if (t.HasVertex(v))
                     {
                         continue;
                     }
 
-                    if (u.m_listFaces[i].HasUVData)
+                    int j;
+                    if (t.HasUVData)
                     {
                         for (j = 0; j < tmpTriangles.Count; j++)
                         {
-                            if (u.m_listFaces[i].TexAt(u) == tmpTriangles[j].TexAt(u))
+                            if (t.TexAt(u) == tmpTriangles[j].TexAt(u))
                             {
-                                u.m_listFaces[i].SetTexAt(u, tmpTriangles[j].TexAt(v));
+                                t.SetTexAt(u, tmpTriangles[j].TexAt(v));
                                 break; // only change tex coords once!
                             }
                         }
@@ -796,14 +805,20 @@ namespace UltimateGameTools
                 {
                     Triangle t = tmpTriangles[i];
                     m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
-                    t.DestructorRuntime();
+                    //t.DestructorRuntime();
+                    t.DestructedRuntime = true;
                 }
 
                 // Update remaining triangles to have v instead of u
 
                 for (i = u.m_listFaces.Count - 1; i >= 0; i--)
                 {
-                    u.m_listFaces[i].ReplaceVertexRuntime(u, v);
+                    Triangle t = u.m_listFaces[i];
+                    if (t.DestructedRuntime)
+                    {
+                        continue;
+                    }
+                    t.ReplaceVertexRuntime(u, v);
                 }
             }
 
