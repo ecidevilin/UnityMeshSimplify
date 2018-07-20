@@ -592,6 +592,7 @@ namespace UltimateGameTools
 
             List<Triangle> tmpTriangles = new List<Triangle>(); 
             List<Vertex> tmpVertices = new List<Vertex>(); 
+            List<int> trianglesToRemove = new List<int>(); 
 
             void Collapse(Vertex u, Vertex v, bool bRecompute, Transform transform, RelevanceSphere[] aRelevanceSpheres)
             {
@@ -599,7 +600,8 @@ namespace UltimateGameTools
                 {
                     if (bRecompute)
                     {
-                        u.Destructor(this);
+                        m_listVertices.Remove(u);
+                        u.Destructor();
                     }
                     return;
                 }
@@ -668,9 +670,10 @@ namespace UltimateGameTools
 
                 for (i = u.m_listFaces.Count - 1; i >= 0; i--)
                 {
-                    if (i < u.m_listFaces.Count && i >= 0 && u.m_listFaces[i].HasVertex(v))
+                    if (u.m_listFaces[i].HasVertex(v))
                     {
-                        u.m_listFaces[i].Destructor(this, bRecompute);
+                        m_aListTriangles[u.m_listFaces[i].SubMeshIndex].m_listTriangles.Remove(u.m_listFaces[i]);
+                        u.m_listFaces[i].Destructor(bRecompute);
                     }
                 }
 
@@ -683,7 +686,8 @@ namespace UltimateGameTools
 
                 if (bRecompute)
                 {
-                    u.Destructor(this);
+                    m_listVertices.Remove(u);
+                    u.Destructor();
 
                 // Recompute the edge collapse costs for neighboring vertices
                 
@@ -701,7 +705,8 @@ namespace UltimateGameTools
 
                 for (int i = 0; i < listVertices.Count; i++)
                 {
-                    new Vertex(this, listVertices[i], listVerticesWorld[i], bHasBoneWeights, bHasBoneWeights ? listBoneWeights[i].ToBoneWeight() : new BoneWeight(), i);
+                    Vertex v = new Vertex(listVertices[i], listVerticesWorld[i], bHasBoneWeights, bHasBoneWeights ? listBoneWeights[i].ToBoneWeight() : new BoneWeight(), i);
+                    m_listVertices.Add(v);
                 }
             }
 
@@ -719,9 +724,11 @@ namespace UltimateGameTools
 
                 for (int i = 0; i < listTriangles.Count / 3; i++)
                 {
-                    Triangle tri = new Triangle(this, nSubMesh,
+                    Triangle tri = new Triangle(nSubMesh,
                                                 m_listVertices[listTriangles[i * 3]], m_listVertices[listTriangles[i * 3 + 1]], m_listVertices[listTriangles[i * 3 + 2]],
                                                 bUVData, anIndices[i * 3], anIndices[i * 3 + 1], anIndices[i * 3 + 2]);
+
+                    m_aListTriangles[nSubMesh].m_listTriangles.Add(tri);
                     ShareUV(v2Mapping, tri);
                 }
             }

@@ -37,6 +37,10 @@ namespace UltimateGameTools
             {
                 get { return m_aIndices; }
             }
+            public int SubMeshIndex
+            {
+                get { return m_nSubMesh; }
+            }
 
             private Vertex[] m_aVertices;
             private bool m_bUVData;
@@ -45,7 +49,7 @@ namespace UltimateGameTools
             private Vector3 m_v3Normal;
             private int m_nSubMesh;
 
-            public Triangle(Simplifier simplifier, int nSubMesh, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
+            public Triangle(int nSubMesh, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
                 int nIndex1, int nIndex2, int nIndex3)
             {
                 m_aVertices = new Vertex[3];
@@ -73,8 +77,6 @@ namespace UltimateGameTools
 
                 ComputeNormal();
 
-                simplifier.m_aListTriangles[nSubMesh].m_listTriangles.Add(this);
-
                 for (int i = 0; i < 3; i++)
                 {
                     m_aVertices[i].m_listFaces.Add(this);
@@ -92,10 +94,9 @@ namespace UltimateGameTools
                 }
             }
 
-            public void Destructor(Simplifier simplifier, bool recompute)
+            public void Destructor(bool recompute)
             {
                 int i;
-                simplifier.m_aListTriangles[m_nSubMesh].m_listTriangles.Remove(this);
 
                 for (i = 0; i < 3; i++)
                 {

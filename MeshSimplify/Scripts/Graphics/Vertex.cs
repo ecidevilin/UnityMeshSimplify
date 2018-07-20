@@ -31,7 +31,7 @@ namespace UltimateGameTools
             public Vertex m_collapse; // Candidate vertex for collapse
             public int m_nHeapSpot; // Heap spot, for optimization purposes.
 
-            public Vertex(Simplifier simplifier, Vector3 v, Vector3 v3World, bool bHasBoneWeight, BoneWeight boneWeight,
+            public Vertex(Vector3 v, Vector3 v3World, bool bHasBoneWeight, BoneWeight boneWeight,
                 int nID)
             {
                 m_v3Position = v;
@@ -42,11 +42,9 @@ namespace UltimateGameTools
 
                 m_listNeighbors = new List<Vertex>();
                 m_listFaces = new List<Triangle>();
-
-                simplifier.m_listVertices.Add(this);
             }
 
-            public void Destructor(Simplifier simplifier)
+            public void Destructor()
             {
                 while (m_listNeighbors.Count > 0)
                 {
@@ -57,8 +55,6 @@ namespace UltimateGameTools
                         m_listNeighbors.RemoveAt(0);
                     }
                 }
-
-                simplifier.m_listVertices.Remove(this);
             }
 
             public void RemoveIfNonNeighbor(Vertex n)
