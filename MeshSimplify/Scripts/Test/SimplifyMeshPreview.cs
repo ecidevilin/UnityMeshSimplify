@@ -157,18 +157,23 @@ public class SimplifyMeshPreview : MonoBehaviour
             else
             {
                 GUILayout.Label("Vertices: " + (m_fVertexAmount * 100.0f).ToString("0.00") + "%");
-                m_fVertexAmount = GUILayout.HorizontalSlider(m_fVertexAmount, 0.0f, 1.0f, GUILayout.Width(200));
-
-                GUILayout.BeginHorizontal();
-                GUILayout.Space(3);
-
-                if (GUILayout.Button("Compute simplified mesh", GUILayout.Width(200)))
+                float VertexAmount = GUILayout.HorizontalSlider(m_fVertexAmount, 0.0f, 1.0f, GUILayout.Width(200));
+                if (!Mathf.Approximately(VertexAmount, m_fVertexAmount))
                 {
+                    m_fVertexAmount = VertexAmount;
                     ComputeMeshWithVertices(m_fVertexAmount);
                 }
 
-                GUILayout.FlexibleSpace();
-                GUILayout.EndHorizontal();
+                //GUILayout.BeginHorizontal();
+                //GUILayout.Space(3);
+
+                //if (GUILayout.Button("Compute simplified mesh", GUILayout.Width(200)))
+                //{
+                //    ComputeMeshWithVertices(m_fVertexAmount);
+                //}
+
+                //GUILayout.FlexibleSpace();
+                //GUILayout.EndHorizontal();
             }
         }
     }
