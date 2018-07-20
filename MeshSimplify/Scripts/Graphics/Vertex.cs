@@ -29,6 +29,7 @@ namespace UltimateGameTools
             public List<Triangle> m_listFaces; // Adjacent triangles
             public float m_fObjDist; // Cached cost of collapsing edge
             public Vertex m_collapse; // Candidate vertex for collapse
+            public bool m_bRuntimeCollapsed;
 
             public Vertex(Vector3 v, Vector3 v3World, bool bHasBoneWeight, BoneWeight boneWeight,
                 int nID)

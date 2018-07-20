@@ -256,6 +256,40 @@ namespace UltimateGameTools
                 //vold.m_listFaces.Remove(this);
                 vnew.m_listFaces.Add(this);
             }
+
+            public static Triangle CreateTriangle(int nSubMesh, int nIndex, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
+                int nIndex0, int nIndex1, int nIndex2)
+            {
+                while (v0.m_bRuntimeCollapsed)
+                {
+                    Vertex v = v0.m_collapse;
+                    if (v == null || v1 == v || v2 == v)
+                    {
+                        return null;
+                    }
+                    v0 = v;
+                }
+                while (v1.m_bRuntimeCollapsed)
+                {
+                    Vertex v = v1.m_collapse;
+                    if (v == null || v0 == v || v2 == v)
+                    {
+                        return null;
+                    }
+                    v1 = v;
+                }
+                while (v2.m_bRuntimeCollapsed)
+                {
+                    Vertex v = v2.m_collapse;
+                    if (v == null || v1 == v || v0 == v)
+                    {
+                        return null;
+                    }
+                    v2 = v;
+                }
+                Triangle t = new Triangle(nSubMesh, nIndex, v0, v1, v2, bUVData, nIndex0, nIndex1, nIndex2, false);
+                return t;
+            }
         };
     }
 }

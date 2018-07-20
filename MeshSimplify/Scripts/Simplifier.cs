@@ -221,7 +221,9 @@ namespace UltimateGameTools
                 for (int i = 0; i < m_listVertices.Count; i++)
                 {
                     m_listVertices[i].m_collapse = (m_listVertexMap[i] == -1) ? null : m_listVertices[m_listVertexMap[i]];
-                    listVertices.Add(m_listVertices[m_listVertexPermutationBack[i]]);
+                    Vertex v = m_listVertices[m_listVertexPermutationBack[i]];
+                    listVertices.Add(v);
+                    v.m_bRuntimeCollapsed = i >= nVertices;
                 }
                 Profiler.EndSample();
                 Profiler.BeginSample("AddFaceListSubMesh");
@@ -271,7 +273,7 @@ namespace UltimateGameTools
                     //}
                 }
                 Profiler.EndSample();
-                
+
                 for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
                 {
                     m_aListTriangles[nSubMesh].RemoveNull();
@@ -883,14 +885,54 @@ namespace UltimateGameTools
                     }
                 }
 
+                int[] inverseMap = new int[m_listVertices.Count];
+                for (int i = 0; i < listTriangles.Count; i++)
+                {
+                    inverseMap[listTriangles[i]] = i;
+                }
+
                 List<Triangle> list = m_aListTriangles[nSubMesh].m_listTriangles;
                 for (int i = 0; i < listTriangles.Count; i+=3)
                 {
-                    Triangle tri = new Triangle(nSubMesh, list.Count,
-                                                m_listVertices[listTriangles[i]], m_listVertices[listTriangles[i + 1]], m_listVertices[listTriangles[i + 2]],
-                                                bUVData, anIndices[i], anIndices[i + 1], anIndices[i + 2], false);
-
-                    list.Add(tri);
+                    Vertex v0 = m_listVertices[listTriangles[i]];
+                    Vertex v1 = m_listVertices[listTriangles[i + 1]];
+                    Vertex v2 = m_listVertices[listTriangles[i + 2]];
+                    Triangle tri = Triangle.CreateTriangle(nSubMesh, list.Count, v0 , v1, v2,
+                                                bUVData, anIndices[i], anIndices[i + 1], anIndices[i + 2]);
+                    if (null != tri)
+                    {
+                        Vertex p0 = tri.Vertices[0];
+                        if (p0 != v0)
+                        {
+                            int idx = inverseMap[p0.m_nID];
+                            if (idx > 0)
+                            {
+                                int uv = anIndices[idx];
+                                tri.SetTexAt(0, uv);
+                            }
+                        }
+                        Vertex p1 = tri.Vertices[1];
+                        if (p1 != v1)
+                        {
+                            int idx = inverseMap[p1.m_nID];
+                            if (idx > 0)
+                            {
+                                int uv = anIndices[idx];
+                                tri.SetTexAt(1, uv);
+                            }
+                        }
+                        Vertex p2 = tri.Vertices[2];
+                        if (p2 != v2)
+                        {
+                            int idx = inverseMap[p2.m_nID];
+                            if (idx > 0)
+                            {
+                                int uv = anIndices[idx];
+                                tri.SetTexAt(2, uv);
+                            }
+                        }
+                        list.Add(tri);
+                    }
                     // NOTE: if need share uv at runtime
                 }
             }
