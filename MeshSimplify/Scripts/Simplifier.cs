@@ -712,7 +712,7 @@ namespace UltimateGameTools
                 {
                     Triangle t = tmpTriangles[i];
                     m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
-                    t.DestructorRuntime();
+                    t.Destructor();
                 }
 
                 // Update remaining triangles to have v instead of u
