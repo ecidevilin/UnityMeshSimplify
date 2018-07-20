@@ -708,14 +708,11 @@ namespace UltimateGameTools
 
                 // Delete triangles on edge uv
 
-                for (i = u.m_listFaces.Count - 1; i >= 0; i--)
+                for (i = tmpTriangles.Count - 1; i >= 0; i--)
                 {
-                    if (u.m_listFaces[i].HasVertex(v))
-                    {
-                        Triangle t = u.m_listFaces[i];
-                        m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
-                        t.Destructor();
-                    }
+                    Triangle t = tmpTriangles[i];
+                    m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
+                    t.DestructorRuntime();
                 }
 
                 // Update remaining triangles to have v instead of u
@@ -795,14 +792,11 @@ namespace UltimateGameTools
 
                 // Delete triangles on edge uv
 
-                for (i = u.m_listFaces.Count - 1; i >= 0; i--)
+                for (i = tmpTriangles.Count - 1; i >= 0; i--)
                 {
-                    if (u.m_listFaces[i].HasVertex(v))
-                    {
-                        Triangle t = u.m_listFaces[i];
-                        m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
-                        t.DestructorRuntime();
-                    }
+                    Triangle t = tmpTriangles[i];
+                    m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
+                    t.DestructorRuntime();
                 }
 
                 // Update remaining triangles to have v instead of u
