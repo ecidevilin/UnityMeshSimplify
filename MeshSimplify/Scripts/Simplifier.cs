@@ -303,6 +303,7 @@ namespace UltimateGameTools
 
             void ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, TriangleList[] aListTriangles)
             {
+                Vector3[] av3Vertices = meshIn.vertices;
                 Vector3[] av3NormalsIn = meshIn.normals;
                 Vector4[] av4TangentsIn = meshIn.tangents;
                 Vector2[] av2Mapping1In = meshIn.uv;
@@ -326,7 +327,63 @@ namespace UltimateGameTools
                 List<Vector2> listMapping2Out = bUV2 ? new List<Vector2>() : null;
                 List<Color32> listColors32Out = bColor ? new List<Color32>() : null;
                 List<BoneWeight> listBoneWeightsOut = bBone ? new List<BoneWeight>() : null;
+#if true
+                int[] map = new int[av3Vertices.Length];
+                int[] map2 = new int[av3Vertices.Length];
+                for (int i = 0, imax = map.Length; i < imax; i++)
+                {
+                    map[i] = -1;
+                    map2[i] = -1;
+                }
+                for (int nSubMesh = 0; nSubMesh < aListTriangles.Length; nSubMesh++)
+                {
+                    List<int> listIndicesOut = new List<int>();
+                    List<Triangle> tl = aListTriangles[nSubMesh].m_listTriangles;
+                    for (int i = 0; i < tl.Count; i++)
+                    {
+                        Triangle t = tl[i];
+                        for (int v = 0; v < 3; v++)
+                        {
+                            int vid = t.Vertices[v].m_nID;
+                            int uvi = t.IndicesUV[v];
+                            if (map[vid] != -1 && map2[uvi] == map[vid])
+                            {
+                                listIndicesOut.Add(map[vid]);
+                                continue;
+                            }
+                            int newVal = listVerticesOut.Count;
+                            int vi = t.Indices[v];
 
+                            listVerticesOut.Add(t.Vertices[v].m_v3Position);
+                            if (bNormal) listNormalsOut.Add(av3NormalsIn[vi]);
+                            if (bUV1) listMapping1Out.Add(av2Mapping1In[uvi]);
+                            if (bUV2) listMapping2Out.Add(av2Mapping2In[vi]);
+                            if (bTangent) listTangentsOut.Add(av4TangentsIn[vi]);
+                            if (bColor)
+                            {
+                                Color32 color32 = new Color32(0, 0, 0, 0);
+
+                                if (acolColorsIn != null && acolColorsIn.Length > 0)
+                                {
+                                    color32 = acolColorsIn[vi];
+                                }
+                                else if (aColors32In != null && aColors32In.Length > 0)
+                                {
+                                    color32 = aColors32In[vi];
+                                }
+                                listColors32Out.Add(color32);
+                            }
+
+                            if (bBone) listBoneWeightsOut.Add(t.Vertices[v].m_boneWeight);
+
+                            listIndicesOut.Add(newVal);
+                            map[vid] = newVal;
+                            map2[uvi] = newVal;
+                        }
+                    }
+                    listlistIndicesOut.Add(listIndicesOut);
+                }
+#else
                 Dictionary<VertexDataHash, int> dicVertexDataHash2Index = new Dictionary<VertexDataHash, int>(new VertexDataHashComparer());
 
                 //Stopwatch sw = Stopwatch.StartNew();
@@ -361,7 +418,6 @@ namespace UltimateGameTools
                         {
                             int nMappingIndex = aListTriangles[nSubMesh].m_listTriangles[i].IndicesUV[v];
                             int nVertexIndex = aListTriangles[nSubMesh].m_listTriangles[i].Indices[v];
-
                             Vector3 v3Vertex = aListTriangles[nSubMesh].m_listTriangles[i].Vertices[v].m_v3Position;
                             Vector3 v3Normal = bNormal ? av3NormalsIn[nVertexIndex] : Vector3.zero;
                             Vector4 v4Tangent = bTangent ? av4TangentsIn[nVertexIndex] : Vector4.zero;
@@ -410,8 +466,9 @@ namespace UltimateGameTools
 
                     listlistIndicesOut.Add(listIndicesOut);
                 }
+#endif
 
-                meshOut.triangles = new int[0];
+                meshOut.triangles = null;
                 meshOut.vertices = listVerticesOut.ToArray();
                 meshOut.normals = bNormal ? listNormalsOut.ToArray() : null;
                 meshOut.tangents = bTangent ? listTangentsOut.ToArray() : null;
@@ -872,9 +929,9 @@ namespace UltimateGameTools
                 }
             }
 
-            #endregion Private methods
+#endregion Private methods
 
-            #region Private vars
+#region Private vars
 
             /////////////////////////////////////////////////////////////////////////////////////////////////
             // Private vars
@@ -896,7 +953,7 @@ namespace UltimateGameTools
             [SerializeField, HideInInspector] bool m_bUseCurvature = true, m_bProtectTexture = true, m_bLockBorder = true;
 
 
-            #endregion // Private vars
+#endregion // Private vars
         }
     }
 }
