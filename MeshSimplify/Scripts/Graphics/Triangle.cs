@@ -56,7 +56,7 @@ namespace UltimateGameTools
             private int m_nIndex;
 
             public Triangle(int nSubMesh, int nIndex, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
-                int nIndex1, int nIndex2, int nIndex3)
+                int nIndex1, int nIndex2, int nIndex3, bool compute)
             {
                 m_aVertices = new Vertex[3];
                 m_aUV = new int[3];
@@ -82,12 +82,18 @@ namespace UltimateGameTools
                 m_aIndices[1] = nIndex2;
                 m_aIndices[2] = nIndex3;
 
-                ComputeNormal();
+                if (compute)
+                {
+                    ComputeNormal();
+                }
 
                 for (int i = 0; i < 3; i++)
                 {
                     m_aVertices[i].m_listFaces.Add(this);
-
+                    if (!compute)
+                    {
+                        continue;
+                    }
                     for (int j = 0; j < 3; j++)
                     {
                         if (i != j)

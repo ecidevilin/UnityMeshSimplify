@@ -213,7 +213,7 @@ namespace UltimateGameTools
                 m_aListTriangles = new TriangleList[m_meshOriginal.subMeshCount];
 
                 List<Vertex> listVertices = new List<Vertex>();
-
+                Profiler.BeginSample("AddVertices");
                 AddVertices(m_meshUniqueVertices.ListVertices, m_meshUniqueVertices.ListVerticesWorld, m_meshUniqueVertices.ListBoneWeights);
 
                 for (int i = 0; i < m_listVertices.Count; i++)
@@ -221,18 +221,21 @@ namespace UltimateGameTools
                     m_listVertices[i].m_collapse = (m_listVertexMap[i] == -1) ? null : m_listVertices[m_listVertexMap[i]];
                     listVertices.Add(m_listVertices[m_listVertexPermutationBack[i]]);
                 }
-
+                Profiler.EndSample();
+                Profiler.BeginSample("AddFaceListSubMesh");
                 Vector2[] av2Mapping = m_meshOriginal.uv;
 
                 for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
                 {
                     int[] anIndices = m_meshOriginal.GetTriangles(nSubMesh);
                     m_aListTriangles[nSubMesh] = new TriangleList();
-                    AddFaceListSubMesh(nSubMesh, m_meshUniqueVertices.SubmeshesFaceList[nSubMesh].m_listIndices, anIndices, av2Mapping);
+                    AddFaceListSubMesh(nSubMesh, m_meshUniqueVertices.SubmeshesFaceList[nSubMesh].m_listIndices, anIndices, av2Mapping, false);
                 }
+                Profiler.EndSample();
 
                 //int nTotalVertices = listVertices.Count;
 
+                Profiler.BeginSample("Collapse");
                 //Stopwatch sw = Stopwatch.StartNew();
                 while (listVertices.Count > nVertices)
                 {
@@ -263,11 +266,14 @@ namespace UltimateGameTools
                     //    sw = Stopwatch.StartNew();
                     //}
                 }
+                Profiler.EndSample();
 
+                Profiler.BeginSample("RemoveNull");
                 for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
                 {
                     m_aListTriangles[nSubMesh].RemoveNull();
                 }
+                Profiler.EndSample();
                 //Vector3[] av3Vertices = new Vector3[m_listVertices.Count];
                 //for (int i = 0; i < m_listVertices.Count; i++)
                 //{
@@ -275,7 +281,9 @@ namespace UltimateGameTools
                 //    av3Vertices[i] = m_listVertices[i].m_v3Position;
                 //}
 
+                Profiler.BeginSample("ConsolidateMesh");
                 ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListTriangles);
+                Profiler.EndSample();
             }
 
             public int GetOriginalMeshUniqueVertexCount()
@@ -695,7 +703,7 @@ namespace UltimateGameTools
                 }
             }
 
-            void AddFaceListSubMesh(int nSubMesh, List<int> listTriangles, int[] anIndices, Vector2[] v2Mapping)
+            void AddFaceListSubMesh(int nSubMesh, List<int> listTriangles, int[] anIndices, Vector2[] v2Mapping, bool compute = true)
             {
                 bool bUVData = false;
 
@@ -712,7 +720,7 @@ namespace UltimateGameTools
                 {
                     Triangle tri = new Triangle(nSubMesh, list.Count,
                                                 m_listVertices[listTriangles[i * 3]], m_listVertices[listTriangles[i * 3 + 1]], m_listVertices[listTriangles[i * 3 + 2]],
-                                                bUVData, anIndices[i * 3], anIndices[i * 3 + 1], anIndices[i * 3 + 2]);
+                                                bUVData, anIndices[i * 3], anIndices[i * 3 + 1], anIndices[i * 3 + 2], compute);
 
                     list.Add(tri);
                     ShareUV(v2Mapping, tri);
