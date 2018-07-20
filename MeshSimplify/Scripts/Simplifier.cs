@@ -256,7 +256,7 @@ namespace UltimateGameTools
                     Vertex mn = listVertices[listVertices.Count - 1];
                     listVertices.RemoveAt(listVertices.Count - 1);
                     Collapse(mn, mn.m_collapse, false, null, null);
-                    m_listVertices.Remove(mn);
+                    //m_listVertices.Remove(mn);
 
                     if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
                     {
@@ -265,13 +265,13 @@ namespace UltimateGameTools
                     }
                 }
 
-                Vector3[] av3Vertices = new Vector3[m_listVertices.Count];
+                Vector3[] av3Vertices = null; //new Vector3[m_listVertices.Count];
 
-                for (int i = 0; i < m_listVertices.Count; i++)
-                {
-                    m_listVertices[i].m_nID = i;  // reassign id's
-                    av3Vertices[i] = m_listVertices[i].m_v3Position;
-                }
+                //for (int i = 0; i < m_listVertices.Count; i++)
+                //{
+                //    m_listVertices[i].m_nID = i;  // reassign id's
+                //    av3Vertices[i] = m_listVertices[i].m_v3Position;
+                //}
 
                 if (Application.isEditor && !Application.isPlaying)
                 {
