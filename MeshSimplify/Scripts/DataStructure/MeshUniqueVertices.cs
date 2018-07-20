@@ -165,7 +165,7 @@ namespace UltimateGameTools
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
             [SerializeField] private List<Vector3> m_listVertices;
-            [SerializeField] private List<Vector3> m_listVerticesWorld;
+            private List<Vector3> m_listVerticesWorld;
             [SerializeField] private List<SerializableBoneWeight> m_listBoneWeights;
             [SerializeField] private ListIndices[] m_aSubmeshesFaceList;
             Dictionary<UniqueVertex, RepeatedVertexList> m_dicRepeatedVertexList;

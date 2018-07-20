@@ -158,7 +158,7 @@ namespace UltimateGameTools
 
                     m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
                     m_listVertexMap[mn.m_nID] = mn.m_collapse != null ? mn.m_collapse.m_nID : -1;
-                    Collapse(mn, mn.m_collapse, true, gameObject.transform, aRelevanceSpheres);
+                    Collapse(mn, mn.m_collapse, gameObject.transform, aRelevanceSpheres);
                 }
 
                 for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
@@ -214,7 +214,7 @@ namespace UltimateGameTools
 
                 List<Vertex> listVertices = new List<Vertex>();
                 Profiler.BeginSample("AddVertices");
-                AddVertices(m_meshUniqueVertices.ListVertices, m_meshUniqueVertices.ListVerticesWorld, m_meshUniqueVertices.ListBoneWeights);
+                AddVerticesRuntime(m_meshUniqueVertices.ListVertices, m_meshUniqueVertices.ListBoneWeights);
 
                 for (int i = 0; i < m_listVertices.Count; i++)
                 {
@@ -229,7 +229,7 @@ namespace UltimateGameTools
                 {
                     int[] anIndices = m_meshOriginal.GetTriangles(nSubMesh);
                     m_aListTriangles[nSubMesh] = new TriangleList();
-                    AddFaceListSubMesh(nSubMesh, m_meshUniqueVertices.SubmeshesFaceList[nSubMesh].m_listIndices, anIndices, av2Mapping, false);
+                    AddFaceListSubMeshRuntime(nSubMesh, m_meshUniqueVertices.SubmeshesFaceList[nSubMesh].m_listIndices, anIndices, av2Mapping);
                 }
                 Profiler.EndSample();
 
@@ -257,7 +257,7 @@ namespace UltimateGameTools
 
                     Vertex mn = listVertices[listVertices.Count - 1];
                     listVertices.RemoveAt(listVertices.Count - 1);
-                    Collapse(mn, mn.m_collapse, false, null, null);
+                    CollapseRuntime(mn, mn.m_collapse);
                     //m_listVertices.Remove(mn);
 
                     //if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
@@ -311,13 +311,14 @@ namespace UltimateGameTools
                 Vector2[] av2Mapping2In = meshIn.uv2;
                 Color[] acolColorsIn = meshIn.colors;
                 Color32[] aColors32In = meshIn.colors32;
+                BoneWeight[] aBoneWeights = meshIn.boneWeights;
 
                 bool bUV1 = av2Mapping1In != null && av2Mapping1In.Length > 0;
                 bool bUV2 = av2Mapping2In != null && av2Mapping2In.Length > 0;
                 bool bNormal = av3NormalsIn != null && av3NormalsIn.Length > 0;
                 bool bTangent = av4TangentsIn != null && av4TangentsIn.Length > 0;
-
                 bool bColor = (acolColorsIn != null && acolColorsIn.Length > 0) || (aColors32In != null && aColors32In.Length > 0);
+                bool bBone = aBoneWeights != null && aBoneWeights.Length > 0;
 
                 List<List<int>> listlistIndicesOut = new List<List<int>>();
                 List<Vector3> listVerticesOut = new List<Vector3>();
@@ -326,7 +327,7 @@ namespace UltimateGameTools
                 List<Vector2> listMapping1Out = bUV1 ? new List<Vector2>() : null;
                 List<Vector2> listMapping2Out = bUV2 ? new List<Vector2>() : null;
                 List<Color32> listColors32Out = bColor ? new List<Color32>() : null;
-                List<BoneWeight> listBoneWeightsOut = new List<BoneWeight>();
+                List<BoneWeight> listBoneWeightsOut = bBone ? new List<BoneWeight>() : null;
 
                 Dictionary<VertexDataHash, int> dicVertexDataHash2Index = new Dictionary<VertexDataHash, int>(new VertexDataHashComparer());
 
@@ -402,10 +403,7 @@ namespace UltimateGameTools
                                 if (bTangent) listTangentsOut.Add(v4Tangent);
                                 if (bColor) listColors32Out.Add(color32);
 
-                                if (aListTriangles[nSubMesh].m_listTriangles[i].Vertices[v].m_bHasBoneWeight)
-                                {
-                                    listBoneWeightsOut.Add(aListTriangles[nSubMesh].m_listTriangles[i].Vertices[v].m_boneWeight);
-                                }
+                                if (bBone) listBoneWeightsOut.Add(aListTriangles[nSubMesh].m_listTriangles[i].Vertices[v].m_boneWeight);
 
                                 listIndicesOut.Add(listVerticesOut.Count - 1);
                             }
@@ -422,7 +420,7 @@ namespace UltimateGameTools
                 meshOut.uv = bUV1 ? listMapping1Out.ToArray() : null;
                 meshOut.uv2 = bUV2 ? listMapping2Out.ToArray() : null;
                 meshOut.colors32 = bColor ? listColors32Out.ToArray() : null;
-                meshOut.boneWeights = listBoneWeightsOut.Count > 0 ? listBoneWeightsOut.ToArray() : null;
+                meshOut.boneWeights = bBone ? listBoneWeightsOut.ToArray() : null;
                 meshOut.bindposes = meshIn.bindposes;
                 meshOut.subMeshCount = listlistIndicesOut.Count;
 
@@ -586,27 +584,22 @@ namespace UltimateGameTools
             List<Triangle> tmpTriangles = new List<Triangle>(); 
             List<Vertex> tmpVertices = new List<Vertex>(); 
 
-            void Collapse(Vertex u, Vertex v, bool bRecompute, Transform transform, RelevanceSphere[] aRelevanceSpheres)
+
+            void Collapse(Vertex u, Vertex v, Transform transform, RelevanceSphere[] aRelevanceSpheres)
             {
                 if (v == null)
                 {
-                    if (bRecompute)
-                    {
-                        m_listVertices.Remove(u);
-                        u.Destructor();
-                    }
+                    m_listVertices.Remove(u);
+                    u.Destructor();
                     return;
                 }
 
                 int i;
-                if (bRecompute)
-                {
-                    tmpVertices.Clear();
+                tmpVertices.Clear();
 
-                    for (i = 0; i < u.m_listNeighbors.Count; i++)
-                    {
-                        tmpVertices.Add(u.m_listNeighbors[i]);
-                    }
+                for (i = 0; i < u.m_listNeighbors.Count; i++)
+                {
+                    tmpVertices.Add(u.m_listNeighbors[i]);
                 }
 
                 tmpTriangles.Clear();
@@ -666,7 +659,7 @@ namespace UltimateGameTools
                     {
                         Triangle t = u.m_listFaces[i];
                         m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
-                        t.Destructor(bRecompute);
+                        t.Destructor();
                     }
                 }
 
@@ -674,21 +667,94 @@ namespace UltimateGameTools
 
                 for (i = u.m_listFaces.Count - 1; i >= 0; i--)
                 {
-                    u.m_listFaces[i].ReplaceVertex(u, v, bRecompute);
+                    u.m_listFaces[i].ReplaceVertex(u, v);
                 }
-
-                if (bRecompute)
-                {
-                    m_listVertices.Remove(u);
-                    u.Destructor();
+                m_listVertices.Remove(u);
+                u.Destructor();
 
                 // Recompute the edge collapse costs for neighboring vertices
-                
-                    for (i = 0; i < tmpVertices.Count; i++)
+
+                for (i = 0; i < tmpVertices.Count; i++)
+                {
+                    ComputeEdgeCostAtVertex(tmpVertices[i], transform, aRelevanceSpheres);
+                    m_heap.ModifyValue(tmpVertices[i].HeapIndex, tmpVertices[i]);
+                }
+            }
+            void CollapseRuntime(Vertex u, Vertex v)
+            {
+                if (v == null)
+                {
+                    return;
+                }
+
+                int i;
+
+                tmpTriangles.Clear();
+
+                for (i = 0; i < u.m_listFaces.Count; i++)
+                {
+                    if (u.m_listFaces[i].HasVertex(v))
                     {
-                        ComputeEdgeCostAtVertex(tmpVertices[i], transform, aRelevanceSpheres);
-                        m_heap.ModifyValue(tmpVertices[i].HeapIndex, tmpVertices[i]);
+                        tmpTriangles.Add(u.m_listFaces[i]);
                     }
+                }
+
+                // update texture mapping
+
+                for (i = 0; i < u.m_listFaces.Count; i++)
+                {
+                    int j;
+
+                    if (u.m_listFaces[i].HasVertex(v))
+                    {
+                        continue;
+                    }
+
+                    if (u.m_listFaces[i].HasUVData)
+                    {
+                        for (j = 0; j < tmpTriangles.Count; j++)
+                        {
+                            if (u.m_listFaces[i].TexAt(u) == tmpTriangles[j].TexAt(u))
+                            {
+                                u.m_listFaces[i].SetTexAt(u, tmpTriangles[j].TexAt(v));
+                                break; // only change tex coords once!
+                            }
+                        }
+                    }
+
+                    // Added support for color or 2nd uv here:
+
+                    /*
+
+                    for (j = 0; j < sides.Count; j++)
+                    {
+                      if (u.m_listFaces[i].VertexColorAt(u) == sides[j].VertexColorAt(u))
+                      {
+                        u.m_listFaces[i].SetVertexColorAt(u, sides[j].VertexColorAt(v));
+                        break; // only change tex coords once!
+                      }
+                    }
+
+                    */
+                }
+
+                // Delete triangles on edge uv
+
+                for (i = u.m_listFaces.Count - 1; i >= 0; i--)
+                {
+                    if (u.m_listFaces[i].HasVertex(v))
+                    {
+                        Triangle t = u.m_listFaces[i];
+                        m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
+                        t.DestructorRuntime();
+                    }
+                }
+
+                // Update remaining triangles to have v instead of u
+
+                for (i = u.m_listFaces.Count - 1; i >= 0; i--)
+                {
+                    u.m_listFaces[i].ReplaceVertexRuntime(u, v);
                 }
             }
 
@@ -702,8 +768,18 @@ namespace UltimateGameTools
                     m_listVertices.Add(v);
                 }
             }
+            void AddVerticesRuntime(List<Vector3> listVertices, List<SerializableBoneWeight> listBoneWeights)
+            {
+                bool bHasBoneWeights = listBoneWeights != null && listBoneWeights.Count > 0;
 
-            void AddFaceListSubMesh(int nSubMesh, List<int> listTriangles, int[] anIndices, Vector2[] v2Mapping, bool compute = true)
+                for (int i = 0; i < listVertices.Count; i++)
+                {
+                    Vertex v = new Vertex(listVertices[i], Vector3.zero, bHasBoneWeights, bHasBoneWeights ? listBoneWeights[i].ToBoneWeight() : new BoneWeight(), i);
+                    m_listVertices.Add(v);
+                }
+            }
+
+            void AddFaceListSubMesh(int nSubMesh, List<int> listTriangles, int[] anIndices, Vector2[] v2Mapping)
             {
                 bool bUVData = false;
 
@@ -720,13 +796,33 @@ namespace UltimateGameTools
                 {
                     Triangle tri = new Triangle(nSubMesh, list.Count,
                                                 m_listVertices[listTriangles[i * 3]], m_listVertices[listTriangles[i * 3 + 1]], m_listVertices[listTriangles[i * 3 + 2]],
-                                                bUVData, anIndices[i * 3], anIndices[i * 3 + 1], anIndices[i * 3 + 2], compute);
+                                                bUVData, anIndices[i * 3], anIndices[i * 3 + 1], anIndices[i * 3 + 2], true);
 
                     list.Add(tri);
-                    if (compute) // NOTE: if need share uv at runtime
+                    ShareUV(v2Mapping, tri);
+                }
+            }
+            void AddFaceListSubMeshRuntime(int nSubMesh, List<int> listTriangles, int[] anIndices, Vector2[] v2Mapping)
+            {
+                bool bUVData = false;
+
+                if (v2Mapping != null)
+                {
+                    if (v2Mapping.Length > 0)
                     {
-                        ShareUV(v2Mapping, tri);
+                        bUVData = true;
                     }
+                }
+
+                List<Triangle> list = m_aListTriangles[nSubMesh].m_listTriangles;
+                for (int i = 0; i < listTriangles.Count / 3; i++)
+                {
+                    Triangle tri = new Triangle(nSubMesh, list.Count,
+                                                m_listVertices[listTriangles[i * 3]], m_listVertices[listTriangles[i * 3 + 1]], m_listVertices[listTriangles[i * 3 + 2]],
+                                                bUVData, anIndices[i * 3], anIndices[i * 3 + 1], anIndices[i * 3 + 2], false);
+
+                    list.Add(tri);
+                    // NOTE: if need share uv at runtime
                 }
             }
 

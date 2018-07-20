@@ -107,7 +107,7 @@ namespace UltimateGameTools
                 }
             }
 
-            public void Destructor(bool recompute)
+            public void Destructor()
             {
                 int i;
 
@@ -118,10 +118,6 @@ namespace UltimateGameTools
                         m_aVertices[i].m_listFaces.Remove(this);
                     }
                 }
-                if (false == recompute)
-                {
-                    return;
-                }
 
                 for (i = 0; i < 3; i++)
                 {
@@ -131,6 +127,18 @@ namespace UltimateGameTools
 
                     m_aVertices[i].RemoveIfNonNeighbor(m_aVertices[i2]);
                     m_aVertices[i2].RemoveIfNonNeighbor(m_aVertices[i]);
+                }
+            }
+            public void DestructorRuntime()
+            {
+                int i;
+
+                for (i = 0; i < 3; i++)
+                {
+                    if (m_aVertices[i] != null)
+                    {
+                        m_aVertices[i].m_listFaces.Remove(this);
+                    }
                 }
             }
 
@@ -190,7 +198,7 @@ namespace UltimateGameTools
                 m_aUV[i] = uv;
             }
 
-            public void ReplaceVertex(Vertex vold, Vertex vnew, bool recompute)
+            public void ReplaceVertex(Vertex vold, Vertex vnew)
             {
                 if (vold == m_aVertices[0])
                 {
@@ -206,11 +214,6 @@ namespace UltimateGameTools
                 }
                 vold.m_listFaces.Remove(this);
                 vnew.m_listFaces.Add(this);
-
-                if (false == recompute)
-                {
-                    return;
-                }
                 int i;
 
                 for (i = 0; i < 3; i++)
@@ -234,6 +237,23 @@ namespace UltimateGameTools
                 }
 
                 ComputeNormal();
+            }
+            public void ReplaceVertexRuntime(Vertex vold, Vertex vnew)
+            {
+                if (vold == m_aVertices[0])
+                {
+                    m_aVertices[0] = vnew;
+                }
+                else if (vold == m_aVertices[1])
+                {
+                    m_aVertices[1] = vnew;
+                }
+                else
+                {
+                    m_aVertices[2] = vnew;
+                }
+                vold.m_listFaces.Remove(this);
+                vnew.m_listFaces.Add(this);
             }
         };
     }
