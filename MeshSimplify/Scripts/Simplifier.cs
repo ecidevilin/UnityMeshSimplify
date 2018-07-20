@@ -672,8 +672,9 @@ namespace UltimateGameTools
                 {
                     if (u.m_listFaces[i].HasVertex(v))
                     {
-                        m_aListTriangles[u.m_listFaces[i].SubMeshIndex].m_listTriangles.Remove(u.m_listFaces[i]);
-                        u.m_listFaces[i].Destructor(bRecompute);
+                        Triangle t = u.m_listFaces[i];
+                        m_aListTriangles[t.SubMeshIndex].m_listTriangles.Remove(t);
+                        t.Destructor(bRecompute);
                     }
                 }
 
