@@ -252,7 +252,7 @@ namespace UltimateGameTools
                 {
                     m_aVertices[2] = vnew;
                 }
-                vold.m_listFaces.Remove(this);
+                //vold.m_listFaces.Remove(this);
                 vnew.m_listFaces.Add(this);
             }
         };
