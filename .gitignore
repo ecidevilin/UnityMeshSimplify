@@ -1,0 +1,13 @@
+.vs/
+Debug/
+Library/
+Packages/
+ProjectSettings/
+Temp/
+UnityPackageManager/
+*.csproj
+*.opensdf
+*.sdf
+*.sln
+*.user
+*.userprefs
