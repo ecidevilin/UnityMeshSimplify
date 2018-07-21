@@ -484,7 +484,7 @@ public partial class MeshSimplify : MonoBehaviour
                 {
                     if (Application.isEditor && Application.isPlaying == false)
                     {
-                        DestroyImmediate(simplifiers[c]);
+                        DestroyImmediate(simplifiers[c], true);
                     }
                     else
                     {

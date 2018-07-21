@@ -40,6 +40,7 @@ public class MeshSimplifyEditor : Editor
         PropertyDataDirty = serializedObject.FindProperty("m_bDataDirty");
         PropertyExcludedFromTree = serializedObject.FindProperty("m_bExcludedFromTree");
 
+		m_bComputeData = false;
         m_bComputeMesh = false;
         m_bEnablePrefabUsage = false;
         m_bDisablePrefabUsage = false;
@@ -387,6 +388,17 @@ public class MeshSimplifyEditor : Editor
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
+			if (GUILayout.Button(new GUIContent("Compute data", "Precomputes the mesh simplification data"), GUILayout.Width(nButtonWidth)))
+			{
+				m_bComputeData = true;
+			}
+
+			GUILayout.FlexibleSpace();
+			GUILayout.EndHorizontal();
+
+			GUILayout.BeginHorizontal();
+			GUILayout.FlexibleSpace();
+
             if (GUILayout.Button(new GUIContent("Compute mesh", "Starts the mesh simplification process and assigns the GameObject the new simplified mesh"), GUILayout.Width(nButtonWidth)))
             {
                 m_bComputeMesh = true;
@@ -453,8 +465,10 @@ public class MeshSimplifyEditor : Editor
             }
         }
 
-        if (m_bComputeMesh && Event.current.type == EventType.Repaint)
+		if ((m_bComputeData || m_bComputeMesh) && Event.current.type == EventType.Repaint)
         {
+			bool assignAndSaveMesh = m_bComputeMesh;
+			m_bComputeData = false;
             m_bComputeMesh = false;
 
             Simplifier.Cancelled = false;
@@ -488,20 +502,22 @@ public class MeshSimplifyEditor : Editor
                             break;
                         }
                     }
+					if (assignAndSaveMesh)
+					{
 
-                    meshSimplify.ComputeMesh(meshSimplify.m_meshSimplifyRoot == null, Progress);
+						meshSimplify.ComputeMesh(meshSimplify.m_meshSimplifyRoot == null, Progress);
 
-                    if (Simplifier.Cancelled)
-                    {
-                        break;
-                    }
+						if (Simplifier.Cancelled)
+						{
+							break;
+						}
+						meshSimplify.AssignSimplifiedMesh(meshSimplify.m_meshSimplifyRoot == null);
 
-                    meshSimplify.AssignSimplifiedMesh(meshSimplify.m_meshSimplifyRoot == null);
-
-                    if (meshSimplify.m_strAssetPath != null && meshSimplify.m_bEnablePrefabUsage)
-                    {
-                        SaveMeshAssets();
-                    }
+						if (meshSimplify.m_strAssetPath != null && meshSimplify.m_bEnablePrefabUsage)
+						{
+							SaveMeshAssets();
+						}
+					}
                 }
                 catch (System.Exception e)
                 {
@@ -539,7 +555,7 @@ public class MeshSimplifyEditor : Editor
 
             if (Application.isEditor && Application.isPlaying == false)
             {
-                UnityEngine.Object.DestroyImmediate(meshSimplify);
+                UnityEngine.Object.DestroyImmediate(meshSimplify, true);
             }
             else
             {
@@ -583,7 +599,7 @@ public class MeshSimplifyEditor : Editor
         {
             if (Application.isEditor && Application.isPlaying == false)
             {
-                UnityEngine.Object.DestroyImmediate(meshSimplify);
+                UnityEngine.Object.DestroyImmediate(meshSimplify, true);
             }
             else
             {
@@ -736,6 +752,7 @@ public class MeshSimplifyEditor : Editor
         }
     }
 
+	bool m_bComputeData = false;
     bool m_bComputeMesh = false;
     bool m_bEnablePrefabUsage = false;
     bool m_bDisablePrefabUsage = false;
