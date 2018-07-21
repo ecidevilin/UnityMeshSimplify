@@ -1,0 +1,3 @@
+[submodule "Assets/MeshSimplify/DataStructureUtility"]
+	path = Assets/MeshSimplify/DataStructureUtility
+	url = git@github.com:ecidevilin/DataStructureUtility.git
