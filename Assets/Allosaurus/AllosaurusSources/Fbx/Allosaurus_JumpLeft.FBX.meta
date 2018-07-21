@@ -1,0 +1,311 @@
+fileFormatVersion: 2
+guid: 414ded54746b0694ba201b253d8bb967
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: allosaurus
+    100002: //RootNode
+    100004: Bone01
+    100006: Bone02
+    100008: Bone03
+    100010: Bone04
+    100012: Bone05
+    100014: Bone06
+    100016: Bone07
+    100018: Bone08
+    100020: Bone09
+    100022: Bone10
+    100024: Bone11
+    100026: Bone12
+    100028: Bone13
+    100030: Bone14
+    100032: Bone15
+    100034: Bone16
+    100036: Bone17
+    100038: Bone18
+    100040: Bone19
+    100042: Bone20
+    100044: Bone21
+    100046: Bone22
+    100048: Bone23
+    100050: Bone24
+    100052: Bone25
+    100054: Bone26
+    100056: Bone27
+    100058: Bone28
+    100060: Bone29
+    100062: Bone30
+    100064: Bone31
+    100066: Bone32
+    100068: Bone33
+    100070: Bone34
+    100072: Bone35
+    100074: Bone36
+    100076: Bone37
+    100078: Bone38
+    100080: IK Chain05
+    100082: IK Chain06
+    100084: IK Chain07
+    100086: IK Chain08
+    400000: allosaurus
+    400002: //RootNode
+    400004: Bone01
+    400006: Bone02
+    400008: Bone03
+    400010: Bone04
+    400012: Bone05
+    400014: Bone06
+    400016: Bone07
+    400018: Bone08
+    400020: Bone09
+    400022: Bone10
+    400024: Bone11
+    400026: Bone12
+    400028: Bone13
+    400030: Bone14
+    400032: Bone15
+    400034: Bone16
+    400036: Bone17
+    400038: Bone18
+    400040: Bone19
+    400042: Bone20
+    400044: Bone21
+    400046: Bone22
+    400048: Bone23
+    400050: Bone24
+    400052: Bone25
+    400054: Bone26
+    400056: Bone27
+    400058: Bone28
+    400060: Bone29
+    400062: Bone30
+    400064: Bone31
+    400066: Bone32
+    400068: Bone33
+    400070: Bone34
+    400072: Bone35
+    400074: Bone36
+    400076: Bone37
+    400078: Bone38
+    400080: IK Chain05
+    400082: IK Chain06
+    400084: IK Chain07
+    400086: IK Chain08
+    2300000: Bone01
+    2300002: Bone02
+    2300004: Bone03
+    2300006: Bone04
+    2300008: Bone05
+    2300010: Bone06
+    2300012: Bone07
+    2300014: Bone08
+    2300016: Bone09
+    2300018: Bone10
+    2300020: Bone11
+    2300022: Bone12
+    2300024: Bone13
+    2300026: Bone14
+    2300028: Bone15
+    2300030: Bone16
+    2300032: Bone17
+    2300034: Bone18
+    2300036: Bone19
+    2300038: Bone20
+    2300040: Bone21
+    2300042: Bone22
+    2300044: Bone23
+    2300046: Bone24
+    2300048: Bone25
+    2300050: Bone26
+    2300052: Bone27
+    2300054: Bone28
+    2300056: Bone29
+    2300058: Bone30
+    2300060: Bone31
+    2300062: Bone32
+    2300064: Bone33
+    2300066: Bone34
+    2300068: Bone35
+    2300070: Bone36
+    2300072: Bone37
+    2300074: Bone38
+    3300000: Bone01
+    3300002: Bone02
+    3300004: Bone03
+    3300006: Bone04
+    3300008: Bone05
+    3300010: Bone06
+    3300012: Bone07
+    3300014: Bone08
+    3300016: Bone09
+    3300018: Bone10
+    3300020: Bone11
+    3300022: Bone12
+    3300024: Bone13
+    3300026: Bone14
+    3300028: Bone15
+    3300030: Bone16
+    3300032: Bone17
+    3300034: Bone18
+    3300036: Bone19
+    3300038: Bone20
+    3300040: Bone21
+    3300042: Bone22
+    3300044: Bone23
+    3300046: Bone24
+    3300048: Bone25
+    3300050: Bone26
+    3300052: Bone27
+    3300054: Bone28
+    3300056: Bone29
+    3300058: Bone30
+    3300060: Bone31
+    3300062: Bone32
+    3300064: Bone33
+    3300066: Bone34
+    3300068: Bone35
+    3300070: Bone36
+    3300072: Bone37
+    3300074: Bone38
+    4300000: allosaurus
+    4300002: Bone01
+    4300004: Bone08
+    4300006: Bone32
+    4300008: Bone09
+    4300010: Bone31
+    4300012: Bone10
+    4300014: Bone33
+    4300016: Bone37
+    4300018: Bone11
+    4300020: Bone12
+    4300022: Bone13
+    4300024: Bone14
+    4300026: Bone15
+    4300028: Bone20
+    4300030: Bone21
+    4300032: Bone22
+    4300034: Bone23
+    4300036: Bone24
+    4300038: Bone25
+    4300040: Bone38
+    4300042: Bone02
+    4300044: Bone03
+    4300046: Bone34
+    4300048: Bone04
+    4300050: Bone30
+    4300052: Bone05
+    4300054: Bone06
+    4300056: Bone07
+    4300058: Bone26
+    4300060: Bone27
+    4300062: Bone28
+    4300064: Bone36
+    4300066: Bone29
+    4300068: Bone16
+    4300070: Bone17
+    4300072: Bone18
+    4300074: Bone35
+    4300076: Bone19
+    7400000: Allosaurus_JumpLeft
+    9500000: //RootNode
+    11100000: //RootNode
+    13700000: allosaurus
+    13700002: Bone01
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 3
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Allosaurus_JumpLeft
+      takeName: Take 001
+      firstFrame: 0
+      lastFrame: 19
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.01
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 4
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 1
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

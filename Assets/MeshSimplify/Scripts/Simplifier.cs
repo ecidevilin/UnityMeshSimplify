@@ -154,8 +154,7 @@ namespace UltimateGameTools
                     {
                         yield return null;
                         sw = Stopwatch.StartNew();
-                    }
-
+					}
                     Vertex mn = m_heap.ExtractTop();
 
                     m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
@@ -664,7 +663,10 @@ namespace UltimateGameTools
 
                 for (i = 0; i < u.m_listNeighbors.Count; i++)
                 {
-                    tmpVertices.Add(u.m_listNeighbors[i]);
+					Vertex nb = u.m_listNeighbors [i];
+					if (nb != u) {
+						tmpVertices.Add(nb);
+					}
                 }
 
                 tmpTriangles.Clear();

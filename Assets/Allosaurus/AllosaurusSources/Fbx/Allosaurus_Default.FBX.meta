@@ -1,0 +1,169 @@
+fileFormatVersion: 2
+guid: 2189b43d85a06b64f8f03357c617705c
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: allosaurus
+    100002: //RootNode
+    100004: Bone01
+    100006: Bone02
+    100008: Bone03
+    100010: Bone04
+    100012: Bone05
+    100014: Bone06
+    100016: Bone07
+    100018: Bone08
+    100020: Bone09
+    100022: Bone10
+    100024: Bone11
+    100026: Bone12
+    100028: Bone13
+    100030: Bone14
+    100032: Bone15
+    100034: Bone16
+    100036: Bone17
+    100038: Bone18
+    100040: Bone19
+    100042: Bone20
+    100044: Bone21
+    100046: Bone22
+    100048: Bone23
+    100050: Bone24
+    100052: Bone25
+    100054: Bone26
+    100056: Bone27
+    100058: Bone28
+    100060: Bone29
+    100062: Bone30
+    100064: Bone31
+    100066: Bone32
+    100068: Bone33
+    100070: Bone34
+    100072: Bone35
+    100074: Bone36
+    100076: Bone37
+    100078: Bone38
+    100080: IK Chain05
+    100082: IK Chain06
+    100084: IK Chain07
+    100086: IK Chain08
+    400000: allosaurus
+    400002: //RootNode
+    400004: Bone01
+    400006: Bone02
+    400008: Bone03
+    400010: Bone04
+    400012: Bone05
+    400014: Bone06
+    400016: Bone07
+    400018: Bone08
+    400020: Bone09
+    400022: Bone10
+    400024: Bone11
+    400026: Bone12
+    400028: Bone13
+    400030: Bone14
+    400032: Bone15
+    400034: Bone16
+    400036: Bone17
+    400038: Bone18
+    400040: Bone19
+    400042: Bone20
+    400044: Bone21
+    400046: Bone22
+    400048: Bone23
+    400050: Bone24
+    400052: Bone25
+    400054: Bone26
+    400056: Bone27
+    400058: Bone28
+    400060: Bone29
+    400062: Bone30
+    400064: Bone31
+    400066: Bone32
+    400068: Bone33
+    400070: Bone34
+    400072: Bone35
+    400074: Bone36
+    400076: Bone37
+    400078: Bone38
+    400080: IK Chain05
+    400082: IK Chain06
+    400084: IK Chain07
+    400086: IK Chain08
+    4300000: allosaurus
+    7400000: Take 001
+    9500000: //RootNode
+    11100000: //RootNode
+    13700000: allosaurus
+    13700002: Bone01
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 3
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 0
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 0.01
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 4
+  importAnimation: 0
+  copyAvatar: 0
+  humanDescription:
+    serializedVersion: 2
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 1
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
