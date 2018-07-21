@@ -62,7 +62,7 @@ namespace UltimateGameTools
                 Vector3[]    av3Vertices  = sourceMesh.vertices;
                 BoneWeight[] aBoneWeights = sourceMesh.boneWeights;
 
-                m_dicRepeatedVertexList = m_dicRepeatedVertexList ?? new Dictionary<UniqueVertex, RepeatedVertexList>();
+                m_dicRepeatedVertexList = m_dicRepeatedVertexList ?? new Dictionary<int, RepeatedVertexList>();
                 m_dicRepeatedVertexList.Clear();
 
                 m_listVertices      = m_listVertices ?? new List<Vector3>();
@@ -118,7 +118,7 @@ namespace UltimateGameTools
                         UniqueVertex vertex = new UniqueVertex(av3Vertices[anFaces[i]]);
 
                         RepeatedVertexList repeatedList = null;
-                        if (m_dicRepeatedVertexList.TryGetValue(vertex, out repeatedList))
+						if (m_dicRepeatedVertexList.TryGetValue(anFaces[i], out repeatedList))
                         {
                             repeatedList.Add(new RepeatedVertex(i / 3, anFaces[i]));
                             m_aSubmeshesFaceList[nSubMesh].m_listIndices.Add(repeatedList.UniqueIndex);
@@ -128,7 +128,7 @@ namespace UltimateGameTools
                             int nVertex = anFaces[i];
                             int nNewUniqueIndex = m_listVertices.Count;
                             repeatedList = new RepeatedVertexList(nNewUniqueIndex, new RepeatedVertex(i/3, nVertex));
-                            m_dicRepeatedVertexList.Add(vertex, repeatedList);
+							m_dicRepeatedVertexList.Add(anFaces[i], repeatedList);
                             m_listVertices.Add(av3Vertices[nVertex]);
                             m_aSubmeshesFaceList[nSubMesh].m_listIndices.Add(nNewUniqueIndex);
 
@@ -168,7 +168,7 @@ namespace UltimateGameTools
             private List<Vector3> m_listVerticesWorld;
             [SerializeField] private List<SerializableBoneWeight> m_listBoneWeights;
             [SerializeField] private ListIndices[] m_aSubmeshesFaceList;
-            Dictionary<UniqueVertex, RepeatedVertexList> m_dicRepeatedVertexList;
+            Dictionary<int, RepeatedVertexList> m_dicRepeatedVertexList;
 
             #endregion // Private vars
         }
