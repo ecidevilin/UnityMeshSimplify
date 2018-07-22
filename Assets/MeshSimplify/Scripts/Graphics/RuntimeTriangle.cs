@@ -13,7 +13,6 @@ namespace UltimateGameTools
 			public int Index;
 			public Vector3Int VertexIndices;
 			public bool HasUVData;
-			public Vector3Int IndicesUV;
 			public Vector3Int Indices;
 			private RuntimeTriangle()
 			{
@@ -57,9 +56,6 @@ namespace UltimateGameTools
 				ret.Index = nIndex;
 				ret.VertexIndices = new Vector3Int (idx0, idx1, idx2);
 				ret.HasUVData = bUVData;
-				if (bUVData) {
-					ret.IndicesUV = new Vector3Int (nIndex0, nIndex1, nIndex2);
-				}
 				ret.Indices = new Vector3Int (nIndex0, nIndex1, nIndex2);
 				return ret;
 			}

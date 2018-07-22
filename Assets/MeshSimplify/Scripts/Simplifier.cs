@@ -390,11 +390,9 @@ namespace UltimateGameTools
 				List<BoneWeight> listBoneWeightsOut = bBone ? new List<BoneWeight>(nVertices) : null;
 #if true
                 int[] map = new int[av3Vertices.Length];
-                int[] map2 = new int[av3Vertices.Length];
                 for (int i = 0, imax = map.Length; i < imax; i++)
                 {
                     map[i] = -1;
-                    map2[i] = -1;
                 }
                 for (int nSubMesh = 0; nSubMesh < aListTriangles.Length; nSubMesh++)
                 {
@@ -406,8 +404,7 @@ namespace UltimateGameTools
                         for (int v = 0; v < 3; v++)
                         {
 							int vid = t.VertexIndices[v];
-                            int uvi = t.IndicesUV[v];
-                            if (map[vid] != -1 && map2[uvi] == map[vid])
+                            if (map[vid] != -1)
                             {
                                 listIndicesOut.Add(map[vid]);
                                 continue;
@@ -416,8 +413,8 @@ namespace UltimateGameTools
                             int vi = t.Indices[v];
 
 							listVerticesOut.Add(av3Vertices[vid]);
+							if (bUV1) listMapping1Out.Add(av2Mapping1In[vid]);
                             if (bNormal) listNormalsOut.Add(av3NormalsIn[vi]);
-                            if (bUV1) listMapping1Out.Add(av2Mapping1In[uvi]);
                             if (bUV2) listMapping2Out.Add(av2Mapping2In[vi]);
                             if (bTangent) listTangentsOut.Add(av4TangentsIn[vi]);
                             if (bColor)
@@ -439,7 +436,6 @@ namespace UltimateGameTools
 
                             listIndicesOut.Add(newVal);
                             map[vid] = newVal;
-                            map2[uvi] = newVal;
                         }
                     }
                     listlistIndicesOut.Add(listIndicesOut);
@@ -939,12 +935,6 @@ namespace UltimateGameTools
                     }
                 }
 
-				int[] inverseMap = new int[v2Mapping.Length];
-				for (int i = 0; i < anIndices.Length; i++)
-                {
-					inverseMap[anIndices[i]] = i;
-                }
-
 				List<RuntimeTriangle> list = m_aListRuntimeTriangles[nSubMesh].m_listTriangles;
 				for (int i = 0; i < anIndices.Length; i+=3)
                 {
@@ -955,36 +945,6 @@ namespace UltimateGameTools
 						nVertices, permutation, map);
                     if (null != tri)
                     {
-						int p0 = tri.VertexIndices[0];
-                        if (p0 != v0)
-                        {
-                            int idx = inverseMap[p0];
-                            if (idx > 0)
-                            {
-                                int uv = anIndices[idx];
-								tri.IndicesUV[0] = uv;
-                            }
-                        }
-						int p1 = tri.VertexIndices[1];
-                        if (p1 != v1)
-                        {
-                            int idx = inverseMap[p1];
-                            if (idx > 0)
-                            {
-								int uv = anIndices[idx];
-								tri.IndicesUV[1] = uv;
-                            }
-                        }
-						int p2 = tri.VertexIndices[2];
-                        if (p2 != v2)
-                        {
-                            int idx = inverseMap[p2];
-                            if (idx > 0)
-                            {
-								int uv = anIndices[idx];
-								tri.IndicesUV[2] = uv;
-                            }
-                        }
                         list.Add(tri);
                     }
                     // NOTE: if need share uv at runtime
