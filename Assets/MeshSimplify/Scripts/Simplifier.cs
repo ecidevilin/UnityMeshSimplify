@@ -363,7 +363,8 @@ namespace UltimateGameTools
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
 			void ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, RuntimeTriangleList[] aListTriangles, int nVertices)
-            {
+			{
+				Profiler.BeginSample("Old mesh data");
                 Vector3[] av3Vertices = meshIn.vertices;
                 Vector3[] av3NormalsIn = meshIn.normals;
                 Vector4[] av4TangentsIn = meshIn.tangents;
@@ -371,7 +372,8 @@ namespace UltimateGameTools
                 Vector2[] av2Mapping2In = meshIn.uv2;
                 Color[] acolColorsIn = meshIn.colors;
                 Color32[] aColors32In = meshIn.colors32;
-                BoneWeight[] aBoneWeights = meshIn.boneWeights;
+				BoneWeight[] aBoneWeights = meshIn.boneWeights;
+				Profiler.EndSample ();
 
                 bool bUV1 = av2Mapping1In != null && av2Mapping1In.Length > 0;
                 bool bUV2 = av2Mapping2In != null && av2Mapping2In.Length > 0;
@@ -400,7 +402,7 @@ namespace UltimateGameTools
 						}
 					}
 				}
-
+				Profiler.BeginSample("New mesh data");
 				List<int[]> listlistIndicesOut = new List<int[]>(meshIn.subMeshCount);
 				Vector3[] listVerticesOut = new Vector3[n];
 				Vector3[] listNormalsOut = bNormal ? new Vector3[n] : null;
@@ -460,7 +462,8 @@ namespace UltimateGameTools
                         }
                     }
                     listlistIndicesOut.Add(listIndicesOut);
-                }
+				}
+				Profiler.EndSample ();
 
                 meshOut.triangles = null;
                 meshOut.vertices = listVerticesOut;
