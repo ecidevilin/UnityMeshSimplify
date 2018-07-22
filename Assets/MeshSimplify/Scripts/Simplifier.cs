@@ -264,7 +264,7 @@ namespace UltimateGameTools
                     return;
                 }
 
-				Profiler.BeginSample("RuntimeTriangleList");
+//				Profiler.BeginSample("RuntimeTriangleList");
 				m_aListRuntimeTriangles = new RuntimeTriangleList[m_meshOriginal.subMeshCount];
 //				m_listVertices = new List<Vertex>();
 //#if false
@@ -331,7 +331,7 @@ namespace UltimateGameTools
                 {
 					m_aListRuntimeTriangles[nSubMesh].RemoveNull();
 				}
-				Profiler.EndSample ();
+//				Profiler.EndSample ();
                 //Vector3[] av3Vertices = new Vector3[m_listVertices.Count];
                 //for (int i = 0; i < m_listVertices.Count; i++)
                 //{
@@ -339,9 +339,9 @@ namespace UltimateGameTools
                 //    av3Vertices[i] = m_listVertices[i].m_v3Position;
                 //}
 
-				Profiler.BeginSample("ConsolidateMesh");
+//				Profiler.BeginSample("ConsolidateMesh");
 				ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListRuntimeTriangles, nVertices);
-				Profiler.EndSample();
+//				Profiler.EndSample();
                 Profiler.EndSample();
             }
 

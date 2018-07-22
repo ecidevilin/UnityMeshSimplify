@@ -11,10 +11,10 @@ namespace UltimateGameTools
 		{
 			public int SubMeshIndex;
 			public int Index;
-			public int[] VertexIndices = new int[3];
+			public Vector3Int VertexIndices;
 			public bool HasUVData;
-			public int[] IndicesUV = new int[3];
-			public int[] Indices = new int[3];
+			public Vector3Int IndicesUV;
+			public Vector3Int Indices;
 			private RuntimeTriangle()
 			{
 			}
@@ -55,18 +55,12 @@ namespace UltimateGameTools
 				RuntimeTriangle ret = new RuntimeTriangle ();
 				ret.SubMeshIndex = nSubMesh;
 				ret.Index = nIndex;
-				ret.VertexIndices [0] = idx0;
-				ret.VertexIndices [1] = idx1;
-				ret.VertexIndices [2] = idx2;
+				ret.VertexIndices = new Vector3Int (idx0, idx1, idx2);
 				ret.HasUVData = bUVData;
 				if (bUVData) {
-					ret.IndicesUV [0] = nIndex0;
-					ret.IndicesUV [1] = nIndex1;
-					ret.IndicesUV [2] = nIndex2;
+					ret.IndicesUV = new Vector3Int (nIndex0, nIndex1, nIndex2);
 				}
-				ret.Indices [0] = nIndex0;
-				ret.Indices [1] = nIndex1;
-				ret.Indices [2] = nIndex2;
+				ret.Indices = new Vector3Int (nIndex0, nIndex1, nIndex2);
 				return ret;
 			}
 		}
