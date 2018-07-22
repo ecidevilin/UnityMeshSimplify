@@ -108,6 +108,17 @@ namespace UltimateGameTools
 						                     + aBones [bw.boneIndex3].localToWorldMatrix * aBindPoses [bw.boneIndex3] * v * bw.weight3;
 
 						worldVertices [nVertex] = v3World;
+
+						if (progress != null && ((nVertex & 0xFF) == 0))
+						{
+							progress("Preprocessing mesh: " + strProgressDisplayObjectName, "Collecting vertex data", ((float)nVertex / (float)sourceMesh.vertices.Length));
+
+							if (Cancelled)
+							{
+								CoroutineEnded = true;
+								yield break;
+							}
+						}
 					}
 				} if ((meshFilter = gameObject.GetComponent<MeshFilter>()) != null)
 				{
@@ -118,6 +129,17 @@ namespace UltimateGameTools
 						Vector3 v3World = transformation * v;
 
 						worldVertices [nVertex] = v3World;
+
+						if (progress != null && ((nVertex & 0xFF) == 0))
+						{
+							progress("Preprocessing mesh: " + strProgressDisplayObjectName, "Collecting vertex data", ((float)nVertex / (float)sourceMesh.vertices.Length));
+
+							if (Cancelled)
+							{
+								CoroutineEnded = true;
+								yield break;
+							}
+						}
 					}
 				}
 
