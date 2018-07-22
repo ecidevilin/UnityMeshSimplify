@@ -22,8 +22,6 @@ namespace UltimateGameTools
 
             public Vector3 m_v3Position;
             public Vector3 m_v3PositionWorld;
-            public bool m_bHasBoneWeight;
-            public BoneWeight m_boneWeight;
             public int m_nID; // Place of vertex in original list
             public List<Vertex> m_listNeighbors; // Adjacent vertices
             public List<Triangle> m_listFaces; // Adjacent triangles
@@ -31,13 +29,10 @@ namespace UltimateGameTools
             public Vertex m_collapse; // Candidate vertex for collapse
             public bool m_bRuntimeCollapsed;
 
-            public Vertex(Vector3 v, Vector3 v3World, bool bHasBoneWeight, BoneWeight boneWeight,
-                int nID)
+            public Vertex(Vector3 v, Vector3 v3World,int nID)
             {
                 m_v3Position = v;
                 m_v3PositionWorld = v3World;
-                m_bHasBoneWeight = bHasBoneWeight;
-                m_boneWeight = boneWeight;
                 this.m_nID = nID;
 
                 m_listNeighbors = new List<Vertex>();
