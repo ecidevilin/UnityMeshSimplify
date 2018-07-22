@@ -364,7 +364,7 @@ namespace UltimateGameTools
 
 			void ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, List<int> permutation, List<int> collapseMap, int nVertices)
 			{
-				Profiler.BeginSample("Old mesh data");
+//				Profiler.BeginSample("Old mesh data");
                 Vector3[] av3Vertices = meshIn.vertices;
                 Vector3[] av3NormalsIn = meshIn.normals;
                 Vector4[] av4TangentsIn = meshIn.tangents;
@@ -373,7 +373,7 @@ namespace UltimateGameTools
                 Color[] acolColorsIn = meshIn.colors;
                 Color32[] aColors32In = meshIn.colors32;
 				BoneWeight[] aBoneWeights = meshIn.boneWeights;
-				Profiler.EndSample ();
+//				Profiler.EndSample ();
 
                 bool bUV1 = av2Mapping1In != null && av2Mapping1In.Length > 0;
                 bool bUV2 = av2Mapping2In != null && av2Mapping2In.Length > 0;
@@ -387,7 +387,7 @@ namespace UltimateGameTools
 				{
 					map[i] = -1;
 				}
-				Profiler.BeginSample("New mesh data");
+//				Profiler.BeginSample("New mesh data");
 				int n = 0;
 				List<List<int>> listlistIndicesOut = new List<List<int>>(meshIn.subMeshCount);
 				for (int nSubMesh = 0; nSubMesh < meshIn.subMeshCount; nSubMesh++)
@@ -501,7 +501,7 @@ namespace UltimateGameTools
                         }
                     }
 				}
-				Profiler.EndSample ();
+//				Profiler.EndSample ();
 
                 meshOut.triangles = null;
                 meshOut.vertices = listVerticesOut;
