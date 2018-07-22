@@ -264,6 +264,7 @@ namespace UltimateGameTools
                     return;
                 }
 
+				Profiler.BeginSample("RuntimeTriangleList");
 				m_aListRuntimeTriangles = new RuntimeTriangleList[m_meshOriginal.subMeshCount];
 //				m_listVertices = new List<Vertex>();
 //#if false
@@ -290,7 +291,6 @@ namespace UltimateGameTools
 					m_aListRuntimeTriangles[nSubMesh] = new RuntimeTriangleList(anIndices.Length / 3);
 					AddFaceListSubMeshRuntime(nSubMesh, anIndices, av2Mapping, nVertices, m_listVertexPermutation, m_listVertexMap);
                 }
-
                 //int nTotalVertices = listVertices.Count;
 #if false
                 Profiler.BeginSample("Collapse");
@@ -330,7 +330,8 @@ namespace UltimateGameTools
 				for (int nSubMesh = 0; nSubMesh < m_aListRuntimeTriangles.Length; nSubMesh++)
                 {
 					m_aListRuntimeTriangles[nSubMesh].RemoveNull();
-                }
+				}
+				Profiler.EndSample ();
                 //Vector3[] av3Vertices = new Vector3[m_listVertices.Count];
                 //for (int i = 0; i < m_listVertices.Count; i++)
                 //{
@@ -338,7 +339,9 @@ namespace UltimateGameTools
                 //    av3Vertices[i] = m_listVertices[i].m_v3Position;
                 //}
 
-				ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListRuntimeTriangles);
+				Profiler.BeginSample("ConsolidateMesh");
+				ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListRuntimeTriangles, nVertices);
+				Profiler.EndSample();
                 Profiler.EndSample();
             }
 
@@ -359,7 +362,7 @@ namespace UltimateGameTools
             // Private methods
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
-            void ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, RuntimeTriangleList[] aListTriangles)
+			void ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, RuntimeTriangleList[] aListTriangles, int nVertices)
             {
                 Vector3[] av3Vertices = meshIn.vertices;
                 Vector3[] av3NormalsIn = meshIn.normals;
@@ -377,14 +380,14 @@ namespace UltimateGameTools
                 bool bColor = (acolColorsIn != null && acolColorsIn.Length > 0) || (aColors32In != null && aColors32In.Length > 0);
                 bool bBone = aBoneWeights != null && aBoneWeights.Length > 0;
 
-                List<List<int>> listlistIndicesOut = new List<List<int>>();
-                List<Vector3> listVerticesOut = new List<Vector3>();
-                List<Vector3> listNormalsOut = bNormal ? new List<Vector3>() : null;
-                List<Vector4> listTangentsOut = bTangent ? new List<Vector4>() : null;
-                List<Vector2> listMapping1Out = bUV1 ? new List<Vector2>() : null;
-                List<Vector2> listMapping2Out = bUV2 ? new List<Vector2>() : null;
-                List<Color32> listColors32Out = bColor ? new List<Color32>() : null;
-                List<BoneWeight> listBoneWeightsOut = bBone ? new List<BoneWeight>() : null;
+				List<List<int>> listlistIndicesOut = new List<List<int>>(meshIn.subMeshCount);
+				List<Vector3> listVerticesOut = new List<Vector3>(nVertices);
+				List<Vector3> listNormalsOut = bNormal ? new List<Vector3>(nVertices) : null;
+				List<Vector4> listTangentsOut = bTangent ? new List<Vector4>(nVertices) : null;
+				List<Vector2> listMapping1Out = bUV1 ? new List<Vector2>(nVertices) : null;
+				List<Vector2> listMapping2Out = bUV2 ? new List<Vector2>(nVertices) : null;
+				List<Color32> listColors32Out = bColor ? new List<Color32>(nVertices) : null;
+				List<BoneWeight> listBoneWeightsOut = bBone ? new List<BoneWeight>(nVertices) : null;
 #if true
                 int[] map = new int[av3Vertices.Length];
                 int[] map2 = new int[av3Vertices.Length];
@@ -412,7 +415,7 @@ namespace UltimateGameTools
                             int newVal = listVerticesOut.Count;
                             int vi = t.Indices[v];
 
-							listVerticesOut.Add(av3Vertices[t.VertexIndices[v]]);
+							listVerticesOut.Add(av3Vertices[vid]);
                             if (bNormal) listNormalsOut.Add(av3NormalsIn[vi]);
                             if (bUV1) listMapping1Out.Add(av2Mapping1In[uvi]);
                             if (bUV2) listMapping2Out.Add(av2Mapping2In[vi]);
