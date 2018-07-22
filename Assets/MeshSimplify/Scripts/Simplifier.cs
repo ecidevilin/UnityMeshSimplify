@@ -383,10 +383,10 @@ namespace UltimateGameTools
                 bool bBone = aBoneWeights != null && aBoneWeights.Length > 0;
 
 				int[] map = new int[av3Vertices.Length];
-				for (int i = 0, imax = map.Length; i < imax; i++)
-				{
-					map[i] = -1;
-				}
+//				for (int i = 0, imax = map.Length; i < imax; i++)
+//				{
+//					map[i] = -1;
+//				}
 //				Profiler.BeginSample("New mesh data");
 				int n = 0;
 				List<List<int>> listlistIndicesOut = new List<List<int>>(meshIn.subMeshCount);
@@ -432,16 +432,19 @@ namespace UltimateGameTools
 						if (idx0 == -1 || idx1 == -1 || idx2 == -1) {
 							continue;
 						}
-						if (map [idx0] == -1) {
-							map [idx0] = n++;
+						if (map [idx0] != -1) {
+							map [idx0] = -1;
+							n++;
 						}
 						listIndicesOut.Add (idx0);
-						if (map [idx1] == -1) {
-							map [idx1] = n++;
+						if (map [idx1] != -1) {
+							map [idx1] = -1;
+							n++;
 						}
 						listIndicesOut.Add (idx1);
-						if (map [idx2] == -1) {
-							map [idx2] = n++;
+						if (map [idx2] != -1) {
+							map [idx2] = -1;
+							n++;
 						}
 						listIndicesOut.Add (idx2);
 					}
@@ -454,10 +457,10 @@ namespace UltimateGameTools
 				Color32[] listColors32Out = bColor ? new Color32[n] : null;
 				BoneWeight[] listBoneWeightsOut = bBone ? new BoneWeight[n] : null;
 
-                for (int i = 0, imax = map.Length; i < imax; i++)
-                {
-                    map[i] = -1;
-                }
+//                for (int i = 0, imax = map.Length; i < imax; i++)
+//                {
+//                    map[i] = -1;
+//                }
 				n = 0;
 				for (int nSubMesh = 0; nSubMesh < listlistIndicesOut.Count; nSubMesh++)
                 {
