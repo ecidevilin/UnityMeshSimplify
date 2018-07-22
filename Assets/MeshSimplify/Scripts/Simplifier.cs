@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine.Profiling;
+using Chaos;
 
 namespace UltimateGameTools
 {
@@ -379,16 +380,18 @@ namespace UltimateGameTools
                 bool bUV2 = av2Mapping2In != null && av2Mapping2In.Length > 0;
                 bool bNormal = av3NormalsIn != null && av3NormalsIn.Length > 0;
                 bool bTangent = av4TangentsIn != null && av4TangentsIn.Length > 0;
-                bool bColor = (acolColorsIn != null && acolColorsIn.Length > 0) || (aColors32In != null && aColors32In.Length > 0);
+				bool bColor = (acolColorsIn != null && acolColorsIn.Length > 0);
+				bool bColor32 = (aColors32In != null && aColors32In.Length > 0);
                 bool bBone = aBoneWeights != null && aBoneWeights.Length > 0;
 
 				int[] map = new int[av3Vertices.Length];
-//				for (int i = 0, imax = map.Length; i < imax; i++)
-//				{
-//					map[i] = -1;
-//				}
+				for (int i = 0, imax = map.Length; i < imax; i++)
+				{
+					map[i] = -1;
+				}
 //				Profiler.BeginSample("New mesh data");
 				int n = 0;
+				// TODO: Use 禁术 to reduce gc here.
 				List<List<int>> listlistIndicesOut = new List<List<int>>(meshIn.subMeshCount);
 				for (int nSubMesh = 0; nSubMesh < meshIn.subMeshCount; nSubMesh++)
 				{
@@ -432,88 +435,145 @@ namespace UltimateGameTools
 						if (idx0 == -1 || idx1 == -1 || idx2 == -1) {
 							continue;
 						}
-						if (map [idx0] != -1) {
-							map [idx0] = -1;
-							n++;
+						if (map [idx0] == -1) {
+							map [idx0] = n++;
 						}
-						listIndicesOut.Add (idx0);
-						if (map [idx1] != -1) {
-							map [idx1] = -1;
-							n++;
+						listIndicesOut.Add (map [idx0]);
+						if (map [idx1] == -1) {
+							map [idx1] = n++;
 						}
-						listIndicesOut.Add (idx1);
-						if (map [idx2] != -1) {
-							map [idx2] = -1;
-							n++;
+						listIndicesOut.Add (map [idx1]);
+						if (map [idx2] == -1) {
+							map [idx2] = n++;
 						}
-						listIndicesOut.Add (idx2);
+						listIndicesOut.Add (map [idx2]);
 					}
 				}
-				Vector3[] listVerticesOut = new Vector3[n];
-				Vector3[] listNormalsOut = bNormal ? new Vector3[n] : null;
-				Vector4[] listTangentsOut = bTangent ? new Vector4[n] : null;
-				Vector2[] listMapping1Out = bUV1 ? new Vector2[n] : null;
-				Vector2[] listMapping2Out = bUV2 ? new Vector2[n] : null;
-				Color32[] listColors32Out = bColor ? new Color32[n] : null;
-				BoneWeight[] listBoneWeightsOut = bBone ? new BoneWeight[n] : null;
 
 //                for (int i = 0, imax = map.Length; i < imax; i++)
 //                {
 //                    map[i] = -1;
 //                }
-				n = 0;
-				for (int nSubMesh = 0; nSubMesh < listlistIndicesOut.Count; nSubMesh++)
-                {
-					List<int> listIndicesOut = listlistIndicesOut[nSubMesh];
-					for (int i = 0; i < listIndicesOut.Count; i+=3)
-                    {
-                        for (int v = 0; v < 3; v++)
-                        {
-							int vid = listIndicesOut[i + v];
-                            if (map[vid] != -1)
-                            {
-								listIndicesOut [i + v] = map [vid];
-                                continue;
-                            }
-							int newVal = n;
-
-							listVerticesOut[n] = av3Vertices[vid];
-							if (bUV1) listMapping1Out[n] = av2Mapping1In[vid];
-							if (bNormal) listNormalsOut[n] = av3NormalsIn[vid];
-							if (bUV2) listMapping2Out[n] = av2Mapping2In[vid];
-							if (bTangent) listTangentsOut[n] = av4TangentsIn[vid];
-                            if (bColor)
-                            {
-                                Color32 color32 = new Color32(0, 0, 0, 0);
-
-                                if (acolColorsIn != null && acolColorsIn.Length > 0)
-                                {
-									color32 = acolColorsIn[vid];
-                                }
-                                else if (aColors32In != null && aColors32In.Length > 0)
-                                {
-									color32 = aColors32In[vid];
-                                }
-                                listColors32Out[n] = color32;
-                            }
-
-							if (bBone) listBoneWeightsOut[n] = aBoneWeights[vid];
-							n++;
-							map[vid] = newVal;
-							listIndicesOut [i + v] = newVal;
-                        }
-                    }
+				Vector2 tmpUV = Vector2.zero;
+				Vector2 tmpUV2 = Vector2.zero;
+				Vector3 tmpNormal = Vector3.zero;
+				Vector4 tmpTangent = Vector4.zero;
+				Color32 tmpColor = Color.black;
+				BoneWeight tmpBoneWeight = new BoneWeight();
+				Vector2 tmpUV_ = Vector2.zero;
+				Vector2 tmpUV2_ = Vector2.zero;
+				Vector3 tmpNormal_ = Vector3.zero;
+				Vector4 tmpTangent_ = Vector4.zero;
+				Color32 tmpColor_ = Color.black;
+				BoneWeight tmpBoneWeight_ = new BoneWeight();
+				for (int i = 0; i < map.Length; i++) {
+					int idx = i;
+					Vector3 tmp = av3Vertices [idx];
+					if (bUV1) tmpUV = av2Mapping1In [idx];
+					if (bUV2) tmpUV2 = av2Mapping2In [idx];
+					if (bNormal) tmpNormal = av3NormalsIn [idx];
+					if (bTangent) tmpTangent = av4TangentsIn [idx];
+					if (bColor) tmpColor = acolColorsIn [idx];
+					if (bColor32) tmpColor = aColors32In [idx];
+					if (bBone) tmpBoneWeight = aBoneWeights [idx];
+					while (map [idx] != -1) {
+						Vector3 tmp_ = av3Vertices [map [idx]];
+						if (bUV1) tmpUV_ = av2Mapping1In [map [idx]];
+						if (bUV2) tmpUV2_ = av2Mapping2In [map [idx]];
+						if (bNormal) tmpNormal_ = av3NormalsIn [map [idx]];
+						if (bTangent) tmpTangent_ = av4TangentsIn [map [idx]];
+						if (bColor) tmpColor_ = acolColorsIn [map [idx]];
+						if (bColor32) tmpColor_ = aColors32In [map [idx]];
+						if (bBone) tmpBoneWeight_ = aBoneWeights [map [idx]];
+						av3Vertices [map [idx]] = tmp;
+						if (bUV1) av2Mapping1In [map [idx]] = tmpUV;
+						if (bUV2) av2Mapping2In [map [idx]] = tmpUV2;
+						if (bNormal) av3NormalsIn [map [idx]] = tmpNormal;
+						if (bTangent) av4TangentsIn [map [idx]] = tmpTangent;
+						if (bColor) acolColorsIn [map [idx]] = tmpColor;
+						if (bColor32) aColors32In [map [idx]] = tmpColor;
+						if (bBone) aBoneWeights [map [idx]] = tmpBoneWeight;
+						tmp = tmp_;
+						tmpUV = tmpUV_;
+						tmpUV2 = tmpUV2_;
+						tmpNormal = tmpNormal_;
+						tmpTangent = tmpTangent_;
+						tmpColor = tmpColor_;
+						tmpBoneWeight = tmpBoneWeight_;
+						int tmpI = map [idx];
+						map [idx] = -1;
+						idx = tmpI;
+					}
 				}
+				// Check
+//				for (int i = 0; i < n; i++) {
+//					if (map [i] != -1) {
+//						throw new Exception ("");
+//					}
+//				}
+//				n = 0;
+//				for (int nSubMesh = 0; nSubMesh < listlistIndicesOut.Count; nSubMesh++)
+//                {
+//					List<int> listIndicesOut = listlistIndicesOut[nSubMesh];
+//					for (int i = 0; i < listIndicesOut.Count; i+=3)
+//                    {
+//                        for (int v = 0; v < 3; v++)
+//                        {
+//							int vid = listIndicesOut[i + v];
+//                            if (map[vid] != -1)
+//                            {
+//								listIndicesOut [i + v] = map [vid];
+//                                continue;
+//                            }
+//							int newVal = n;
+//
+//							listVerticesOut[n] = av3Vertices[vid];
+//							if (bUV1) listMapping1Out[n] = av2Mapping1In[vid];
+//							if (bNormal) listNormalsOut[n] = av3NormalsIn[vid];
+//							if (bUV2) listMapping2Out[n] = av2Mapping2In[vid];
+//							if (bTangent) listTangentsOut[n] = av4TangentsIn[vid];
+//                            if (bColor)
+//                            {
+//                                Color32 color32 = new Color32(0, 0, 0, 0);
+//
+//                                if (acolColorsIn != null && acolColorsIn.Length > 0)
+//                                {
+//									color32 = acolColorsIn[vid];
+//                                }
+//                                else if (aColors32In != null && aColors32In.Length > 0)
+//                                {
+//									color32 = aColors32In[vid];
+//                                }
+//                                listColors32Out[n] = color32;
+//                            }
+//
+//							if (bBone) listBoneWeightsOut[n] = aBoneWeights[vid];
+//							n++;
+//							map[vid] = newVal;
+//							listIndicesOut [i + v] = newVal;
+//                        }
+//                    }
+//				}
 //				Profiler.EndSample ();
+				// NOTE: 禁术
+				UnsafeUtil.Vector3HackArraySize (av3Vertices, n);
+				UnsafeUtil.Vector3HackArraySize (av3NormalsIn, n);
+				UnsafeUtil.Vector4HackArraySize (av4TangentsIn, n);
+				UnsafeUtil.Vector2HackArraySize (av2Mapping1In, n);
+				UnsafeUtil.Vector2HackArraySize (av2Mapping2In, n);
+				UnsafeUtil.Color32HackArraySize (aColors32In, n);
+				UnsafeUtil.BoneWeightHackArraySize (aBoneWeights, n);
 
+
+				// TODO: reuse the arrays and use function to assign the arrays to the mesh
                 meshOut.triangles = null;
-                meshOut.vertices = listVerticesOut;
-                meshOut.normals = bNormal ? listNormalsOut : null;
-                meshOut.tangents = bTangent ? listTangentsOut : null;
-                meshOut.uv = bUV1 ? listMapping1Out : null;
-                meshOut.uv2 = bUV2 ? listMapping2Out : null;
-                meshOut.colors32 = bColor ? listColors32Out : null;
-                meshOut.boneWeights = bBone ? listBoneWeightsOut : null;
+				meshOut.vertices = av3Vertices;
+				meshOut.normals = bNormal ? av3NormalsIn : null;
+				meshOut.tangents = bTangent ? av4TangentsIn : null;
+				meshOut.uv = bUV1 ? av2Mapping1In : null;
+				meshOut.uv2 = bUV2 ? av2Mapping2In : null;
+				meshOut.colors32 = bColor ? aColors32In : null;
+				meshOut.boneWeights = bBone ? aBoneWeights : null;
                 meshOut.bindposes = meshIn.bindposes;
 				meshOut.subMeshCount = listlistIndicesOut.Count;
 
