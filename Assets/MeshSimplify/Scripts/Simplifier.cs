@@ -73,7 +73,7 @@ namespace UltimateGameTools
                 //}
 
                 m_listVertexMap = new List<int>();
-                m_listVertexPermutationBack = new List<int>();
+                m_listVertexPermutation = new List<int>();
                 m_listVertices = new List<Vertex>();
                 m_aListTriangles = new TriangleList[m_meshOriginal.subMeshCount];
 
@@ -151,7 +151,7 @@ namespace UltimateGameTools
 				for (int i = 0; i < m_nOriginalMeshVertexCount; i++)
                 {
                     m_listVertexMap.Add(-1);
-                    m_listVertexPermutationBack.Add(-1);
+                    m_listVertexPermutation.Add(-1);
                 }
 
                 Vector2[] av2Mapping = m_meshOriginal.uv;
@@ -209,7 +209,8 @@ namespace UltimateGameTools
 					}
                     Vertex mn = m_heap.ExtractTop();
 
-                    m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
+//                    m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
+					m_listVertexPermutation[mn.m_nID] = m_listVertices.Count - 1;
                     m_listVertexMap[mn.m_nID] = mn.m_collapse != null ? mn.m_collapse.m_nID : -1;
                     Collapse(mn, mn.m_collapse, gameObject.transform, aRelevanceSpheres);
                 }
@@ -222,7 +223,8 @@ namespace UltimateGameTools
             }
 
             public void ComputeMeshWithVertexCount(GameObject gameObject, Mesh meshOut, int nVertices)
-            {
+			{
+				Profiler.BeginSample("ComputeMeshWithVertexCount");
                 if (GetOriginalMeshUniqueVertexCount() == -1)
                 {
                     return;
@@ -262,34 +264,32 @@ namespace UltimateGameTools
                     return;
                 }
 
-                m_listVertices = new List<Vertex>();
-                m_aListTriangles = new TriangleList[m_meshOriginal.subMeshCount];
-#if false
-                List<Vertex> listVertices = new List<Vertex>();
-#endif
-                Profiler.BeginSample("AddVertices");
-				AddVerticesRuntime(m_meshOriginal.vertices);
-
-                for (int i = 0; i < m_listVertices.Count; i++)
-                {
-                    m_listVertices[i].m_collapse = (m_listVertexMap[i] == -1) ? null : m_listVertices[m_listVertexMap[i]];
-                    Vertex v = m_listVertices[m_listVertexPermutationBack[i]];
-#if false
-                    listVertices.Add(v);
-#endif
-                    v.m_bRuntimeCollapsed = i >= nVertices;
-                }
-                Profiler.EndSample();
-                Profiler.BeginSample("AddFaceListSubMesh");
+				m_aListRuntimeTriangles = new RuntimeTriangleList[m_meshOriginal.subMeshCount];
+//				m_listVertices = new List<Vertex>();
+//#if false
+//                List<Vertex> listVertices = new List<Vertex>();
+//#endif
+//                Profiler.BeginSample("AddVertices");
+//				AddVerticesRuntime(m_meshOriginal.vertices);
+//
+//                for (int i = 0; i < m_listVertices.Count; i++)
+//                {
+//                    m_listVertices[i].m_collapse = (m_listVertexMap[i] == -1) ? null : m_listVertices[m_listVertexMap[i]];
+//                    Vertex v = m_listVertices[m_listVertexPermutationBack[i]];
+//#if false
+//                    listVertices.Add(v);
+//#endif
+//                    v.m_bRuntimeCollapsed = i >= nVertices;
+//                }
+//                Profiler.EndSample();
                 Vector2[] av2Mapping = m_meshOriginal.uv;
 
                 for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
                 {
                     int[] anIndices = m_meshOriginal.GetTriangles(nSubMesh);
-					m_aListTriangles[nSubMesh] = new TriangleList(anIndices.Length / 3);
-                    AddFaceListSubMeshRuntime(nSubMesh, anIndices, av2Mapping);
+					m_aListRuntimeTriangles[nSubMesh] = new RuntimeTriangleList(anIndices.Length / 3);
+					AddFaceListSubMeshRuntime(nSubMesh, anIndices, av2Mapping, nVertices, m_listVertexPermutation, m_listVertexMap);
                 }
-                Profiler.EndSample();
 
                 //int nTotalVertices = listVertices.Count;
 #if false
@@ -327,9 +327,9 @@ namespace UltimateGameTools
                 Profiler.EndSample();
 #endif
 
-                for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
+				for (int nSubMesh = 0; nSubMesh < m_aListRuntimeTriangles.Length; nSubMesh++)
                 {
-                    m_aListTriangles[nSubMesh].RemoveNull();
+					m_aListRuntimeTriangles[nSubMesh].RemoveNull();
                 }
                 //Vector3[] av3Vertices = new Vector3[m_listVertices.Count];
                 //for (int i = 0; i < m_listVertices.Count; i++)
@@ -338,8 +338,7 @@ namespace UltimateGameTools
                 //    av3Vertices[i] = m_listVertices[i].m_v3Position;
                 //}
 
-                Profiler.BeginSample("ConsolidateMesh");
-                ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListTriangles);
+				ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_aListRuntimeTriangles);
                 Profiler.EndSample();
             }
 
@@ -360,7 +359,7 @@ namespace UltimateGameTools
             // Private methods
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
-            void ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, TriangleList[] aListTriangles)
+            void ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, RuntimeTriangleList[] aListTriangles)
             {
                 Vector3[] av3Vertices = meshIn.vertices;
                 Vector3[] av3NormalsIn = meshIn.normals;
@@ -397,13 +396,13 @@ namespace UltimateGameTools
                 for (int nSubMesh = 0; nSubMesh < aListTriangles.Length; nSubMesh++)
                 {
                     List<int> listIndicesOut = new List<int>();
-                    List<Triangle> tl = aListTriangles[nSubMesh].m_listTriangles;
+					List<RuntimeTriangle> tl = aListTriangles[nSubMesh].m_listTriangles;
                     for (int i = 0; i < tl.Count; i++)
                     {
-                        Triangle t = tl[i];
+						RuntimeTriangle t = tl[i];
                         for (int v = 0; v < 3; v++)
                         {
-                            int vid = t.Vertices[v].m_nID;
+							int vid = t.VertexIndices[v];
                             int uvi = t.IndicesUV[v];
                             if (map[vid] != -1 && map2[uvi] == map[vid])
                             {
@@ -413,7 +412,7 @@ namespace UltimateGameTools
                             int newVal = listVerticesOut.Count;
                             int vi = t.Indices[v];
 
-                            listVerticesOut.Add(t.Vertices[v].m_v3Position);
+							listVerticesOut.Add(av3Vertices[t.VertexIndices[v]]);
                             if (bNormal) listNormalsOut.Add(av3NormalsIn[vi]);
                             if (bUV1) listMapping1Out.Add(av2Mapping1In[uvi]);
                             if (bUV2) listMapping2Out.Add(av2Mapping2In[vi]);
@@ -925,7 +924,7 @@ namespace UltimateGameTools
                     ShareUV(v2Mapping, tri);
                 }
             }
-            void AddFaceListSubMeshRuntime(int nSubMesh, int[] anIndices, Vector2[] v2Mapping)
+			void AddFaceListSubMeshRuntime(int nSubMesh, int[] anIndices, Vector2[] v2Mapping, int nVertices, List<int> permutation, List<int> map)
             {
                 bool bUVData = false;
 
@@ -937,50 +936,50 @@ namespace UltimateGameTools
                     }
                 }
 
-                int[] inverseMap = new int[m_listVertices.Count];
+				int[] inverseMap = new int[v2Mapping.Length];
 				for (int i = 0; i < anIndices.Length; i++)
                 {
 					inverseMap[anIndices[i]] = i;
                 }
 
-                List<Triangle> list = m_aListTriangles[nSubMesh].m_listTriangles;
+				List<RuntimeTriangle> list = m_aListRuntimeTriangles[nSubMesh].m_listTriangles;
 				for (int i = 0; i < anIndices.Length; i+=3)
                 {
-					Vertex v0 = m_listVertices[anIndices[i]];
-					Vertex v1 = m_listVertices[anIndices[i + 1]];
-					Vertex v2 = m_listVertices[anIndices[i + 2]];
-                    Triangle tri = Triangle.CreateTriangle(nSubMesh, list.Count, v0 , v1, v2,
-                                                bUVData, anIndices[i], anIndices[i + 1], anIndices[i + 2]);
+					int v0 = anIndices[i];
+					int v1 = anIndices[i + 1];
+					int v2 = anIndices[i + 2];
+					RuntimeTriangle tri = RuntimeTriangle.CreateRuntimeTriangle(nSubMesh, list.Count,bUVData, v0 , v1, v2,
+						nVertices, permutation, map);
                     if (null != tri)
                     {
-                        Vertex p0 = tri.Vertices[0];
+						int p0 = tri.VertexIndices[0];
                         if (p0 != v0)
                         {
-                            int idx = inverseMap[p0.m_nID];
+                            int idx = inverseMap[p0];
                             if (idx > 0)
                             {
                                 int uv = anIndices[idx];
-                                tri.SetTexAt(0, uv);
+								tri.IndicesUV[0] = uv;
                             }
                         }
-                        Vertex p1 = tri.Vertices[1];
+						int p1 = tri.VertexIndices[1];
                         if (p1 != v1)
                         {
-                            int idx = inverseMap[p1.m_nID];
+                            int idx = inverseMap[p1];
                             if (idx > 0)
                             {
-                                int uv = anIndices[idx];
-                                tri.SetTexAt(1, uv);
+								int uv = anIndices[idx];
+								tri.IndicesUV[1] = uv;
                             }
                         }
-                        Vertex p2 = tri.Vertices[2];
+						int p2 = tri.VertexIndices[2];
                         if (p2 != v2)
                         {
-                            int idx = inverseMap[p2.m_nID];
+                            int idx = inverseMap[p2];
                             if (idx > 0)
                             {
-                                int uv = anIndices[idx];
-                                tri.SetTexAt(2, uv);
+								int uv = anIndices[idx];
+								tri.IndicesUV[2] = uv;
                             }
                         }
                         list.Add(tri);
@@ -1050,11 +1049,12 @@ namespace UltimateGameTools
 
             public List<Vertex> m_listVertices;
             private Heap<Vertex> m_heap;
+			public RuntimeTriangleList[] m_aListRuntimeTriangles;
             public TriangleList[] m_aListTriangles;
             [SerializeField, HideInInspector] private int m_nOriginalMeshVertexCount = -1;
             [SerializeField, HideInInspector] private float m_fOriginalMeshSize = 1.0f;
             [SerializeField, HideInInspector] private List<int> m_listVertexMap;
-            [SerializeField, HideInInspector] private List<int> m_listVertexPermutationBack;
+            [SerializeField, HideInInspector] private List<int> m_listVertexPermutation;
 //            [SerializeField, HideInInspector] private MeshUniqueVertices m_meshUniqueVertices;
             [SerializeField, HideInInspector] private Mesh m_meshOriginal;
             [SerializeField, HideInInspector] private bool m_bUseEdgeLength = true;
