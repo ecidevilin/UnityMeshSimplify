@@ -327,10 +327,10 @@ namespace UltimateGameTools
                 Profiler.EndSample();
 #endif
 
-				for (int nSubMesh = 0; nSubMesh < m_aListRuntimeTriangles.Length; nSubMesh++)
-                {
-					m_aListRuntimeTriangles[nSubMesh].RemoveNull();
-				}
+//				for (int nSubMesh = 0; nSubMesh < m_aListRuntimeTriangles.Length; nSubMesh++)
+//                {
+//					m_aListRuntimeTriangles[nSubMesh].RemoveNull();
+//				}
 //				Profiler.EndSample ();
                 //Vector3[] av3Vertices = new Vector3[m_listVertices.Count];
                 //for (int i = 0; i < m_listVertices.Count; i++)
