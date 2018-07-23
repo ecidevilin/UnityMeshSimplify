@@ -280,10 +280,8 @@ namespace UltimateGameTools
 
                     return;
                 }
-
-                //				Profiler.BeginSample("ConsolidateMesh");
+                
                 ConsolidateMesh(gameObject, meshOut, m_aVertexPermutation, m_aVertexMap, nVertices);
-//				Profiler.EndSample();
             }
 
             public int GetOriginalMeshUniqueVertexCount()
@@ -422,22 +420,18 @@ namespace UltimateGameTools
                     if (t < l - 1)
                     {
                         _aTriangleCount[nSubMesh] = t + 1;
-#if DEBUG
-                        if (t >= 0 && triangles[t] == -1)
-                        {
-                            throw new Exception("triangles[t] == -1");
-                        }
-#endif
+//#if DEBUG
+//                        if (t >= 0 && triangles[t] == -1)
+//                        {
+//                            throw new Exception("triangles[t] == -1");
+//                        }
+//#endif
                     }
                     else
                     {
                         _aTriangleCount[nSubMesh] = l;
                     }
                 }
-//                for (int i = 0, imax = map.Length; i < imax; i++)
-//                {
-//                    map[i] = -1;
-//                }
 				Vector2 tmpUV = Vector2.zero;
 				Vector2 tmpUV2 = Vector2.zero;
 				Vector3 tmpNormal = Vector3.zero;
@@ -485,17 +479,19 @@ namespace UltimateGameTools
 						_vertexMap [idx] = -1;
 						idx = tmpI;
 					}
-				}
-                // Check
-                for (int i = 0; i < n; i++)
-                {
-                    if (_vertexMap[i] != -1)
-                    {
-                        throw new Exception("");
-                    }
                 }
+//#if DEBUG
+//                // Check
+//                for (int i = 0; i < n; i++)
+//                {
+//                    if (_vertexMap[i] != -1)
+//                    {
+//                        throw new Exception("");
+//                    }
+//                }
+//#endif
 
-			    this._meshOut = meshOut;
+                this._meshOut = meshOut;
 
                 _assignVertices = _assignVertices ?? (arr => this._meshOut.vertices = arr);
                 if (bNormal) _assignNormals = _assignNormals ?? (arr => this._meshOut.normals = arr);
@@ -783,109 +779,12 @@ namespace UltimateGameTools
                     m_heap.ModifyValue(tmpVertices[i].HeapIndex, tmpVertices[i]);
                 }
             }
-            void CollapseRuntime(Vertex u, Vertex v)
-            {
-                if (v == null)
-                {
-                    return;
-                }
-
-                int i;
-
-                tmpTriangles.Clear();
-
-                for (i = 0; i < u.m_listFaces.Count; i++)
-                {
-                    Triangle t = u.m_listFaces[i];
-                    if (t.DestructedRuntime)
-                    {
-                        continue;
-                    }
-                    if (t.HasVertex(v))
-                    {
-                        tmpTriangles.Add(t);
-                    }
-                }
-
-                // update texture mapping
-
-                for (i = 0; i < u.m_listFaces.Count; i++)
-                {
-                    Triangle t = u.m_listFaces[i];
-                    if (t.DestructedRuntime)
-                    {
-                        continue;
-                    }
-                    if (t.HasVertex(v))
-                    {
-                        continue;
-                    }
-
-                    int j;
-                    if (t.HasUVData)
-                    {
-                        for (j = 0; j < tmpTriangles.Count; j++)
-                        {
-                            if (t.TexAt(u) == tmpTriangles[j].TexAt(u))
-                            {
-                                t.SetTexAt(u, tmpTriangles[j].TexAt(v));
-                                break; // only change tex coords once!
-                            }
-                        }
-                    }
-
-                    // Added support for color or 2nd uv here:
-
-                    /*
-
-                    for (j = 0; j < sides.Count; j++)
-                    {
-                      if (u.m_listFaces[i].VertexColorAt(u) == sides[j].VertexColorAt(u))
-                      {
-                        u.m_listFaces[i].SetVertexColorAt(u, sides[j].VertexColorAt(v));
-                        break; // only change tex coords once!
-                      }
-                    }
-
-                    */
-                }
-
-                // Delete triangles on edge uv
-
-                for (i = tmpTriangles.Count - 1; i >= 0; i--)
-                {
-                    Triangle t = tmpTriangles[i];
-                    m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
-                    //t.DestructorRuntime();
-                    t.DestructedRuntime = true;
-                }
-
-                // Update remaining triangles to have v instead of u
-
-                for (i = u.m_listFaces.Count - 1; i >= 0; i--)
-                {
-                    Triangle t = u.m_listFaces[i];
-                    if (t.DestructedRuntime)
-                    {
-                        continue;
-                    }
-                    t.ReplaceVertexRuntime(u, v);
-                }
-            }
 
             void AddVertices(Vector3[] listVertices, Vector3[] listVerticesWorld)
             {
 				for (int i = 0; i < listVertices.Length; i++)
                 {
                     Vertex v = new Vertex(listVertices[i], listVerticesWorld[i], i);
-                    m_listVertices.Add(v);
-                }
-            }
-			void AddVerticesRuntime(Vector3[] listVertices)
-            {
-				for (int i = 0; i < listVertices.Length; i++)
-                {
-                    Vertex v = new Vertex(listVertices[i], Vector3.zero, i);
                     m_listVertices.Add(v);
                 }
             }
@@ -914,33 +813,6 @@ namespace UltimateGameTools
                     ShareUV(v2Mapping, tri);
                 }
             }
-//			void AddFaceListSubMeshRuntime(int nSubMesh, int[] anIndices, Vector2[] v2Mapping, int nVertices, List<int> permutation, List<int> map)
-//            {
-//                bool bUVData = false;
-//
-//                if (v2Mapping != null)
-//                {
-//                    if (v2Mapping.Length > 0)
-//                    {
-//                        bUVData = true;
-//                    }
-//                }
-//
-//				List<RuntimeTriangle> list = m_aListRuntimeTriangles[nSubMesh].m_listTriangles;
-//				for (int i = 0; i < anIndices.Length; i+=3)
-//                {
-//					int v0 = anIndices[i];
-//					int v1 = anIndices[i + 1];
-//					int v2 = anIndices[i + 2];
-//					RuntimeTriangle tri = RuntimeTriangle.CreateRuntimeTriangle(nSubMesh, list.Count,bUVData, v0 , v1, v2,
-//						nVertices, permutation, map);
-//                    if (null != tri)
-//                    {
-//                        list.Add(tri);
-//                    }
-//                    // NOTE: if need share uv at runtime
-//                }
-//            }
 
             void ShareUV(Vector2[] aMapping, Triangle t)
             {
@@ -1003,13 +875,11 @@ namespace UltimateGameTools
 
             public List<Vertex> m_listVertices;
             private Heap<Vertex> m_heap;
-//			public RuntimeTriangleList[] m_aListRuntimeTriangles;
             public TriangleList[] m_aListTriangles;
             [SerializeField, HideInInspector] private int m_nOriginalMeshVertexCount = -1;
             [SerializeField, HideInInspector] private float m_fOriginalMeshSize = 1.0f;
             [SerializeField, HideInInspector] private int[] m_aVertexMap;
             [SerializeField, HideInInspector] private int[] m_aVertexPermutation;
-//            [SerializeField, HideInInspector] private MeshUniqueVertices m_meshUniqueVertices;
             [SerializeField, HideInInspector] private Mesh m_meshOriginal;
             [SerializeField, HideInInspector] private bool m_bUseEdgeLength = true;
             [SerializeField, HideInInspector] bool m_bUseCurvature = true, m_bProtectTexture = true, m_bLockBorder = true;
