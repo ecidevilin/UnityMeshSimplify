@@ -100,7 +100,7 @@ namespace UltimateGameTools
 					Transform[] aBones = skin.bones;
 
 					for (int nVertex = 0; nVertex < sourceMesh.vertices.Length; nVertex++) {
-						BoneWeight bw = aBoneWeights [nVertex];
+						BoneWeight bw = aBoneWeights[nVertex];
 						Vector4 v = sourceMesh.vertices [nVertex];
 						v.w = 1;
 						Vector3 v3World = aBones [bw.boneIndex0].localToWorldMatrix * aBindPoses [bw.boneIndex0] * v * bw.weight0
@@ -236,6 +236,15 @@ namespace UltimateGameTools
                     return;
                 }
 
+                _av3VerticesOriginal = _av3VerticesOriginal ?? m_meshOriginal.vertices;
+                _av3NormalsOriginal = _av3NormalsOriginal ?? m_meshOriginal.normals;
+                _av4TangentsOriginal = _av4TangentsOriginal ?? m_meshOriginal.tangents;
+                _av2Mapping1Original = _av2Mapping1Original ?? m_meshOriginal.uv;
+                _av2Mapping2Original = _av2Mapping2Original ?? m_meshOriginal.uv2;
+                _aColors32Original = _aColors32Original ?? m_meshOriginal.colors32;
+                _aBoneWeightsOriginal = _aBoneWeightsOriginal ?? m_meshOriginal.boneWeights;
+                _aBindPoses = _aBindPoses ?? m_meshOriginal.bindposes;
+
                 if (nVertices >= GetOriginalMeshUniqueVertexCount())
                 {
                     // Original vertex count requested
@@ -243,14 +252,14 @@ namespace UltimateGameTools
                     meshOut.triangles = new int[0];
                     meshOut.subMeshCount = m_meshOriginal.subMeshCount;
 
-                    meshOut.vertices = m_meshOriginal.vertices;
-                    meshOut.normals = m_meshOriginal.normals;
-                    meshOut.tangents = m_meshOriginal.tangents;
-                    meshOut.uv = m_meshOriginal.uv;
-                    meshOut.uv2 = m_meshOriginal.uv2;
-                    meshOut.colors32 = m_meshOriginal.colors32;
-                    meshOut.boneWeights = m_meshOriginal.boneWeights;
-                    meshOut.bindposes = m_meshOriginal.bindposes;
+                    meshOut.vertices = _av3VerticesOriginal;
+                    meshOut.normals = _av3NormalsOriginal;
+                    meshOut.tangents = _av4TangentsOriginal;
+                    meshOut.uv = _av2Mapping1Original;
+                    meshOut.uv2 = _av2Mapping2Original;
+                    meshOut.colors32 = _aColors32Original;
+                    meshOut.boneWeights = _aBoneWeightsOriginal;
+                    meshOut.bindposes = _aBindPoses;
 
                     meshOut.triangles = m_meshOriginal.triangles;
                     meshOut.subMeshCount = m_meshOriginal.subMeshCount;
@@ -264,84 +273,23 @@ namespace UltimateGameTools
 
                     return;
                 }
+                if (null == _av3Vertices) _av3Vertices = (Vector3[])_av3VerticesOriginal.Clone();
+                else _av3VerticesOriginal.CopyTo(_av3Vertices, 0);
+                if (null == _av3NormalsIn) _av3NormalsIn = (Vector3[])_av3NormalsOriginal.Clone();
+                else _av3NormalsOriginal.CopyTo(_av3NormalsIn, 0);
+                if (null == _av4TangentsIn) _av4TangentsIn = (Vector4[])_av4TangentsOriginal.Clone();
+                else _av4TangentsOriginal.CopyTo(_av4TangentsIn, 0);
+                if (null == _av2Mapping1In) _av2Mapping1In = (Vector2[])_av2Mapping1Original.Clone();
+                else _av2Mapping1Original.CopyTo(_av2Mapping1In, 0);
+                if (null == _av2Mapping2In) _av2Mapping2In = (Vector2[])_av2Mapping2Original.Clone();
+                else _av2Mapping2Original.CopyTo(_av2Mapping2In, 0);
+                if (null == _aColors32In) _aColors32In = (Color32[])_aColors32Original.Clone();
+                else _aColors32Original.CopyTo(_aColors32In, 0);
+                if (null == _aBoneWeights) _aBoneWeights = (BoneWeight[])_aBoneWeightsOriginal.Clone();
+                else _aBoneWeightsOriginal.CopyTo(_aBoneWeights, 0);
 
-//				Profiler.BeginSample("RuntimeTriangleList");
-//				m_aListRuntimeTriangles = new RuntimeTriangleList[m_meshOriginal.subMeshCount];
-//				m_listVertices = new List<Vertex>();
-//#if false
-//                List<Vertex> listVertices = new List<Vertex>();
-//#endif
-//                Profiler.BeginSample("AddVertices");
-//				AddVerticesRuntime(m_meshOriginal.vertices);
-//
-//                for (int i = 0; i < m_listVertices.Count; i++)
-//                {
-//                    m_listVertices[i].m_collapse = (m_listVertexMap[i] == -1) ? null : m_listVertices[m_listVertexMap[i]];
-//                    Vertex v = m_listVertices[m_listVertexPermutationBack[i]];
-//#if false
-//                    listVertices.Add(v);
-//#endif
-//                    v.m_bRuntimeCollapsed = i >= nVertices;
-//                }
-//                Profiler.EndSample();
-//                Vector2[] av2Mapping = m_meshOriginal.uv;
-//
-//                for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
-//                {
-//                    int[] anIndices = m_meshOriginal.GetTriangles(nSubMesh);
-//					m_aListRuntimeTriangles[nSubMesh] = new RuntimeTriangleList(anIndices.Length / 3);
-//					AddFaceListSubMeshRuntime(nSubMesh, anIndices, av2Mapping, nVertices, m_listVertexPermutation, m_listVertexMap);
-//                }
-                //int nTotalVertices = listVertices.Count;
-#if false
-                Profiler.BeginSample("Collapse");
-                //Stopwatch sw = Stopwatch.StartNew();
-                while (listVertices.Count > nVertices)
-                {
-                    //if (progress != null)
-                    //{
-                    //    float fT = 1.0f;
-                    //    if (nTotalVertices != nVertices && ((listVertices.Count & 0xFF) == 0))
-                    //    {
-                    //        fT = 1.0f - ((float)(listVertices.Count - nVertices) / (float)(nTotalVertices - nVertices));
-                    //        progress("Simplifying mesh: " + strProgressDisplayObjectName, "Collapsing edges", fT);
-
-                    //        if (Cancelled)
-                    //        {
-                    //            CoroutineEnded = true;
-                    //            yield break;
-                    //        }
-                    //    }
-                    //}
-
-                    Vertex mn = listVertices[listVertices.Count - 1];
-                    listVertices.RemoveAt(listVertices.Count - 1);
-                    CollapseRuntime(mn, mn.m_collapse);
-                    //m_listVertices.Remove(mn);
-
-                    //if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
-                    //{
-                    //    yield return null;
-                    //    sw = Stopwatch.StartNew();
-                    //}
-                }
-                Profiler.EndSample();
-#endif
-
-//				for (int nSubMesh = 0; nSubMesh < m_aListRuntimeTriangles.Length; nSubMesh++)
-//                {
-//					m_aListRuntimeTriangles[nSubMesh].RemoveNull();
-//				}
-//				Profiler.EndSample ();
-                //Vector3[] av3Vertices = new Vector3[m_listVertices.Count];
-                //for (int i = 0; i < m_listVertices.Count; i++)
-                //{
-                //    m_listVertices[i].m_nID = i;  // reassign id's
-                //    av3Vertices[i] = m_listVertices[i].m_v3Position;
-                //}
-
-//				Profiler.BeginSample("ConsolidateMesh");
-				ConsolidateMesh(gameObject, m_meshOriginal, meshOut, m_listVertexPermutation, m_listVertexMap, nVertices);
+                //				Profiler.BeginSample("ConsolidateMesh");
+                ConsolidateMesh(gameObject, meshOut, m_listVertexPermutation, m_listVertexMap, nVertices);
 //				Profiler.EndSample();
                 Profiler.EndSample();
             }
@@ -363,39 +311,38 @@ namespace UltimateGameTools
             // Private methods
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
-			void ConsolidateMesh(GameObject gameObject, Mesh meshIn, Mesh meshOut, List<int> permutation, List<int> collapseMap, int nVertices)
+			void ConsolidateMesh(GameObject gameObject, Mesh meshOut, List<int> permutation, List<int> collapseMap, int nVertices)
 			{
 //				Profiler.BeginSample("Old mesh data");
-                Vector3[] av3Vertices = meshIn.vertices;
-                Vector3[] av3NormalsIn = meshIn.normals;
-                Vector4[] av4TangentsIn = meshIn.tangents;
-                Vector2[] av2Mapping1In = meshIn.uv;
-                Vector2[] av2Mapping2In = meshIn.uv2;
-                Color[] acolColorsIn = meshIn.colors;
-                Color32[] aColors32In = meshIn.colors32;
-				BoneWeight[] aBoneWeights = meshIn.boneWeights;
+    //            Vector3[] _av3Vertices = m_meshOriginal.vertices;
+    //            Vector3[] _av3NormalsIn = m_meshOriginal.normals;
+    //            Vector4[] _av4TangentsIn = m_meshOriginal.tangents;
+    //            Vector2[] _av2Mapping1In = m_meshOriginal.uv;
+    //            Vector2[] _av2Mapping2In = m_meshOriginal.uv2;
+    //            Color[] _acolColorsIn = m_meshOriginal.colors;
+    //            Color32[] _aColors32In = m_meshOriginal.colors32;
+				//BoneWeight[] _aBoneWeights = m_meshOriginal.boneWeights;
 //				Profiler.EndSample ();
 
-                bool bUV1 = av2Mapping1In != null && av2Mapping1In.Length > 0;
-                bool bUV2 = av2Mapping2In != null && av2Mapping2In.Length > 0;
-                bool bNormal = av3NormalsIn != null && av3NormalsIn.Length > 0;
-                bool bTangent = av4TangentsIn != null && av4TangentsIn.Length > 0;
-				bool bColor = (acolColorsIn != null && acolColorsIn.Length > 0);
-				bool bColor32 = (aColors32In != null && aColors32In.Length > 0);
-                bool bBone = aBoneWeights != null && aBoneWeights.Length > 0;
+                bool bUV1 = _av2Mapping1In != null && _av2Mapping1In.Length > 0;
+                bool bUV2 = _av2Mapping2In != null && _av2Mapping2In.Length > 0;
+                bool bNormal = _av3NormalsIn != null && _av3NormalsIn.Length > 0;
+                bool bTangent = _av4TangentsIn != null && _av4TangentsIn.Length > 0;
+				bool bColor32 = (_aColors32In != null && _aColors32In.Length > 0);
+                bool bBone = _aBoneWeights != null && _aBoneWeights.Length > 0;
 
-				int[] map = new int[av3Vertices.Length];
-				for (int i = 0, imax = map.Length; i < imax; i++)
+                Profiler.BeginSample("Triangle data");
+                _vertexMap = _vertexMap ?? new int[_av3Vertices.Length];
+				for (int i = 0, imax = _vertexMap.Length; i < imax; i++)
 				{
-					map[i] = -1;
+					_vertexMap[i] = -1;
 				}
-//				Profiler.BeginSample("New mesh data");
 				int n = 0;
 				// TODO: Use 禁术 to reduce gc here.
-				List<List<int>> listlistIndicesOut = new List<List<int>>(meshIn.subMeshCount);
-				for (int nSubMesh = 0; nSubMesh < meshIn.subMeshCount; nSubMesh++)
+				List<List<int>> listlistIndicesOut = new List<List<int>>(m_meshOriginal.subMeshCount);
+				for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
 				{
-					int[] triangles = meshIn.GetTriangles (nSubMesh);
+					int[] triangles = m_meshOriginal.GetTriangles (nSubMesh);
 					List<int> listIndicesOut = new List<int>(triangles.Length);
 					listlistIndicesOut.Add(listIndicesOut);
 					for (int i = 0; i < triangles.Length; i+=3) {
@@ -435,21 +382,21 @@ namespace UltimateGameTools
 						if (idx0 == -1 || idx1 == -1 || idx2 == -1) {
 							continue;
 						}
-						if (map [idx0] == -1) {
-							map [idx0] = n++;
+						if (_vertexMap [idx0] == -1) {
+							_vertexMap [idx0] = n++;
 						}
-						listIndicesOut.Add (map [idx0]);
-						if (map [idx1] == -1) {
-							map [idx1] = n++;
+						listIndicesOut.Add (_vertexMap [idx0]);
+						if (_vertexMap [idx1] == -1) {
+							_vertexMap [idx1] = n++;
 						}
-						listIndicesOut.Add (map [idx1]);
-						if (map [idx2] == -1) {
-							map [idx2] = n++;
+						listIndicesOut.Add (_vertexMap [idx1]);
+						if (_vertexMap [idx2] == -1) {
+							_vertexMap [idx2] = n++;
 						}
-						listIndicesOut.Add (map [idx2]);
+						listIndicesOut.Add (_vertexMap [idx2]);
 					}
 				}
-
+                Profiler.EndSample();
 //                for (int i = 0, imax = map.Length; i < imax; i++)
 //                {
 //                    map[i] = -1;
@@ -466,33 +413,30 @@ namespace UltimateGameTools
 				Vector4 tmpTangent_ = Vector4.zero;
 				Color32 tmpColor_ = Color.black;
 				BoneWeight tmpBoneWeight_ = new BoneWeight();
-				for (int i = 0; i < map.Length; i++) {
+				for (int i = 0; i < _vertexMap.Length; i++) {
 					int idx = i;
-					Vector3 tmp = av3Vertices [idx];
-					if (bUV1) tmpUV = av2Mapping1In [idx];
-					if (bUV2) tmpUV2 = av2Mapping2In [idx];
-					if (bNormal) tmpNormal = av3NormalsIn [idx];
-					if (bTangent) tmpTangent = av4TangentsIn [idx];
-					if (bColor) tmpColor = acolColorsIn [idx];
-					if (bColor32) tmpColor = aColors32In [idx];
-					if (bBone) tmpBoneWeight = aBoneWeights [idx];
-					while (map [idx] != -1) {
-						Vector3 tmp_ = av3Vertices [map [idx]];
-						if (bUV1) tmpUV_ = av2Mapping1In [map [idx]];
-						if (bUV2) tmpUV2_ = av2Mapping2In [map [idx]];
-						if (bNormal) tmpNormal_ = av3NormalsIn [map [idx]];
-						if (bTangent) tmpTangent_ = av4TangentsIn [map [idx]];
-						if (bColor) tmpColor_ = acolColorsIn [map [idx]];
-						if (bColor32) tmpColor_ = aColors32In [map [idx]];
-						if (bBone) tmpBoneWeight_ = aBoneWeights [map [idx]];
-						av3Vertices [map [idx]] = tmp;
-						if (bUV1) av2Mapping1In [map [idx]] = tmpUV;
-						if (bUV2) av2Mapping2In [map [idx]] = tmpUV2;
-						if (bNormal) av3NormalsIn [map [idx]] = tmpNormal;
-						if (bTangent) av4TangentsIn [map [idx]] = tmpTangent;
-						if (bColor) acolColorsIn [map [idx]] = tmpColor;
-						if (bColor32) aColors32In [map [idx]] = tmpColor;
-						if (bBone) aBoneWeights [map [idx]] = tmpBoneWeight;
+					Vector3 tmp = _av3Vertices [idx];
+					if (bUV1) tmpUV = _av2Mapping1In [idx];
+					if (bUV2) tmpUV2 = _av2Mapping2In [idx];
+					if (bNormal) tmpNormal = _av3NormalsIn [idx];
+					if (bTangent) tmpTangent = _av4TangentsIn [idx];
+					if (bColor32) tmpColor = _aColors32In [idx];
+					if (bBone) tmpBoneWeight = _aBoneWeights [idx];
+					while (_vertexMap [idx] != -1) {
+						Vector3 tmp_ = _av3Vertices [_vertexMap [idx]];
+						if (bUV1) tmpUV_ = _av2Mapping1In [_vertexMap [idx]];
+						if (bUV2) tmpUV2_ = _av2Mapping2In [_vertexMap [idx]];
+						if (bNormal) tmpNormal_ = _av3NormalsIn [_vertexMap [idx]];
+						if (bTangent) tmpTangent_ = _av4TangentsIn [_vertexMap [idx]];
+						if (bColor32) tmpColor_ = _aColors32In [_vertexMap [idx]];
+						if (bBone) tmpBoneWeight_ = _aBoneWeights [_vertexMap [idx]];
+						_av3Vertices [_vertexMap [idx]] = tmp;
+						if (bUV1) _av2Mapping1In [_vertexMap [idx]] = tmpUV;
+						if (bUV2) _av2Mapping2In [_vertexMap [idx]] = tmpUV2;
+						if (bNormal) _av3NormalsIn [_vertexMap [idx]] = tmpNormal;
+						if (bTangent) _av4TangentsIn [_vertexMap [idx]] = tmpTangent;
+						if (bColor32) _aColors32In [_vertexMap [idx]] = tmpColor;
+						if (bBone) _aBoneWeights [_vertexMap [idx]] = tmpBoneWeight;
 						tmp = tmp_;
 						tmpUV = tmpUV_;
 						tmpUV2 = tmpUV2_;
@@ -500,81 +444,42 @@ namespace UltimateGameTools
 						tmpTangent = tmpTangent_;
 						tmpColor = tmpColor_;
 						tmpBoneWeight = tmpBoneWeight_;
-						int tmpI = map [idx];
-						map [idx] = -1;
+						int tmpI = _vertexMap [idx];
+						_vertexMap [idx] = -1;
 						idx = tmpI;
 					}
 				}
-				// Check
-//				for (int i = 0; i < n; i++) {
-//					if (map [i] != -1) {
-//						throw new Exception ("");
-//					}
-//				}
-//				n = 0;
-//				for (int nSubMesh = 0; nSubMesh < listlistIndicesOut.Count; nSubMesh++)
-//                {
-//					List<int> listIndicesOut = listlistIndicesOut[nSubMesh];
-//					for (int i = 0; i < listIndicesOut.Count; i+=3)
-//                    {
-//                        for (int v = 0; v < 3; v++)
-//                        {
-//							int vid = listIndicesOut[i + v];
-//                            if (map[vid] != -1)
-//                            {
-//								listIndicesOut [i + v] = map [vid];
-//                                continue;
-//                            }
-//							int newVal = n;
-//
-//							listVerticesOut[n] = av3Vertices[vid];
-//							if (bUV1) listMapping1Out[n] = av2Mapping1In[vid];
-//							if (bNormal) listNormalsOut[n] = av3NormalsIn[vid];
-//							if (bUV2) listMapping2Out[n] = av2Mapping2In[vid];
-//							if (bTangent) listTangentsOut[n] = av4TangentsIn[vid];
-//                            if (bColor)
-//                            {
-//                                Color32 color32 = new Color32(0, 0, 0, 0);
-//
-//                                if (acolColorsIn != null && acolColorsIn.Length > 0)
-//                                {
-//									color32 = acolColorsIn[vid];
-//                                }
-//                                else if (aColors32In != null && aColors32In.Length > 0)
-//                                {
-//									color32 = aColors32In[vid];
-//                                }
-//                                listColors32Out[n] = color32;
-//                            }
-//
-//							if (bBone) listBoneWeightsOut[n] = aBoneWeights[vid];
-//							n++;
-//							map[vid] = newVal;
-//							listIndicesOut [i + v] = newVal;
-//                        }
-//                    }
-//				}
-//				Profiler.EndSample ();
-				// NOTE: 禁术
-				UnsafeUtil.Vector3HackArraySize (av3Vertices, n);
-				UnsafeUtil.Vector3HackArraySize (av3NormalsIn, n);
-				UnsafeUtil.Vector4HackArraySize (av4TangentsIn, n);
-				UnsafeUtil.Vector2HackArraySize (av2Mapping1In, n);
-				UnsafeUtil.Vector2HackArraySize (av2Mapping2In, n);
-				UnsafeUtil.Color32HackArraySize (aColors32In, n);
-				UnsafeUtil.BoneWeightHackArraySize (aBoneWeights, n);
+                // Check
+                for (int i = 0; i < n; i++)
+                {
+                    if (_vertexMap[i] != -1)
+                    {
+                        throw new Exception("");
+                    }
+                }
+
+			    this._meshOut = meshOut;
+
+                _assignVertices = _assignVertices ?? (arr => this._meshOut.vertices = arr);
+                if (bNormal) _assignNormals = _assignNormals ?? (arr => this._meshOut.normals = arr);
+                if (bTangent) _assignTangents = _assignTangents ?? (arr => this._meshOut.tangents = arr);
+                if (bUV1) _assignUV = _assignUV ?? (arr => this._meshOut.uv = arr);
+                if (bUV2) _assignUV2 = _assignUV2 ?? (arr => this._meshOut.uv2 = arr);
+                if (bColor32) _assignColor32 = _assignColor32 ?? (arr => this._meshOut.colors32 = arr);
+                if (bBone) _assignBoneWeights = _assignBoneWeights ?? (arr => this._meshOut.boneWeights = arr);
 
 
-				// TODO: reuse the arrays and use function to assign the arrays to the mesh
+                // TODO: reuse the arrays and use function to assign the arrays to the mesh
                 meshOut.triangles = null;
-				meshOut.vertices = av3Vertices;
-				meshOut.normals = bNormal ? av3NormalsIn : null;
-				meshOut.tangents = bTangent ? av4TangentsIn : null;
-				meshOut.uv = bUV1 ? av2Mapping1In : null;
-				meshOut.uv2 = bUV2 ? av2Mapping2In : null;
-				meshOut.colors32 = bColor ? aColors32In : null;
-				meshOut.boneWeights = bBone ? aBoneWeights : null;
-                meshOut.bindposes = meshIn.bindposes;
+                // NOTE: 禁术
+                UnsafeUtil.Vector3HackArraySizeCall(_av3Vertices, n, _assignVertices);
+                if (bNormal) UnsafeUtil.Vector3HackArraySizeCall(_av3NormalsIn, n, _assignNormals);
+                if (bTangent) UnsafeUtil.Vector4HackArraySizeCall(_av4TangentsIn, n, _assignTangents);
+                if (bUV1) UnsafeUtil.Vector2HackArraySizeCall(_av2Mapping1In, n, _assignUV);
+                if (bUV2) UnsafeUtil.Vector2HackArraySizeCall(_av2Mapping2In, n, _assignUV2);
+                if (bColor32) UnsafeUtil.Color32HackArraySizeCall(_aColors32In, n, _assignColor32);
+                if (bBone) UnsafeUtil.BoneWeightHackArraySizeCall(_aBoneWeights, n, _assignBoneWeights);
+                meshOut.bindposes = _aBindPoses;
 				meshOut.subMeshCount = listlistIndicesOut.Count;
 
                 for (int nSubMesh = 0; nSubMesh < listlistIndicesOut.Count; nSubMesh++)
@@ -583,7 +488,33 @@ namespace UltimateGameTools
                 }
 
                 meshOut.name = gameObject.name + " simplified mesh";
+                
             }
+
+            private Action<Vector3[]> _assignVertices;
+            private Action<Vector3[]> _assignNormals;
+            private Action<Vector4[]> _assignTangents;
+            private Action<Vector2[]> _assignUV;
+            private Action<Vector2[]> _assignUV2;
+            private Action<Color32[]> _assignColor32;
+            private Action<BoneWeight[]> _assignBoneWeights;
+            Vector3[] _av3VerticesOriginal;
+            Vector3[] _av3NormalsOriginal;
+            Vector4[] _av4TangentsOriginal;
+            Vector2[] _av2Mapping1Original;
+            Vector2[] _av2Mapping2Original;
+            Color32[] _aColors32Original;
+            BoneWeight[] _aBoneWeightsOriginal;
+            Vector3[] _av3Vertices;
+            Vector3[] _av3NormalsIn;
+            Vector4[] _av4TangentsIn;
+            Vector2[] _av2Mapping1In;
+            Vector2[] _av2Mapping2In;
+            Color32[] _aColors32In;
+            BoneWeight[] _aBoneWeights;
+            Matrix4x4[] _aBindPoses;
+            Mesh _meshOut;
+            int[] _vertexMap;
 
             float ComputeEdgeCollapseCost(Vertex u, Vertex v, float fRelevanceBias)
             {

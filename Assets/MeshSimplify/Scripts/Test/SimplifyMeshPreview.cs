@@ -250,11 +250,11 @@ public class SimplifyMeshPreview : MonoBehaviour
                 Mesh newMesh = null;
                 if (skin != null)
                 {
-                    newMesh = Mesh.Instantiate(skin.sharedMesh);
+                    newMesh = new Mesh();//Mesh.Instantiate(skin.sharedMesh);
                 }
                 else// if (meshFilter != null)
                 {
-                    newMesh = Mesh.Instantiate(meshFilter.sharedMesh);
+                    newMesh = new Mesh(); //Mesh.Instantiate(meshFilter.sharedMesh);
                 }
 
                 if (meshSimplify.MeshSimplifier != null)
