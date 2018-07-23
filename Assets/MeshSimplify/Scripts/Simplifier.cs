@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Chaos;
-using MyNamespace;
 
 namespace UltimateGameTools
 {

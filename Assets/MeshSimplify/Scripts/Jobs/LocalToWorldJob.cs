@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿#if UNITY_2018_1_OR_NEWER
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Jobs;
 
-namespace MyNamespace
+namespace Chaos
 {
     public struct SkinLocalToWorldJob : IJobParallelFor
     {
@@ -84,3 +85,4 @@ namespace MyNamespace
         }
     }
 }
+#endif

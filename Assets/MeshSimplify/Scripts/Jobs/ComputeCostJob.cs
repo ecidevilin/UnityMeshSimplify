@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if UNITY_2018_1_OR_NEWER
+using System.Collections;
 using System.Collections.Generic;
 using UltimateGameTools.MeshSimplifier;
 using Unity.Collections;
@@ -283,3 +284,4 @@ public static class CostCompution
         job.Collapse.Dispose();
     }
 }
+#endif
