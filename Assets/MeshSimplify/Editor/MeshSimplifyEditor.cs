@@ -96,7 +96,7 @@ public class MeshSimplifyEditor : Editor
                     continue;
                 }
 
-                RelevanceSphere relevanceSphere = meshSimplify.m_aRelevanceSpheres[nSphere] as RelevanceSphere;
+                RelevanceSphere relevanceSphere = meshSimplify.m_aRelevanceSpheres[nSphere];
 
                 if (Tools.current == Tool.Move)
                 {

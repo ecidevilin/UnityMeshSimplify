@@ -179,6 +179,19 @@ namespace UltimateGameTools
 
                 if (Application.isEditor && !Application.isPlaying)
                 {
+#if UNITY_2018_1_OR_NEWER
+                    float[] costs = new float[m_listVertices.Count];
+                    int[] collapses = new int[m_listVertices.Count];
+                    CostCompution.Compute(m_listVertices, m_aListTriangles, aRelevanceSpheres, m_bUseEdgeLength, m_bUseCurvature, m_bProtectTexture, m_bLockBorder, m_fOriginalMeshSize, costs, collapses);
+
+                    for (int i = 0; i < m_listVertices.Count; i++)
+                    {
+                        Vertex v = m_listVertices[i];
+                        v.m_fObjDist = costs[i];
+                        v.m_collapse = collapses[i] == -1 ? null : m_listVertices[collapses[i]];
+                        m_heap.Insert(v);
+                    }
+#else
                     IEnumerator enumerator = ComputeAllEdgeCollapseCosts(strProgressDisplayObjectName, gameObject.transform, aRelevanceSpheres, progress);
 
                     while (enumerator.MoveNext())
@@ -189,10 +202,26 @@ namespace UltimateGameTools
                             yield break;
                         }
                     }
+#endif
                 }
                 else
                 {
+#if UNITY_2018_1_OR_NEWER
+                    float[] costs = new float[m_listVertices.Count];
+                    int[] collapses = new int[m_listVertices.Count];
+                    CostCompution.Compute(m_listVertices, m_aListTriangles, aRelevanceSpheres, m_bUseEdgeLength, m_bUseCurvature, m_bProtectTexture, m_bLockBorder, m_fOriginalMeshSize, costs, collapses);
+
+                    for (int i = 0; i < m_listVertices.Count; i++)
+                    {
+                        Vertex v = m_listVertices[i];
+                        v.m_fObjDist = costs[i];
+                        v.m_collapse = m_listVertices[collapses[i]];
+                        m_heap.Insert(v);
+                    }
+#else
                     yield return StartCoroutine(ComputeAllEdgeCollapseCosts(strProgressDisplayObjectName, gameObject.transform, aRelevanceSpheres, progress));
+                
+#endif
                 }
 
                 int nVertices = m_listVertices.Count;
