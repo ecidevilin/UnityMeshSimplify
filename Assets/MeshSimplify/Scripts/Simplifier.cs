@@ -3,7 +3,6 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using UnityEngine.Profiling;
 using Chaos;
 
 namespace UltimateGameTools
@@ -72,9 +71,9 @@ namespace UltimateGameTools
                 //  CoroutineEnded = true;
                 //  yield break;
                 //}
-
-                m_listVertexMap = new List<int>();
-                m_listVertexPermutation = new List<int>();
+                int vertexCount = sourceMesh.vertexCount;
+                m_aVertexMap = new int[vertexCount];
+                m_aVertexPermutation = new int[vertexCount];
                 m_listVertices = new List<Vertex>();
                 m_aListTriangles = new TriangleList[m_meshOriginal.subMeshCount];
 
@@ -151,8 +150,8 @@ namespace UltimateGameTools
 
 				for (int i = 0; i < m_nOriginalMeshVertexCount; i++)
                 {
-                    m_listVertexMap.Add(-1);
-                    m_listVertexPermutation.Add(-1);
+                    m_aVertexMap[i] = -1;
+                    m_aVertexPermutation[i] = -1;
                 }
 
                 Vector2[] av2Mapping = m_meshOriginal.uv;
@@ -211,8 +210,8 @@ namespace UltimateGameTools
                     Vertex mn = m_heap.ExtractTop();
 
 //                    m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
-					m_listVertexPermutation[mn.m_nID] = m_listVertices.Count - 1;
-                    m_listVertexMap[mn.m_nID] = mn.m_collapse != null ? mn.m_collapse.m_nID : -1;
+					m_aVertexPermutation[mn.m_nID] = m_listVertices.Count - 1;
+                    m_aVertexMap[mn.m_nID] = mn.m_collapse != null ? mn.m_collapse.m_nID : -1;
                     Collapse(mn, mn.m_collapse, gameObject.transform, aRelevanceSpheres);
                 }
 
@@ -225,7 +224,6 @@ namespace UltimateGameTools
 
             public void ComputeMeshWithVertexCount(GameObject gameObject, Mesh meshOut, int nVertices)
 			{
-				Profiler.BeginSample("ComputeMeshWithVertexCount");
                 if (GetOriginalMeshUniqueVertexCount() == -1)
                 {
                     return;
@@ -244,6 +242,15 @@ namespace UltimateGameTools
                 _aColors32Original = _aColors32Original ?? m_meshOriginal.colors32;
                 _aBoneWeightsOriginal = _aBoneWeightsOriginal ?? m_meshOriginal.boneWeights;
                 _aBindPoses = _aBindPoses ?? m_meshOriginal.bindposes;
+                int subMeshCount = m_meshOriginal.subMeshCount;
+                if (null == _aSubMeshesOriginal)
+                {
+                    _aSubMeshesOriginal = new int[subMeshCount][];
+                    for (int nSubMesh = 0; nSubMesh < subMeshCount; nSubMesh++)
+                    {
+                        _aSubMeshesOriginal[nSubMesh] =  m_meshOriginal.GetTriangles(nSubMesh);
+                    }
+                }
 
                 if (nVertices >= GetOriginalMeshUniqueVertexCount())
                 {
@@ -264,34 +271,19 @@ namespace UltimateGameTools
                     meshOut.triangles = m_meshOriginal.triangles;
                     meshOut.subMeshCount = m_meshOriginal.subMeshCount;
 
-                    for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
+                    for (int nSubMesh = 0; nSubMesh < subMeshCount; nSubMesh++)
                     {
-                        meshOut.SetTriangles(m_meshOriginal.GetTriangles(nSubMesh), nSubMesh);
+                        meshOut.SetTriangles(_aSubMeshesOriginal[nSubMesh], nSubMesh);
                     }
 
                     meshOut.name = gameObject.name + " simplified mesh";
 
                     return;
                 }
-                if (null == _av3Vertices) _av3Vertices = (Vector3[])_av3VerticesOriginal.Clone();
-                else _av3VerticesOriginal.CopyTo(_av3Vertices, 0);
-                if (null == _av3NormalsIn) _av3NormalsIn = (Vector3[])_av3NormalsOriginal.Clone();
-                else _av3NormalsOriginal.CopyTo(_av3NormalsIn, 0);
-                if (null == _av4TangentsIn) _av4TangentsIn = (Vector4[])_av4TangentsOriginal.Clone();
-                else _av4TangentsOriginal.CopyTo(_av4TangentsIn, 0);
-                if (null == _av2Mapping1In) _av2Mapping1In = (Vector2[])_av2Mapping1Original.Clone();
-                else _av2Mapping1Original.CopyTo(_av2Mapping1In, 0);
-                if (null == _av2Mapping2In) _av2Mapping2In = (Vector2[])_av2Mapping2Original.Clone();
-                else _av2Mapping2Original.CopyTo(_av2Mapping2In, 0);
-                if (null == _aColors32In) _aColors32In = (Color32[])_aColors32Original.Clone();
-                else _aColors32Original.CopyTo(_aColors32In, 0);
-                if (null == _aBoneWeights) _aBoneWeights = (BoneWeight[])_aBoneWeightsOriginal.Clone();
-                else _aBoneWeightsOriginal.CopyTo(_aBoneWeights, 0);
 
                 //				Profiler.BeginSample("ConsolidateMesh");
-                ConsolidateMesh(gameObject, meshOut, m_listVertexPermutation, m_listVertexMap, nVertices);
+                ConsolidateMesh(gameObject, meshOut, m_aVertexPermutation, m_aVertexMap, nVertices);
 //				Profiler.EndSample();
-                Profiler.EndSample();
             }
 
             public int GetOriginalMeshUniqueVertexCount()
@@ -311,18 +303,25 @@ namespace UltimateGameTools
             // Private methods
             /////////////////////////////////////////////////////////////////////////////////////////////////
 
-			void ConsolidateMesh(GameObject gameObject, Mesh meshOut, List<int> permutation, List<int> collapseMap, int nVertices)
-			{
-//				Profiler.BeginSample("Old mesh data");
-    //            Vector3[] _av3Vertices = m_meshOriginal.vertices;
-    //            Vector3[] _av3NormalsIn = m_meshOriginal.normals;
-    //            Vector4[] _av4TangentsIn = m_meshOriginal.tangents;
-    //            Vector2[] _av2Mapping1In = m_meshOriginal.uv;
-    //            Vector2[] _av2Mapping2In = m_meshOriginal.uv2;
-    //            Color[] _acolColorsIn = m_meshOriginal.colors;
-    //            Color32[] _aColors32In = m_meshOriginal.colors32;
-				//BoneWeight[] _aBoneWeights = m_meshOriginal.boneWeights;
-//				Profiler.EndSample ();
+			void ConsolidateMesh(GameObject gameObject, Mesh meshOut, int[] permutation, int[] collapseMap, int nVertices)
+            {
+                int subMeshCount = _aSubMeshesOriginal.Length;
+                if (null == _av3Vertices) _av3Vertices = (Vector3[])_av3VerticesOriginal.Clone();
+                else _av3VerticesOriginal.CopyTo(_av3Vertices, 0);
+                if (null == _av3NormalsIn) _av3NormalsIn = (Vector3[])_av3NormalsOriginal.Clone();
+                else _av3NormalsOriginal.CopyTo(_av3NormalsIn, 0);
+                if (null == _av4TangentsIn) _av4TangentsIn = (Vector4[])_av4TangentsOriginal.Clone();
+                else _av4TangentsOriginal.CopyTo(_av4TangentsIn, 0);
+                if (null == _av2Mapping1In) _av2Mapping1In = (Vector2[])_av2Mapping1Original.Clone();
+                else _av2Mapping1Original.CopyTo(_av2Mapping1In, 0);
+                if (null == _av2Mapping2In) _av2Mapping2In = (Vector2[])_av2Mapping2Original.Clone();
+                else _av2Mapping2Original.CopyTo(_av2Mapping2In, 0);
+                if (null == _aColors32In) _aColors32In = (Color32[])_aColors32Original.Clone();
+                else _aColors32Original.CopyTo(_aColors32In, 0);
+                if (null == _aBoneWeights) _aBoneWeights = (BoneWeight[])_aBoneWeightsOriginal.Clone();
+                else _aBoneWeightsOriginal.CopyTo(_aBoneWeights, 0);
+			    if (null == _aSubMeshes) _aSubMeshes = new int[subMeshCount][];
+                if (null == _aTriangleCount) _aTriangleCount = new int[subMeshCount];
 
                 bool bUV1 = _av2Mapping1In != null && _av2Mapping1In.Length > 0;
                 bool bUV2 = _av2Mapping2In != null && _av2Mapping2In.Length > 0;
@@ -330,21 +329,18 @@ namespace UltimateGameTools
                 bool bTangent = _av4TangentsIn != null && _av4TangentsIn.Length > 0;
 				bool bColor32 = (_aColors32In != null && _aColors32In.Length > 0);
                 bool bBone = _aBoneWeights != null && _aBoneWeights.Length > 0;
-
-                Profiler.BeginSample("Triangle data");
+                
                 _vertexMap = _vertexMap ?? new int[_av3Vertices.Length];
 				for (int i = 0, imax = _vertexMap.Length; i < imax; i++)
 				{
 					_vertexMap[i] = -1;
 				}
 				int n = 0;
-				// TODO: Use 禁术 to reduce gc here.
-				List<List<int>> listlistIndicesOut = new List<List<int>>(m_meshOriginal.subMeshCount);
-				for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
+				for (int nSubMesh = 0; nSubMesh < subMeshCount; nSubMesh++)
 				{
-					int[] triangles = m_meshOriginal.GetTriangles (nSubMesh);
-					List<int> listIndicesOut = new List<int>(triangles.Length);
-					listlistIndicesOut.Add(listIndicesOut);
+				    if (null == _aSubMeshes[nSubMesh]) _aSubMeshes[nSubMesh] = (int[])_aSubMeshesOriginal[nSubMesh].Clone();
+                    else _aSubMeshesOriginal[nSubMesh].CopyTo(_aSubMeshes[nSubMesh], 0);
+                    int[] triangles = _aSubMeshes[nSubMesh];
 					for (int i = 0; i < triangles.Length; i+=3) {
 						int idx0 = triangles [i];
 						int idx1 = triangles [i + 1];
@@ -379,24 +375,65 @@ namespace UltimateGameTools
 							}
 							idx2 = idx;
 						}
-						if (idx0 == -1 || idx1 == -1 || idx2 == -1) {
-							continue;
+						if (idx0 == -1 || idx1 == -1 || idx2 == -1)
+						{
+						    triangles[i] = -1;
+                            triangles[i + 1] = -1;
+                            triangles[i + 2] = -1;
+                            continue;
 						}
 						if (_vertexMap [idx0] == -1) {
 							_vertexMap [idx0] = n++;
 						}
-						listIndicesOut.Add (_vertexMap [idx0]);
+                        triangles[i] = _vertexMap [idx0];
 						if (_vertexMap [idx1] == -1) {
 							_vertexMap [idx1] = n++;
 						}
-						listIndicesOut.Add (_vertexMap [idx1]);
+                        triangles[i + 1] = _vertexMap [idx1];
 						if (_vertexMap [idx2] == -1) {
 							_vertexMap [idx2] = n++;
 						}
-						listIndicesOut.Add (_vertexMap [idx2]);
-					}
-				}
-                Profiler.EndSample();
+                        triangles[i + 2] = _vertexMap [idx2];
+                    }
+                    int l = triangles.Length;
+                    int h = 0;
+                    int t = l - 1;
+                    while (h < t)
+                    {
+                        if (triangles[t] == -1)
+                        {
+                            t-=3;
+                            continue;
+                        }
+                        if (triangles[h] != -1)
+                        {
+                            h+=3;
+                            continue;
+                        }
+                        triangles[h] = triangles[t - 2];
+                        triangles[h + 1] = triangles[t - 1];
+                        triangles[h + 2] = triangles[t];
+                        triangles[t - 2] = -1;
+                        triangles[t - 1] = -1;
+                        triangles[t] = -1;
+                        h+=3;
+                        t-=3;
+                    }
+                    if (t < l - 1)
+                    {
+                        _aTriangleCount[nSubMesh] = t + 1;
+#if DEBUG
+                        if (t >= 0 && triangles[t] == -1)
+                        {
+                            throw new Exception("triangles[t] == -1");
+                        }
+#endif
+                    }
+                    else
+                    {
+                        _aTriangleCount[nSubMesh] = l;
+                    }
+                }
 //                for (int i = 0, imax = map.Length; i < imax; i++)
 //                {
 //                    map[i] = -1;
@@ -467,9 +504,16 @@ namespace UltimateGameTools
                 if (bUV2) _assignUV2 = _assignUV2 ?? (arr => this._meshOut.uv2 = arr);
                 if (bColor32) _assignColor32 = _assignColor32 ?? (arr => this._meshOut.colors32 = arr);
                 if (bBone) _assignBoneWeights = _assignBoneWeights ?? (arr => this._meshOut.boneWeights = arr);
-
-
-                // TODO: reuse the arrays and use function to assign the arrays to the mesh
+			    if (null == _setTriangles)
+			    {
+			        _setTriangles = new Action<int[]>[subMeshCount];
+			        for (int i = 0; i < subMeshCount; i++)
+			        {
+			            int idx = i;
+			            _setTriangles[i] = (arr => this._meshOut.SetTriangles(arr, idx));
+			        }
+			    }
+                
                 meshOut.triangles = null;
                 // NOTE: 禁术
                 UnsafeUtil.Vector3HackArraySizeCall(_av3Vertices, n, _assignVertices);
@@ -479,42 +523,17 @@ namespace UltimateGameTools
                 if (bUV2) UnsafeUtil.Vector2HackArraySizeCall(_av2Mapping2In, n, _assignUV2);
                 if (bColor32) UnsafeUtil.Color32HackArraySizeCall(_aColors32In, n, _assignColor32);
                 if (bBone) UnsafeUtil.BoneWeightHackArraySizeCall(_aBoneWeights, n, _assignBoneWeights);
-                meshOut.bindposes = _aBindPoses;
-				meshOut.subMeshCount = listlistIndicesOut.Count;
-
-                for (int nSubMesh = 0; nSubMesh < listlistIndicesOut.Count; nSubMesh++)
+                if (bBone) meshOut.bindposes = _aBindPoses;
+                meshOut.subMeshCount = _aSubMeshes.Length;
+                
+                for (int i = 0; i < subMeshCount; i++)
                 {
-                    meshOut.SetTriangles(listlistIndicesOut[nSubMesh], nSubMesh);
+                    UnsafeUtil.IntegerHackArraySizeCall(_aSubMeshes[i], _aTriangleCount[i], _setTriangles[i]);
                 }
-
-                meshOut.name = gameObject.name + " simplified mesh";
+                meshOut.UploadMeshData(false);
+                //meshOut.name = gameObject.name + " simplified mesh";
                 
             }
-
-            private Action<Vector3[]> _assignVertices;
-            private Action<Vector3[]> _assignNormals;
-            private Action<Vector4[]> _assignTangents;
-            private Action<Vector2[]> _assignUV;
-            private Action<Vector2[]> _assignUV2;
-            private Action<Color32[]> _assignColor32;
-            private Action<BoneWeight[]> _assignBoneWeights;
-            Vector3[] _av3VerticesOriginal;
-            Vector3[] _av3NormalsOriginal;
-            Vector4[] _av4TangentsOriginal;
-            Vector2[] _av2Mapping1Original;
-            Vector2[] _av2Mapping2Original;
-            Color32[] _aColors32Original;
-            BoneWeight[] _aBoneWeightsOriginal;
-            Vector3[] _av3Vertices;
-            Vector3[] _av3NormalsIn;
-            Vector4[] _av4TangentsIn;
-            Vector2[] _av2Mapping1In;
-            Vector2[] _av2Mapping2In;
-            Color32[] _aColors32In;
-            BoneWeight[] _aBoneWeights;
-            Matrix4x4[] _aBindPoses;
-            Mesh _meshOut;
-            int[] _vertexMap;
 
             float ComputeEdgeCollapseCost(Vertex u, Vertex v, float fRelevanceBias)
             {
@@ -988,15 +1007,44 @@ namespace UltimateGameTools
             public TriangleList[] m_aListTriangles;
             [SerializeField, HideInInspector] private int m_nOriginalMeshVertexCount = -1;
             [SerializeField, HideInInspector] private float m_fOriginalMeshSize = 1.0f;
-            [SerializeField, HideInInspector] private List<int> m_listVertexMap;
-            [SerializeField, HideInInspector] private List<int> m_listVertexPermutation;
+            [SerializeField, HideInInspector] private int[] m_aVertexMap;
+            [SerializeField, HideInInspector] private int[] m_aVertexPermutation;
 //            [SerializeField, HideInInspector] private MeshUniqueVertices m_meshUniqueVertices;
             [SerializeField, HideInInspector] private Mesh m_meshOriginal;
             [SerializeField, HideInInspector] private bool m_bUseEdgeLength = true;
             [SerializeField, HideInInspector] bool m_bUseCurvature = true, m_bProtectTexture = true, m_bLockBorder = true;
 
+            private Action<Vector3[]> _assignVertices;
+            private Action<Vector3[]> _assignNormals;
+            private Action<Vector4[]> _assignTangents;
+            private Action<Vector2[]> _assignUV;
+            private Action<Vector2[]> _assignUV2;
+            private Action<Color32[]> _assignColor32;
+            private Action<BoneWeight[]> _assignBoneWeights;
+            private Action<int[]>[] _setTriangles;
+            Vector3[] _av3VerticesOriginal;
+            Vector3[] _av3NormalsOriginal;
+            Vector4[] _av4TangentsOriginal;
+            Vector2[] _av2Mapping1Original;
+            Vector2[] _av2Mapping2Original;
+            Color32[] _aColors32Original;
+            BoneWeight[] _aBoneWeightsOriginal;
+            int[][] _aSubMeshesOriginal;
+            Vector3[] _av3Vertices;
+            Vector3[] _av3NormalsIn;
+            Vector4[] _av4TangentsIn;
+            Vector2[] _av2Mapping1In;
+            Vector2[] _av2Mapping2In;
+            Color32[] _aColors32In;
+            BoneWeight[] _aBoneWeights;
+            Matrix4x4[] _aBindPoses;
+            int[][] _aSubMeshes;
+            int[] _aTriangleCount;
+            Mesh _meshOut;
+            int[] _vertexMap;
 
-#endregion // Private vars
+
+            #endregion // Private vars
         }
     }
 }

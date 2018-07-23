@@ -4,6 +4,7 @@ using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
 using UltimateGameTools.MeshSimplifier;
+using UnityEngine.Profiling;
 
 public class SimplifyMeshPreview : MonoBehaviour
 {
@@ -259,7 +260,9 @@ public class SimplifyMeshPreview : MonoBehaviour
 
                 if (meshSimplify.MeshSimplifier != null)
                 {
+                    Profiler.BeginSample("ComputeMeshWithVertexCount");
                     meshSimplify.MeshSimplifier.ComputeMeshWithVertexCount(go, newMesh, Mathf.RoundToInt(fAmount * meshSimplify.MeshSimplifier.GetOriginalMeshUniqueVertexCount()));
+                    Profiler.EndSample();
                     
                     if (skin != null)
                     {
