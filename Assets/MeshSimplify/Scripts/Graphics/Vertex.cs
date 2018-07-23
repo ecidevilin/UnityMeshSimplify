@@ -41,15 +41,19 @@ namespace UltimateGameTools
 
             public void Destructor()
             {
-                while (m_listNeighbors.Count > 0)
+                for (int i = 0, imax = m_listNeighbors.Count; i < imax; i++)
                 {
-                    m_listNeighbors[m_listNeighbors.Count - 1].m_listNeighbors.Remove(this);
-
-                    if (m_listNeighbors.Count > 0)
-                    {
-                        m_listNeighbors.RemoveAt(m_listNeighbors.Count - 1);
-                    }
+                    m_listNeighbors[i].m_listNeighbors.Remove(this);
                 }
+                //while (m_listNeighbors.Count > 0)
+                //{
+                //    m_listNeighbors[m_listNeighbors.Count - 1].m_listNeighbors.Remove(this);
+
+                //    if (m_listNeighbors.Count > 0)
+                //    {
+                //        m_listNeighbors.RemoveAt(m_listNeighbors.Count - 1);
+                //    }
+                //}
             }
 
             public void RemoveIfNonNeighbor(Vertex n)

@@ -754,45 +754,6 @@ namespace UltimateGameTools
                     }
                 }
 
-                // update texture mapping
-
-                for (i = 0; i < u.m_listFaces.Count; i++)
-                {
-                    int j;
-
-                    if (u.m_listFaces[i].HasVertex(v))
-                    {
-                        continue;
-                    }
-
-                    if (u.m_listFaces[i].HasUVData)
-                    {
-                        for (j = 0; j < tmpTriangles.Count; j++)
-                        {
-                            if (u.m_listFaces[i].TexAt(u) == tmpTriangles[j].TexAt(u))
-                            {
-                                u.m_listFaces[i].SetTexAt(u, tmpTriangles[j].TexAt(v));
-                                break; // only change tex coords once!
-                            }
-                        }
-                    }
-
-                    // Added support for color or 2nd uv here:
-
-                    /*
-
-                    for (j = 0; j < sides.Count; j++)
-                    {
-                      if (u.m_listFaces[i].VertexColorAt(u) == sides[j].VertexColorAt(u))
-                      {
-                        u.m_listFaces[i].SetVertexColorAt(u, sides[j].VertexColorAt(v));
-                        break; // only change tex coords once!
-                      }
-                    }
-
-                    */
-                }
-
                 // Delete triangles on edge uv
 
                 for (i = tmpTriangles.Count - 1; i >= 0; i--)
