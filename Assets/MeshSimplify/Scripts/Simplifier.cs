@@ -228,12 +228,12 @@ namespace UltimateGameTools
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                int nVertex = m_listVertices.Count;
-                while (nVertex-- > 0)
+                int vertexNum = m_listVertices.Count;
+                while (vertexNum-- > 0)
                 {
-                    if (progress != null && ((nVertex & 0xFF) == 0))
+                    if (progress != null && ((vertexNum & 0xFF) == 0))
                     {
-                        progress("Preprocessing mesh: " + strProgressDisplayObjectName, "Collapsing edges", 1.0f - ((float)nVertex / (float)nVertices));
+                        progress("Preprocessing mesh: " + strProgressDisplayObjectName, "Collapsing edges", 1.0f - ((float)vertexNum / (float)nVertices));
 
                         if (Cancelled)
                         {
@@ -250,7 +250,7 @@ namespace UltimateGameTools
                     Vertex mn = m_heap.ExtractTop();
 
 //                    m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
-					m_aVertexPermutation[mn.m_nID] = nVertex;
+					m_aVertexPermutation[mn.m_nID] = vertexNum;
                     m_aVertexMap[mn.m_nID] = mn.m_collapse != null ? mn.m_collapse.m_nID : -1;
                     Collapse(mn, mn.m_collapse, gameObject.transform, aRelevanceSpheres);
                 }
