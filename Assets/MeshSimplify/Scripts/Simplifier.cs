@@ -255,10 +255,10 @@ namespace UltimateGameTools
                     Collapse(mn, mn.m_collapse, gameObject.transform, aRelevanceSpheres);
                 }
 
-                for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
-                {
-                    m_aListTriangles[nSubMesh].RemoveNull();
-                }
+                //for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
+                //{
+                //    m_aListTriangles[nSubMesh].RemoveNull();
+                //}
                 CoroutineEnded = true;
             }
 
@@ -759,7 +759,7 @@ namespace UltimateGameTools
                 for (i = tmpTriangles.Count - 1; i >= 0; i--)
                 {
                     Triangle t = tmpTriangles[i];
-                    m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
+                    //m_aListTriangles[t.SubMeshIndex].m_listTriangles[t.Index] = null;
                     t.Destructor();
                 }
 
