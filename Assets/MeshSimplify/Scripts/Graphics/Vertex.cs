@@ -43,11 +43,11 @@ namespace UltimateGameTools
             {
                 while (m_listNeighbors.Count > 0)
                 {
-                    m_listNeighbors[0].m_listNeighbors.Remove(this);
+                    m_listNeighbors[m_listNeighbors.Count - 1].m_listNeighbors.Remove(this);
 
                     if (m_listNeighbors.Count > 0)
                     {
-                        m_listNeighbors.RemoveAt(0);
+                        m_listNeighbors.RemoveAt(m_listNeighbors.Count - 1);
                     }
                 }
             }

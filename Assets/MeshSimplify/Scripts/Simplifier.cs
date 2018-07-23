@@ -228,11 +228,12 @@ namespace UltimateGameTools
 
                 Stopwatch sw = Stopwatch.StartNew();
 
-                while (m_listVertices.Count > 0)
+                int nVertex = m_listVertices.Count;
+                while (nVertex-- > 0)
                 {
-                    if (progress != null && ((m_listVertices.Count & 0xFF) == 0))
+                    if (progress != null && ((nVertex & 0xFF) == 0))
                     {
-                        progress("Preprocessing mesh: " + strProgressDisplayObjectName, "Collapsing edges", 1.0f - ((float)m_listVertices.Count / (float)nVertices));
+                        progress("Preprocessing mesh: " + strProgressDisplayObjectName, "Collapsing edges", 1.0f - ((float)nVertex / (float)nVertices));
 
                         if (Cancelled)
                         {
@@ -249,7 +250,7 @@ namespace UltimateGameTools
                     Vertex mn = m_heap.ExtractTop();
 
 //                    m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
-					m_aVertexPermutation[mn.m_nID] = m_listVertices.Count - 1;
+					m_aVertexPermutation[mn.m_nID] = nVertex;
                     m_aVertexMap[mn.m_nID] = mn.m_collapse != null ? mn.m_collapse.m_nID : -1;
                     Collapse(mn, mn.m_collapse, gameObject.transform, aRelevanceSpheres);
                 }
@@ -727,7 +728,7 @@ namespace UltimateGameTools
             {
                 if (v == null)
                 {
-                    m_listVertices.Remove(u);
+                    //m_listVertices.Remove(u);
                     u.Destructor();
                     return;
                 }
@@ -807,7 +808,7 @@ namespace UltimateGameTools
                 {
                     u.m_listFaces[i].ReplaceVertex(u, v);
                 }
-                m_listVertices.Remove(u);
+                //m_listVertices.Remove(u);
                 u.Destructor();
 
                 // Recompute the edge collapse costs for neighboring vertices
