@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Chaos;
+using MyNamespace;
 
 namespace UltimateGameTools
 {
@@ -92,8 +93,12 @@ namespace UltimateGameTools
 //                m_meshUniqueVertices.BuildData(m_meshOriginal, gameObject);
 				Vector3[] worldVertices = new Vector3[sourceMesh.vertices.Length];
 				SkinnedMeshRenderer skin;
-				if ((skin = gameObject.GetComponent<SkinnedMeshRenderer> ()) != null) {
-					BoneWeight[] aBoneWeights = sourceMesh.boneWeights;
+                MeshFilter filter;
+                if ((skin = gameObject.GetComponent<SkinnedMeshRenderer> ()) != null) {
+#if UNITY_2018_1_OR_NEWER
+				    LocalToWorldTransformation.Transform(skin, worldVertices);
+#else
+                    BoneWeight[] aBoneWeights = sourceMesh.boneWeights;
 					Matrix4x4[] aBindPoses = sourceMesh.bindposes;
 					Transform[] aBones = skin.bones;
 
@@ -119,8 +124,13 @@ namespace UltimateGameTools
 							}
 						}
 					}
-				} if (gameObject.GetComponent<MeshFilter>() != null)
-				{
+#endif
+				}
+                if ((filter = gameObject.GetComponent<MeshFilter>()) != null)
+                {
+#if UNITY_2018_1_OR_NEWER
+                    LocalToWorldTransformation.Transform(filter, worldVertices);
+#else
 					Matrix4x4 transformation = gameObject.transform.localToWorldMatrix;
 					for (int nVertex = 0; nVertex < sourceMesh.vertices.Length; nVertex++) {
 						Vector4 v = sourceMesh.vertices [nVertex];
@@ -140,6 +150,7 @@ namespace UltimateGameTools
 							}
 						}
 					}
+#endif
 				}
 
 				m_nOriginalMeshVertexCount = sourceMesh.vertexCount;//m_meshUniqueVertices.ListVertices.Count;
@@ -913,7 +924,7 @@ namespace UltimateGameTools
             int[] _vertexMap;
 
 
-            #endregion // Private vars
+#endregion // Private vars
         }
     }
 }
