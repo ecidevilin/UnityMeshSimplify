@@ -92,7 +92,6 @@ namespace UltimateGameTools
 //                m_meshUniqueVertices.BuildData(m_meshOriginal, gameObject);
 				Vector3[] worldVertices = new Vector3[sourceMesh.vertices.Length];
 				SkinnedMeshRenderer skin;
-				MeshFilter meshFilter;
 				if ((skin = gameObject.GetComponent<SkinnedMeshRenderer> ()) != null) {
 					BoneWeight[] aBoneWeights = sourceMesh.boneWeights;
 					Matrix4x4[] aBindPoses = sourceMesh.bindposes;
@@ -120,7 +119,7 @@ namespace UltimateGameTools
 							}
 						}
 					}
-				} if ((meshFilter = gameObject.GetComponent<MeshFilter>()) != null)
+				} if (gameObject.GetComponent<MeshFilter>() != null)
 				{
 					Matrix4x4 transformation = gameObject.transform.localToWorldMatrix;
 					for (int nVertex = 0; nVertex < sourceMesh.vertices.Length; nVertex++) {
