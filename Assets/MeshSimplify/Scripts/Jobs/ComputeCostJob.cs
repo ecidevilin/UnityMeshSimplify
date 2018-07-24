@@ -24,7 +24,6 @@ public unsafe struct StructTriangle
     public int* Indices;
     public Vector3 Normal;
     public int Index;
-    public int HasUVData;
 }
 
 public struct StructRelevanceSphere
@@ -47,7 +46,6 @@ public unsafe struct ComputeCostJob : IJobParallelFor
 
     public bool UseEdgeLength;
     public bool UseCurvature;
-    public bool ProtectTexture;
     public bool LockBorder;
     public float OriginalMeshSize;
 
@@ -115,7 +113,6 @@ public unsafe struct ComputeCostJob : IJobParallelFor
     {
         bool bUseEdgeLength = UseEdgeLength;
         bool bUseCurvature = UseCurvature;
-        bool bProtectTexture = ProtectTexture;
         bool bLockBorder = LockBorder;
 
         int i;
@@ -154,34 +151,6 @@ public unsafe struct ComputeCostJob : IJobParallelFor
             fCurvature = 1.0f;
         }
 
-        if (bProtectTexture)
-        {
-            bool bNoMatch = true;
-
-            for (i = 0; i < u.FaceCount; i++)
-            {
-                for (int j = 0; j < sides.Count; j++)
-                {
-                    StructTriangle ut = Triangles[u.Faces[i]];
-                    if (ut.HasUVData == 0)
-                    {
-                        bNoMatch = false;
-                        break;
-                    }
-
-                    if (IndexOf(ut, u.ID) == IndexOf(sides[j], u.ID))
-                    {
-                        bNoMatch = false;
-                    }
-                }
-            }
-
-            if (bNoMatch)
-            {
-                fCurvature = 1.0f;
-            }
-        }
-
         if (bLockBorder && u.IsBorder == 1)
         {
             fCurvature = float.MaxValue;
@@ -196,12 +165,11 @@ public unsafe struct ComputeCostJob : IJobParallelFor
 
 public static class CostCompution
 {
-    public unsafe static void Compute(List<Vertex> vertices, TriangleList[] triangleLists, RelevanceSphere[] aRelevanceSpheres, bool bUseEdgeLength, bool bUseCurvature, bool bProtectTexture, bool bLockBorder, float fOriginalMeshSize, float[] costs, int[] collapses)
+    public unsafe static void Compute(List<Vertex> vertices, TriangleList[] triangleLists, RelevanceSphere[] aRelevanceSpheres, bool bUseEdgeLength, bool bUseCurvature, bool bLockBorder, float fOriginalMeshSize, float[] costs, int[] collapses)
     {
         ComputeCostJob job = new ComputeCostJob();
         job.UseEdgeLength = bUseEdgeLength;
         job.UseCurvature = bUseCurvature;
-        job.ProtectTexture = bProtectTexture;
         job.LockBorder = bLockBorder;
         job.OriginalMeshSize = fOriginalMeshSize;
         List<StructTriangle> structTriangles = new List<StructTriangle>();
@@ -217,7 +185,6 @@ public static class CostCompution
                     Index = t.Index,
                     Indices = (int*)UnsafeUtility.Malloc(t.Indices.Length * intAlignment, intAlignment, Allocator.TempJob),
                     Normal = t.Normal,
-                    HasUVData = t.HasUVData ? 1 : 0,
                 };
                 for (int j = 0; j < t.Indices.Length; j++)
                 {
@@ -265,8 +232,15 @@ public static class CostCompution
         }
         job.Result = new NativeArray<float>(costs, Allocator.TempJob);
         job.Collapse = new NativeArray<int>(collapses, Allocator.TempJob);
+#if !JOB_DEBUG
         JobHandle handle = job.Schedule(costs.Length, 1);
         handle.Complete();
+#else
+        for (int i = 0; i < costs.Length; i++)
+        {
+            job.Execute(i);
+        }
+#endif
         job.Result.CopyTo(costs);
         job.Collapse.CopyTo(collapses);
         for (int i = 0; i < job.Triangles.Length; i++)

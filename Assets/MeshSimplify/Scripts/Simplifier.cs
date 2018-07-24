@@ -167,13 +167,14 @@ namespace UltimateGameTools
 
 				AddVertices(sourceMesh.vertices, worldVertices);
 
+                int nTriangles = 0;
 //                ListIndices[] faceList = m_meshUniqueVertices.SubmeshesFaceList;
                 for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
                 {
                     int[] anIndices = m_meshOriginal.GetTriangles(nSubMesh);
 //                    List<int> listIndices = faceList[nSubMesh].m_listIndices;
 					m_aListTriangles[nSubMesh] = new TriangleList(anIndices.Length / 3);
-                    AddFaceListSubMesh(nSubMesh, anIndices, av2Mapping);
+                    nTriangles = AddFaceListSubMesh(nSubMesh, anIndices, av2Mapping, nTriangles);
                 }
 
                 if (Application.isEditor && !Application.isPlaying)
@@ -181,7 +182,7 @@ namespace UltimateGameTools
 #if UNITY_2018_1_OR_NEWER
                     float[] costs = new float[m_listVertices.Count];
                     int[] collapses = new int[m_listVertices.Count];
-                    CostCompution.Compute(m_listVertices, m_aListTriangles, aRelevanceSpheres, m_bUseEdgeLength, m_bUseCurvature, m_bProtectTexture, m_bLockBorder, m_fOriginalMeshSize, costs, collapses);
+                    CostCompution.Compute(m_listVertices, m_aListTriangles, aRelevanceSpheres, m_bUseEdgeLength, m_bUseCurvature, m_bLockBorder, m_fOriginalMeshSize, costs, collapses);
 
                     for (int i = 0; i < m_listVertices.Count; i++)
                     {
@@ -208,7 +209,7 @@ namespace UltimateGameTools
 #if UNITY_2018_1_OR_NEWER
                     float[] costs = new float[m_listVertices.Count];
                     int[] collapses = new int[m_listVertices.Count];
-                    CostCompution.Compute(m_listVertices, m_aListTriangles, aRelevanceSpheres, m_bUseEdgeLength, m_bUseCurvature, m_bProtectTexture, m_bLockBorder, m_fOriginalMeshSize, costs, collapses);
+                    CostCompution.Compute(m_listVertices, m_aListTriangles, aRelevanceSpheres, m_bUseEdgeLength, m_bUseCurvature, m_bLockBorder, m_fOriginalMeshSize, costs, collapses);
 
                     for (int i = 0; i < m_listVertices.Count; i++)
                     {
@@ -575,7 +576,6 @@ namespace UltimateGameTools
             {
                 bool bUseEdgeLength = m_bUseEdgeLength;
                 bool bUseCurvature = m_bUseCurvature;
-                bool bProtectTexture = m_bProtectTexture;
                 bool bLockBorder = m_bLockBorder;
 
                 int i;
@@ -611,34 +611,6 @@ namespace UltimateGameTools
                 if (isBorder && sides.Count > 1)
                 {
                     fCurvature = 1.0f;
-                }
-
-                if (bProtectTexture)
-                {
-                    bool bNoMatch = true;
-
-                    for (i = 0; i < u.m_listFaces.Count; i++)
-                    {
-                        for (int j = 0; j < sides.Count; j++)
-                        {
-                            if (u.m_listFaces[i].HasUVData == false)
-                            {
-                                bNoMatch = false;
-                                break;
-                            }
-
-                            if (u.m_listFaces[i].TexAt(u) == sides[j].TexAt(u))
-                            {
-                                bNoMatch = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (bNoMatch)
-                    {
-                        fCurvature = 1.0f;
-                    }
                 }
 
                 if (bLockBorder && isBorder)
@@ -791,7 +763,7 @@ namespace UltimateGameTools
                 }
             }
 
-            void AddFaceListSubMesh(int nSubMesh, int[] anIndices, Vector2[] v2Mapping)
+            int AddFaceListSubMesh(int nSubMesh, int[] anIndices, Vector2[] v2Mapping, int nTriangles)
             {
                 bool bUVData = false;
 
@@ -806,7 +778,7 @@ namespace UltimateGameTools
                 List<Triangle> list = m_aListTriangles[nSubMesh].m_listTriangles;
 				for (int i = 0; i < anIndices.Length; i += 3)
                 {
-                    Triangle tri = new Triangle(nSubMesh, list.Count,
+                    Triangle tri = new Triangle(nSubMesh, nTriangles + list.Count,
 						m_listVertices[anIndices[i]], m_listVertices[anIndices[i + 1]], m_listVertices[anIndices[i + 2]],
                                                 bUVData, anIndices[i], anIndices[i + 1], anIndices[i + 2], true);
 
@@ -814,6 +786,7 @@ namespace UltimateGameTools
                     list.Add(tri);
                     ShareUV(v2Mapping, tri);
                 }
+                return nTriangles + list.Count;
             }
 
             void ShareUV(Vector2[] aMapping, Triangle t)
