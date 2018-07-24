@@ -607,8 +607,8 @@ namespace UltimateGameTools
                         fCurvature = Mathf.Max(fCurvature, fMinCurv);
                     }
                 }
-
-                if (u.IsBorder() && sides.Count > 1)
+                bool isBorder = u.IsBorder();
+                if (isBorder && sides.Count > 1)
                 {
                     fCurvature = 1.0f;
                 }
@@ -630,6 +630,7 @@ namespace UltimateGameTools
                             if (u.m_listFaces[i].TexAt(u) == sides[j].TexAt(u))
                             {
                                 bNoMatch = false;
+                                break;
                             }
                         }
                     }
@@ -640,7 +641,7 @@ namespace UltimateGameTools
                     }
                 }
 
-                if (bLockBorder && u.IsBorder())
+                if (bLockBorder && isBorder)
                 {
                     fCurvature = MAX_VERTEX_COLLAPSE_COST;
                 }
