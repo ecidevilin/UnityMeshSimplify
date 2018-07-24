@@ -55,6 +55,7 @@ namespace UltimateGameTools
             private int m_nSubMesh;
             private int m_nIndex;
             public bool DestructedRuntime = false;
+            public int[] FaceIndex;
 
             public Triangle(int nSubMesh, int nIndex, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
                 int nIndex1, int nIndex2, int nIndex3, bool compute)
@@ -88,8 +89,11 @@ namespace UltimateGameTools
                     ComputeNormal();
                 }
 
+                FaceIndex = new int[3];
+
                 for (int i = 0; i < 3; i++)
                 {
+                    FaceIndex[i] = m_aVertices[i].m_listFaces.Count;
                     m_aVertices[i].m_listFaces.Add(this);
                     if (!compute)
                     {
@@ -116,7 +120,12 @@ namespace UltimateGameTools
                 {
                     if (m_aVertices[i] != null)
                     {
-                        m_aVertices[i].m_listFaces.Remove(this);
+                        List<Triangle> list = m_aVertices[i].m_listFaces;
+                        Triangle t = list[list.Count - 1];
+                        list[FaceIndex[i]] = t;
+                        t.FaceIndex[t.IndexOf(m_aVertices[i])] = FaceIndex[i];
+                        list.RemoveAt(list.Count - 1);
+                        //m_aVertices[i].m_listFaces.Remove(this);
                     }
                 }
 
@@ -145,7 +154,19 @@ namespace UltimateGameTools
 
             public bool HasVertex(Vertex v)
             {
-                return (v == m_aVertices[0] || v == m_aVertices[1] || v == m_aVertices[2]);
+                return IndexOf(v) >= 0; //(v == m_aVertices[0] || v == m_aVertices[1] || v == m_aVertices[2]);
+            }
+
+            public int IndexOf(Vertex v)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (v == m_aVertices[i])
+                    {
+                        return i;
+                    }
+                }
+                return -1;
             }
 
             public void ComputeNormal()
@@ -201,95 +222,57 @@ namespace UltimateGameTools
 
             public void ReplaceVertex(Vertex vold, Vertex vnew)
             {
-                if (vold == m_aVertices[0])
+                int idx;
+                for (idx = 0; idx < 3; idx++)
                 {
-                    m_aVertices[0] = vnew;
-                }
-                else if (vold == m_aVertices[1])
-                {
-                    m_aVertices[1] = vnew;
-                }
-                else
-                {
-                    m_aVertices[2] = vnew;
-                }
-                vold.m_listFaces.Remove(this);
-                vnew.m_listFaces.Add(this);
-                int i;
-
-                for (i = 0; i < 3; i++)
-                {
-                    vold.RemoveIfNonNeighbor(m_aVertices[i]);
-                    m_aVertices[i].RemoveIfNonNeighbor(vold);
-                }
-
-                for (i = 0; i < 3; i++)
-                {
-                    for (int j = 0; j < 3; j++)
+                    if (vold == m_aVertices[idx])
                     {
-                        if (i != j)
+                        m_aVertices[idx] = vnew;
+                        for (int i = 0; i < 3; i++)
                         {
-                            if (m_aVertices[i].m_listNeighbors.Contains(m_aVertices[j]) == false)
+                            if (i == idx)
                             {
-                                m_aVertices[i].m_listNeighbors.Add(m_aVertices[j]);
+                                continue;
+                            }
+                            Vertex n = m_aVertices[i];
+                            List<Vertex> nn = n.m_listNeighbors;
+                            nn.Remove(vold);
+                            if (!nn.Contains(vnew))
+                            {
+                                nn.Add(vnew);
+                            }
+                            List<Vertex> vn = vnew.m_listNeighbors;
+                            if (!vn.Contains(n))
+                            {
+                                vn.Add(n);
                             }
                         }
+                        break;
                     }
                 }
+                //vold.m_listFaces.Remove(this);
+                FaceIndex[idx] = vnew.m_listFaces.Count;
+                vnew.m_listFaces.Add(this);
 
                 ComputeNormal();
             }
-            public void ReplaceVertexRuntime(Vertex vold, Vertex vnew)
-            {
-                if (vold == m_aVertices[0])
-                {
-                    m_aVertices[0] = vnew;
-                }
-                else if (vold == m_aVertices[1])
-                {
-                    m_aVertices[1] = vnew;
-                }
-                else
-                {
-                    m_aVertices[2] = vnew;
-                }
-                //vold.m_listFaces.Remove(this);
-                vnew.m_listFaces.Add(this);
-            }
-
-            public static Triangle CreateTriangle(int nSubMesh, int nIndex, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
-                int nIndex0, int nIndex1, int nIndex2)
-            {
-                while (v0.m_bRuntimeCollapsed)
-                {
-                    Vertex v = v0.m_collapse;
-                    if (v == null || v1 == v || v2 == v)
-                    {
-                        return null;
-                    }
-                    v0 = v;
-                }
-                while (v1.m_bRuntimeCollapsed)
-                {
-                    Vertex v = v1.m_collapse;
-                    if (v == null || v0 == v || v2 == v)
-                    {
-                        return null;
-                    }
-                    v1 = v;
-                }
-                while (v2.m_bRuntimeCollapsed)
-                {
-                    Vertex v = v2.m_collapse;
-                    if (v == null || v1 == v || v0 == v)
-                    {
-                        return null;
-                    }
-                    v2 = v;
-                }
-                Triangle t = new Triangle(nSubMesh, nIndex, v0, v1, v2, bUVData, nIndex0, nIndex1, nIndex2, false);
-                return t;
-            }
+            //public void ReplaceVertexRuntime(Vertex vold, Vertex vnew)
+            //{
+            //    if (vold == m_aVertices[0])
+            //    {
+            //        m_aVertices[0] = vnew;
+            //    }
+            //    else if (vold == m_aVertices[1])
+            //    {
+            //        m_aVertices[1] = vnew;
+            //    }
+            //    else
+            //    {
+            //        m_aVertices[2] = vnew;
+            //    }
+            //    //vold.m_listFaces.Remove(this);
+            //    vnew.m_listFaces.Add(this);
+            //}
         };
     }
 }

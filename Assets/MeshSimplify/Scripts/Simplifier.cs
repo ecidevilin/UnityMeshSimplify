@@ -230,22 +230,22 @@ namespace UltimateGameTools
                 int vertexNum = m_listVertices.Count;
                 while (vertexNum-- > 0)
                 {
-                    if (progress != null && ((vertexNum & 0xFF) == 0))
-                    {
-                        progress("Preprocessing mesh: " + strProgressDisplayObjectName, "Collapsing edges", 1.0f - ((float)vertexNum / (float)nVertices));
+     //               if (progress != null && ((vertexNum & 0xFF) == 0))
+     //               {
+     //                   progress("Preprocessing mesh: " + strProgressDisplayObjectName, "Collapsing edges", 1.0f - ((float)vertexNum / (float)nVertices));
 
-                        if (Cancelled)
-                        {
-                            CoroutineEnded = true;
-                            yield break;
-                        }
-                    }
+     //                   if (Cancelled)
+     //                   {
+     //                       CoroutineEnded = true;
+     //                       yield break;
+     //                   }
+     //               }
 
-                    if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
-                    {
-                        yield return null;
-                        sw = Stopwatch.StartNew();
-					}
+     //               if (sw.ElapsedMilliseconds > CoroutineFrameMiliseconds && CoroutineFrameMiliseconds > 0)
+     //               {
+     //                   yield return null;
+     //                   sw = Stopwatch.StartNew();
+					//}
                     Vertex mn = m_heap.ExtractTop();
 
 //                    m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
@@ -259,6 +259,7 @@ namespace UltimateGameTools
                 //    m_aListTriangles[nSubMesh].RemoveNull();
                 //}
                 CoroutineEnded = true;
+                yield return null;
             }
 
             public void ComputeMeshWithVertexCount(GameObject gameObject, Mesh meshOut, int nVertices)

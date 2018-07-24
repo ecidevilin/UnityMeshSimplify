@@ -58,7 +58,8 @@ namespace UltimateGameTools
 
             public void RemoveIfNonNeighbor(Vertex n)
             {
-                if (!m_listNeighbors.Contains(n))
+                int idx = m_listNeighbors.IndexOf(n);
+                if (idx < 0)
                 {
                     return;
                 }
@@ -71,7 +72,7 @@ namespace UltimateGameTools
                     }
                 }
 
-                m_listNeighbors.Remove(n);
+                m_listNeighbors.RemoveAt(idx);
             }
 
             public bool IsBorder()
