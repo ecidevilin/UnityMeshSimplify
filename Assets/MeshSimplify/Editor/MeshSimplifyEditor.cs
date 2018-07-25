@@ -2,6 +2,7 @@
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using Chaos;
 using UltimateGameTools.MeshSimplifier;
 
@@ -28,7 +29,7 @@ public class MeshSimplifyEditor : Editor
     void OnEnable()
     {
         PropertyGenerateIncludeChildren = serializedObject.FindProperty("m_bGenerateIncludeChildren");
-        PropertyEnablePrefabUsage = serializedObject.FindProperty("m_bEnablePrefabUsage");
+        //PropertyEnablePrefabUsage = serializedObject.FindProperty("m_bEnablePrefabUsage");
         PropertyExpandRelevanceSpheres = serializedObject.FindProperty("m_bExpandRelevanceSpheres");
         PropertyRelevanceSpheres = serializedObject.FindProperty("m_aRelevanceSpheres");
         PropertyOverrideRootSettings = serializedObject.FindProperty("m_bOverrideRootSettings");
@@ -42,7 +43,7 @@ public class MeshSimplifyEditor : Editor
 
 		m_bComputeData = false;
         m_bComputeMesh = false;
-        m_bEnablePrefabUsage = false;
+        //m_bEnablePrefabUsage = false;
         m_bDisablePrefabUsage = false;
         m_bDeleteData = false;
         m_bRemoveFromTree = false;
@@ -184,20 +185,20 @@ public class MeshSimplifyEditor : Editor
         {
             EditorGUILayout.PropertyField(PropertyGenerateIncludeChildren, new GUIContent(strIncludeChildrenLabel, "If checked, we will traverse the whole GameObject's hierarchy looking for meshes"));
 
-            EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(PropertyEnablePrefabUsage, new GUIContent("Enable Prefab Usage", "Will save the generated mesh assets to disk, so that this GameObject can be used as a prefab and be instantiated at runtime. Otherwise the mesh won't be available"));
+            //EditorGUI.BeginChangeCheck();
+            //EditorGUILayout.PropertyField(PropertyEnablePrefabUsage, new GUIContent("Enable Prefab Usage", "Will save the generated mesh assets to disk, so that this GameObject can be used as a prefab and be instantiated at runtime. Otherwise the mesh won't be available"));
 
-            if (EditorGUI.EndChangeCheck())
-            {
-                if (PropertyEnablePrefabUsage.boolValue)
-                {
-                    m_bEnablePrefabUsage = true;
-                }
-                else
-                {
-                    m_bDisablePrefabUsage = true;
-                }
-            }
+            //if (EditorGUI.EndChangeCheck())
+            //{
+            //    if (PropertyEnablePrefabUsage.boolValue)
+            //    {
+            //        m_bEnablePrefabUsage = true;
+            //    }
+            //    else
+            //    {
+            //        m_bDisablePrefabUsage = true;
+            //    }
+            //}
         }
         else
         {
@@ -399,7 +400,7 @@ public class MeshSimplifyEditor : Editor
 			GUILayout.BeginHorizontal();
 			GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(new GUIContent("Compute mesh", "Starts the mesh simplification process and assigns the GameObject the new simplified mesh"), GUILayout.Width(nButtonWidth)))
+            if (GUILayout.Button(new GUIContent("Save mesh", "Starts the mesh simplification process and save the new simplified mesh"), GUILayout.Width(nButtonWidth)))
             {
                 m_bComputeMesh = true;
             }
@@ -410,9 +411,9 @@ public class MeshSimplifyEditor : Editor
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(new GUIContent("Restore Original Mesh...", "Deletes the simplified data and restores the original mesh"), GUILayout.Width(nButtonWidth)))
+            if (GUILayout.Button(new GUIContent("Delete data...", "Deletes the simplified data"), GUILayout.Width(nButtonWidth)))
             {
-                if (EditorUtility.DisplayDialog("Delete all data and restore original mesh?", "Are you sure you want to delete all data and restore the original mesh?", "Delete", "Cancel"))
+                if (EditorUtility.DisplayDialog("Delete all data?", "Are you sure you want to delete all data?", "Delete", "Cancel"))
                 {
                     m_bDeleteData = true;
                 }
@@ -445,11 +446,11 @@ public class MeshSimplifyEditor : Editor
 
         bool bRepaint = false;
 
-        if (m_bEnablePrefabUsage)
-        {
-            m_bEnablePrefabUsage = false;
-            SaveMeshAssets();
-        }
+        //if (m_bEnablePrefabUsage)
+        //{
+        //    m_bEnablePrefabUsage = false;
+        //    SaveMeshAssets();
+        //}
 
         if (m_bDisablePrefabUsage)
         {
@@ -467,7 +468,7 @@ public class MeshSimplifyEditor : Editor
 
 		if ((m_bComputeData || m_bComputeMesh) && Event.current.type == EventType.Repaint)
         {
-			bool assignAndSaveMesh = m_bComputeMesh;
+			bool saveMesh = m_bComputeMesh;
 			m_bComputeData = false;
             m_bComputeMesh = false;
 
@@ -496,13 +497,14 @@ public class MeshSimplifyEditor : Editor
                         meshSimplify.RestoreOriginalMesh(true, meshSimplify.m_meshSimplifyRoot == null);
                         meshSimplify.ComputeData(meshSimplify.m_meshSimplifyRoot == null, Progress);
 
-                        if (Simplifier.Cancelled)
-                        {
-                            meshSimplify.RestoreOriginalMesh(true, meshSimplify.m_meshSimplifyRoot == null);
-                            break;
-                        }
+                        EditorUtility.DisplayDialog("Done", "Done", "Done");
+                        //if (Simplifier.Cancelled)
+                        //{
+                        //    meshSimplify.RestoreOriginalMesh(true, meshSimplify.m_meshSimplifyRoot == null);
+                        //    break;
+                        //}
                     }
-					if (assignAndSaveMesh)
+					if (saveMesh)
 					{
 
 						meshSimplify.ComputeMesh(meshSimplify.m_meshSimplifyRoot == null, Progress);
@@ -511,9 +513,9 @@ public class MeshSimplifyEditor : Editor
 						{
 							break;
 						}
-						meshSimplify.AssignSimplifiedMesh(meshSimplify.m_meshSimplifyRoot == null);
+						//meshSimplify.AssignSimplifiedMesh(meshSimplify.m_meshSimplifyRoot == null);
 
-						if (meshSimplify.m_strAssetPath != null && meshSimplify.m_bEnablePrefabUsage)
+						//if (meshSimplify.m_strAssetPath != null && meshSimplify.m_bEnablePrefabUsage)
 						{
 							SaveMeshAssets();
 						}
@@ -625,15 +627,37 @@ public class MeshSimplifyEditor : Editor
                 MeshSimplify meshSimplify = targetObject as MeshSimplify;
                 GameObject gameObject = meshSimplify.gameObject;
 
-                if (meshSimplify.m_meshSimplifyRoot == null && meshSimplify.m_bEnablePrefabUsage)
+                if (meshSimplify.m_meshSimplifyRoot == null/* && meshSimplify.m_bEnablePrefabUsage*/)
                 {
                     string strMeshAssetPath = meshSimplify.m_strAssetPath;
 
-                    if (string.IsNullOrEmpty(strMeshAssetPath))
+                    //if (string.IsNullOrEmpty(strMeshAssetPath))
                     {
                         //Debug.Log("Showing file selection panel");
-
-                        strMeshAssetPath = UnityEditor.EditorUtility.SaveFilePanelInProject("Save mesh asset(s)", "mesh_" + gameObject.name + gameObject.GetInstanceID().ToString() + ".asset", "asset", "Please enter a file name to save the mesh asset(s) to");
+                        string path;
+                        string name;
+                        if (string.IsNullOrEmpty(strMeshAssetPath))
+                        {
+                            path = AssetDatabase.GetAssetPath(gameObject);
+                            name = Path.GetFileNameWithoutExtension(path);
+                            path = Path.GetDirectoryName(path);
+                        }
+                        else
+                        {
+                            path = strMeshAssetPath;
+                            name = Path.GetFileNameWithoutExtension(path);
+                            path = Path.GetDirectoryName(path);
+                            int idx = name.LastIndexOf('_');
+                            if (idx >= 0)
+                            {
+                                name = name.Remove(idx, name.Length - idx);
+                            }
+                        }
+                        if (path.StartsWith("Assets/"))
+                        {
+                            path = path.Remove(0, 7);
+                        }
+                        strMeshAssetPath = UnityEditor.EditorUtility.SaveFilePanelInProject("Save mesh asset(s)", name + "_" + meshSimplify.GetSimplifiedTriangleCount(true).ToString() + ".asset", "asset", "Please enter a file name to save the mesh asset(s) to", path);
 
                         if (strMeshAssetPath.Length == 0)
                         {
@@ -688,16 +712,18 @@ public class MeshSimplifyEditor : Editor
                     return bAssetAlreadyCreated;
                 }
 
-                if (bAssetAlreadyCreated == false && UnityEditor.AssetDatabase.Contains(meshSimplify.m_simplifiedMesh) == false)
+                if (bAssetAlreadyCreated == false/* && UnityEditor.AssetDatabase.Contains(meshSimplify.m_simplifiedMesh) == false*/)
                 {
                     //Debug.Log("Creating asset " + meshSimplify.m_simplifiedMesh.name);
 
                     UnityEditor.AssetDatabase.CreateAsset(meshSimplify.m_simplifiedMesh, strFile);
+                    Resources.UnloadAsset(meshSimplify.m_simplifiedMesh);
+                    meshSimplify.m_simplifiedMesh = null;
                     bAssetAlreadyCreated = true;
                 }
                 else
                 {
-                    if (UnityEditor.AssetDatabase.Contains(meshSimplify.m_simplifiedMesh) == false)
+                    //if (UnityEditor.AssetDatabase.Contains(meshSimplify.m_simplifiedMesh) == false)
                     {
                         //Debug.Log("Adding asset " + meshSimplify.m_simplifiedMesh.name);
 
@@ -754,7 +780,7 @@ public class MeshSimplifyEditor : Editor
 
 	bool m_bComputeData = false;
     bool m_bComputeMesh = false;
-    bool m_bEnablePrefabUsage = false;
+    //bool m_bEnablePrefabUsage = false;
     bool m_bDisablePrefabUsage = false;
     bool m_bDeleteData = false;
     bool m_bRemoveFromTree = false;
