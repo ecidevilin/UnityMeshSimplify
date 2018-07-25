@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using Chaos;
-using UltimateGameTools.MeshSimplifier;
 
 [CustomEditor(typeof(MeshSimplify)), CanEditMultipleObjects]
 public class MeshSimplifyEditor : Editor

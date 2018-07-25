@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Chaos;
-using UltimateGameTools.MeshSimplifier;
+﻿using Chaos;
 using UnityEngine;
 
 public partial class MeshSimplify : MonoBehaviour

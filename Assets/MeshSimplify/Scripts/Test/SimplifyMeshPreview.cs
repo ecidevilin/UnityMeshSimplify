@@ -1,9 +1,7 @@
 using System;
 using UnityEngine;
-using System.Threading;
-using System.Collections;
 using System.Collections.Generic;
-using UltimateGameTools.MeshSimplifier;
+using Chaos;
 using UnityEngine.Profiling;
 
 public class SimplifyMeshPreview : MonoBehaviour

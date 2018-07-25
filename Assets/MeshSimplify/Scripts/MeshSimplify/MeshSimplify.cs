@@ -1,9 +1,6 @@
 ﻿using UnityEngine;
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using Chaos;
-using UltimateGameTools.MeshSimplifier;
 
 public partial class MeshSimplify : MonoBehaviour
 {
