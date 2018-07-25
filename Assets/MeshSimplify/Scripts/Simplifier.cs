@@ -224,9 +224,9 @@ namespace UltimateGameTools
 #endif
                 }
 
-                int nVertices = m_listVertices.Count;
+                //int nVertices = m_listVertices.Count;
 
-                Stopwatch sw = Stopwatch.StartNew();
+                //Stopwatch sw = Stopwatch.StartNew();
 
                 int vertexNum = m_listVertices.Count;
                 while (vertexNum-- > 0)

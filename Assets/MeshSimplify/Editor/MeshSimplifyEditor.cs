@@ -44,7 +44,7 @@ public class MeshSimplifyEditor : Editor
 		m_bComputeData = false;
         m_bComputeMesh = false;
         //m_bEnablePrefabUsage = false;
-        m_bDisablePrefabUsage = false;
+        //m_bDisablePrefabUsage = false;
         m_bDeleteData = false;
         m_bRemoveFromTree = false;
         m_bSetupNewRelevanceSphere = false;
@@ -452,19 +452,19 @@ public class MeshSimplifyEditor : Editor
         //    SaveMeshAssets();
         //}
 
-        if (m_bDisablePrefabUsage)
-        {
-            m_bDisablePrefabUsage = false;
+        //if (m_bDisablePrefabUsage)
+        //{
+        //    m_bDisablePrefabUsage = false;
 
-            if (PropertyEnablePrefabUsage.boolValue == false)
-            {
-                foreach (Object targetObject in targets)
-                {
-                    meshSimplify = targetObject as MeshSimplify;
-                    meshSimplify.DisablePrefabUsage(true);
-                }
-            }
-        }
+        //    if (PropertyEnablePrefabUsage.boolValue == false)
+        //    {
+        //        foreach (Object targetObject in targets)
+        //        {
+        //            meshSimplify = targetObject as MeshSimplify;
+        //            meshSimplify.DisablePrefabUsage(true);
+        //        }
+        //    }
+        //}
 
 		if ((m_bComputeData || m_bComputeMesh) && Event.current.type == EventType.Repaint)
         {
@@ -781,7 +781,7 @@ public class MeshSimplifyEditor : Editor
 	bool m_bComputeData = false;
     bool m_bComputeMesh = false;
     //bool m_bEnablePrefabUsage = false;
-    bool m_bDisablePrefabUsage = false;
+    //bool m_bDisablePrefabUsage = false;
     bool m_bDeleteData = false;
     bool m_bRemoveFromTree = false;
     bool m_bSetupNewRelevanceSphere = false;
@@ -789,7 +789,7 @@ public class MeshSimplifyEditor : Editor
     bool m_bPreviewOriginalMesh = false;
 
     SerializedProperty PropertyGenerateIncludeChildren;
-    SerializedProperty PropertyEnablePrefabUsage;
+    //SerializedProperty PropertyEnablePrefabUsage;
     SerializedProperty PropertyExpandRelevanceSpheres;
     SerializedProperty PropertyRelevanceSpheres;
     SerializedProperty PropertyOverrideRootSettings;
