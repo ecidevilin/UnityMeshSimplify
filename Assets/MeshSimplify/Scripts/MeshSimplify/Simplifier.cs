@@ -3,8 +3,10 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if UNITY_2018_1_OR_NEWER
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+#endif
 
 namespace Chaos
 {
