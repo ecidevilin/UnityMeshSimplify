@@ -3,12 +3,19 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Chaos
 {
 
     public class Simplifier : MonoBehaviour
     {
+        unsafe struct MappingLinkedNode
+        {
+            public MappingLinkedNode *Next;
+            public int Mapping;
+        }
         #region Types
 
         /////////////////////////////////////////////////////////////////////////////////////////////////
@@ -344,7 +351,7 @@ namespace Chaos
         // Private methods
         /////////////////////////////////////////////////////////////////////////////////////////////////
 
-        void ConsolidateMesh(GameObject gameObject, Mesh meshOut, int[] permutation, int[] collapseMap, int nVertices)
+        unsafe void ConsolidateMesh(GameObject gameObject, Mesh meshOut, int[] permutation, int[] collapseMap, int nVertices)
         {
             int subMeshCount = _aSubMeshesOriginal.Length;
             if (null == _av3Vertices) _av3Vertices = (Vector3[])_av3VerticesOriginal.Clone();
@@ -479,6 +486,32 @@ namespace Chaos
                     _aTriangleCount[nSubMesh] = l;
                 }
             }
+            NativeArray<MappingLinkedNode> headArray = new NativeArray<MappingLinkedNode>(_vertexMap.Length, Allocator.TempJob);
+            int headCount = 0;
+            int nodeSize = UnsafeUtility.AlignOf<MappingLinkedNode>();
+            for (int i = 0; i < _vertexMap.Length; i++)
+            {
+                int idx = i;
+                MappingLinkedNode *head = (MappingLinkedNode *) UnsafeUtility.Malloc(1, nodeSize, Allocator.TempJob);
+                head->Next = null;
+                head->Mapping = i;
+                MappingLinkedNode *node = head;
+                while (_vertexMap[idx] != -1)
+                {
+                    MappingLinkedNode *next = (MappingLinkedNode *)UnsafeUtility.Malloc(1, nodeSize, Allocator.TempJob);
+                    next->Next = null;
+                    next->Mapping = _vertexMap[idx];
+                    node->Next = next;
+                    int tmpI = _vertexMap[idx];
+                    _vertexMap[idx] = -1;
+                    idx = tmpI;
+                    node = next;
+                }
+                if (head->Next != null)
+                {
+                    headArray[headCount++] = *head;
+                }
+            }
             Vector2 tmpUV = Vector2.zero;
             Vector2 tmpUV2 = Vector2.zero;
             Vector3 tmpNormal = Vector3.zero;
@@ -491,9 +524,12 @@ namespace Chaos
             Vector4 tmpTangent_ = Vector4.zero;
             Color32 tmpColor_ = Color.black;
             BoneWeight tmpBoneWeight_ = new BoneWeight();
-            for (int i = 0; i < _vertexMap.Length; i++)
+            for (int i = 0; i < headCount; i++)
             {
-                int idx = i;
+                MappingLinkedNode head = headArray[i];
+                MappingLinkedNode *node = &head;
+
+                int idx = node->Mapping;
                 Vector3 tmp = _av3Vertices[idx];
                 if (bUV1) tmpUV = _av2Mapping1In[idx];
                 if (bUV2) tmpUV2 = _av2Mapping2In[idx];
@@ -501,22 +537,24 @@ namespace Chaos
                 if (bTangent) tmpTangent = _av4TangentsIn[idx];
                 if (bColor32) tmpColor = _aColors32In[idx];
                 if (bBone) tmpBoneWeight = _aBoneWeights[idx];
-                while (_vertexMap[idx] != -1)
+                node = node->Next;
+                while (node != null)
                 {
-                    Vector3 tmp_ = _av3Vertices[_vertexMap[idx]];
-                    if (bUV1) tmpUV_ = _av2Mapping1In[_vertexMap[idx]];
-                    if (bUV2) tmpUV2_ = _av2Mapping2In[_vertexMap[idx]];
-                    if (bNormal) tmpNormal_ = _av3NormalsIn[_vertexMap[idx]];
-                    if (bTangent) tmpTangent_ = _av4TangentsIn[_vertexMap[idx]];
-                    if (bColor32) tmpColor_ = _aColors32In[_vertexMap[idx]];
-                    if (bBone) tmpBoneWeight_ = _aBoneWeights[_vertexMap[idx]];
-                    _av3Vertices[_vertexMap[idx]] = tmp;
-                    if (bUV1) _av2Mapping1In[_vertexMap[idx]] = tmpUV;
-                    if (bUV2) _av2Mapping2In[_vertexMap[idx]] = tmpUV2;
-                    if (bNormal) _av3NormalsIn[_vertexMap[idx]] = tmpNormal;
-                    if (bTangent) _av4TangentsIn[_vertexMap[idx]] = tmpTangent;
-                    if (bColor32) _aColors32In[_vertexMap[idx]] = tmpColor;
-                    if (bBone) _aBoneWeights[_vertexMap[idx]] = tmpBoneWeight;
+                    int vidx = node->Mapping;
+                    Vector3 tmp_ = _av3Vertices[vidx];
+                    if (bUV1) tmpUV_ = _av2Mapping1In[vidx];
+                    if (bUV2) tmpUV2_ = _av2Mapping2In[vidx];
+                    if (bNormal) tmpNormal_ = _av3NormalsIn[vidx];
+                    if (bTangent) tmpTangent_ = _av4TangentsIn[vidx];
+                    if (bColor32) tmpColor_ = _aColors32In[vidx];
+                    if (bBone) tmpBoneWeight_ = _aBoneWeights[vidx];
+                    _av3Vertices[vidx] = tmp;
+                    if (bUV1) _av2Mapping1In[vidx] = tmpUV;
+                    if (bUV2) _av2Mapping2In[vidx] = tmpUV2;
+                    if (bNormal) _av3NormalsIn[vidx] = tmpNormal;
+                    if (bTangent) _av4TangentsIn[vidx] = tmpTangent;
+                    if (bColor32) _aColors32In[vidx] = tmpColor;
+                    if (bBone) _aBoneWeights[vidx] = tmpBoneWeight;
                     tmp = tmp_;
                     tmpUV = tmpUV_;
                     tmpUV2 = tmpUV2_;
@@ -524,11 +562,50 @@ namespace Chaos
                     tmpTangent = tmpTangent_;
                     tmpColor = tmpColor_;
                     tmpBoneWeight = tmpBoneWeight_;
-                    int tmpI = _vertexMap[idx];
-                    _vertexMap[idx] = -1;
-                    idx = tmpI;
+                    MappingLinkedNode* oldNode = node;
+                    node = node->Next;
+                    UnsafeUtility.Free(oldNode, Allocator.TempJob);
                 }
             }
+            headArray.Dispose();
+            //for (int i = 0; i < _vertexMap.Length; i++)
+            //{
+            //    int idx = i;
+            //    Vector3 tmp = _av3Vertices[idx];
+            //    if (bUV1) tmpUV = _av2Mapping1In[idx];
+            //    if (bUV2) tmpUV2 = _av2Mapping2In[idx];
+            //    if (bNormal) tmpNormal = _av3NormalsIn[idx];
+            //    if (bTangent) tmpTangent = _av4TangentsIn[idx];
+            //    if (bColor32) tmpColor = _aColors32In[idx];
+            //    if (bBone) tmpBoneWeight = _aBoneWeights[idx];
+            //    while (_vertexMap[idx] != -1)
+            //    {
+            //        Vector3 tmp_ = _av3Vertices[_vertexMap[idx]];
+            //        if (bUV1) tmpUV_ = _av2Mapping1In[_vertexMap[idx]];
+            //        if (bUV2) tmpUV2_ = _av2Mapping2In[_vertexMap[idx]];
+            //        if (bNormal) tmpNormal_ = _av3NormalsIn[_vertexMap[idx]];
+            //        if (bTangent) tmpTangent_ = _av4TangentsIn[_vertexMap[idx]];
+            //        if (bColor32) tmpColor_ = _aColors32In[_vertexMap[idx]];
+            //        if (bBone) tmpBoneWeight_ = _aBoneWeights[_vertexMap[idx]];
+            //        _av3Vertices[_vertexMap[idx]] = tmp;
+            //        if (bUV1) _av2Mapping1In[_vertexMap[idx]] = tmpUV;
+            //        if (bUV2) _av2Mapping2In[_vertexMap[idx]] = tmpUV2;
+            //        if (bNormal) _av3NormalsIn[_vertexMap[idx]] = tmpNormal;
+            //        if (bTangent) _av4TangentsIn[_vertexMap[idx]] = tmpTangent;
+            //        if (bColor32) _aColors32In[_vertexMap[idx]] = tmpColor;
+            //        if (bBone) _aBoneWeights[_vertexMap[idx]] = tmpBoneWeight;
+            //        tmp = tmp_;
+            //        tmpUV = tmpUV_;
+            //        tmpUV2 = tmpUV2_;
+            //        tmpNormal = tmpNormal_;
+            //        tmpTangent = tmpTangent_;
+            //        tmpColor = tmpColor_;
+            //        tmpBoneWeight = tmpBoneWeight_;
+            //        int tmpI = _vertexMap[idx];
+            //        _vertexMap[idx] = -1;
+            //        idx = tmpI;
+            //    }
+            //}
             //#if DEBUG
             //                // Check
             //                for (int i = 0; i < n; i++)
