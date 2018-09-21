@@ -490,6 +490,18 @@ namespace Chaos
                     _aTriangleCount[nSubMesh] = l;
                 }
             }
+            Vector2 tmpUV = Vector2.zero;
+            Vector2 tmpUV2 = Vector2.zero;
+            Vector3 tmpNormal = Vector3.zero;
+            Vector4 tmpTangent = Vector4.zero;
+            Color32 tmpColor = Color.black;
+            BoneWeight tmpBoneWeight = new BoneWeight();
+            Vector2 tmpUV_ = Vector2.zero;
+            Vector2 tmpUV2_ = Vector2.zero;
+            Vector3 tmpNormal_ = Vector3.zero;
+            Vector4 tmpTangent_ = Vector4.zero;
+            Color32 tmpColor_ = Color.black;
+            BoneWeight tmpBoneWeight_ = new BoneWeight();
 #if UNITY_2018_1_OR_NEWER
             NativeArray<MappingLinkedNode> headArray = new NativeArray<MappingLinkedNode>(_vertexMap.Length, Allocator.TempJob);
             int headCount = 0;
@@ -517,18 +529,6 @@ namespace Chaos
                     headArray[headCount++] = *head;
                 }
             }
-            Vector2 tmpUV = Vector2.zero;
-            Vector2 tmpUV2 = Vector2.zero;
-            Vector3 tmpNormal = Vector3.zero;
-            Vector4 tmpTangent = Vector4.zero;
-            Color32 tmpColor = Color.black;
-            BoneWeight tmpBoneWeight = new BoneWeight();
-            Vector2 tmpUV_ = Vector2.zero;
-            Vector2 tmpUV2_ = Vector2.zero;
-            Vector3 tmpNormal_ = Vector3.zero;
-            Vector4 tmpTangent_ = Vector4.zero;
-            Color32 tmpColor_ = Color.black;
-            BoneWeight tmpBoneWeight_ = new BoneWeight();
             for (int i = 0; i < headCount; i++)
             {
                 MappingLinkedNode head = headArray[i];
