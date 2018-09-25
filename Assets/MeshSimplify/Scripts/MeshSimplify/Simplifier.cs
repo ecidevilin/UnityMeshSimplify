@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.Jobs;
 #if UNITY_2018_1_OR_NEWER
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -14,7 +15,7 @@ namespace Chaos
     public class Simplifier : MonoBehaviour
     {
 #if UNITY_2018_1_OR_NEWER
-        unsafe struct MappingLinkedNode
+        public unsafe struct MappingLinkedNode
         {
             public MappingLinkedNode *Next;
             public int Mapping;
@@ -354,7 +355,6 @@ namespace Chaos
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // Private methods
         /////////////////////////////////////////////////////////////////////////////////////////////////
-
         unsafe void ConsolidateMesh(GameObject gameObject, Mesh meshOut, int[] permutation, int[] collapseMap, int nVertices)
         {
             int subMeshCount = _aSubMeshesOriginal.Length;
@@ -490,6 +490,195 @@ namespace Chaos
                     _aTriangleCount[nSubMesh] = l;
                 }
             }
+#if UNITY_2018_1_OR_NEWER
+            NativeArray<MappingLinkedNode> headArray = new NativeArray<MappingLinkedNode>(_vertexMap.Length, Allocator.TempJob);
+            NativeArray<MappingLinkedNode> nodeArray = new NativeArray<MappingLinkedNode>(_vertexMap.Length, Allocator.TempJob);
+            MappingLinkedNode *pNodeArray = (MappingLinkedNode *)nodeArray.GetUnsafeReadOnlyPtr();
+            MappingLinkedNode *pHeadArray = (MappingLinkedNode *)headArray.GetUnsafeReadOnlyPtr();
+            int headCount = 0;
+            for (int i = _vertexMap.Length - 1; i >= 0; i--)
+            {
+                if (_vertexMap[i] == -1)
+                {
+                    continue;
+                }
+                int idx = i;
+                MappingLinkedNode *head = pNodeArray + i;
+                head->Next = null;
+                head->Mapping = i;
+                MappingLinkedNode *node = head;
+                while (_vertexMap[idx] != -1)
+                {
+                    int vidx = _vertexMap[idx];
+                    MappingLinkedNode *next = pNodeArray + vidx;
+                    next->Next = null;
+                    next->Mapping = vidx;
+                    node->Next = next;
+                    _vertexMap[idx] = -1;
+                    idx = vidx;
+                    node = next;
+                }
+                //if (headHash[idx].Next != null)
+                //{
+                //    MappingLinkedNode h = headHash[idx];
+                //    node->Next = h.Next;
+                //    headHash[idx] = default(MappingLinkedNode);
+                //}
+                if (head->Next != null)
+                {
+                    UnsafeUtility.WriteArrayElement(pHeadArray, headCount++, new MappingLinkedNode() {Mapping = -1, Next = head});
+                    //headArray[headCount++] = new MappingLinkedNode()
+                    //{
+                    //    Mapping = -1,
+                    //    Next = head,
+                    //};
+                }
+            }
+
+            //for (int i = 0; i < _vertexMap.Length; i++)
+            //{
+            //    if (headHash[i].Next != null)
+            //    {
+            //        headArray[headCount++] = headHash[i];
+            //        headHash[i] = default(MappingLinkedNode);
+            //    }
+            //}
+            
+            int hi = 0;
+            NativeArray<JobHandle> handles = new NativeArray<JobHandle>(7, Allocator.TempJob);
+            int arrLen = _av3Vertices.Length;
+            CopyMeshJob<Vector3> jobVert = CopyMeshJob<Vector3>.Create(pHeadArray, arrLen);
+            jobVert.CopyFromArray(_av3Vertices);
+            handles[hi++] = jobVert.Schedule(headCount, 1);
+
+            CopyMeshJob<Vector2> jobUV = default(CopyMeshJob<Vector2>);
+            if (bUV1)
+            {
+                jobUV = CopyMeshJob<Vector2>.Create(pHeadArray, arrLen);
+                jobUV.CopyFromArray(_av2Mapping1In);
+                handles[hi++] = jobUV.Schedule(headCount, 1);
+            }
+            CopyMeshJob<Vector2> jobUV2 = default(CopyMeshJob<Vector2>);
+            if (bUV2)
+            {
+                jobUV2 = CopyMeshJob<Vector2>.Create(pHeadArray, arrLen);
+                jobUV2.CopyFromArray(_av2Mapping2In);
+                handles[hi++] = jobUV2.Schedule(headCount, 1);
+            }
+            CopyMeshJob<Vector3> jobNorm = default(CopyMeshJob<Vector3>);
+            if (bNormal)
+            {
+                jobNorm = CopyMeshJob<Vector3>.Create(pHeadArray, arrLen);
+                jobNorm.CopyFromArray(_av3NormalsIn);
+                handles[hi++] = jobNorm.Schedule(headCount, 1);
+            }
+            CopyMeshJob<Vector4> jobTang = default(CopyMeshJob<Vector4>);
+            if (bTangent)
+            {
+                jobTang = CopyMeshJob<Vector4>.Create(pHeadArray, arrLen);
+                jobTang.CopyFromArray(_av4TangentsIn);
+                handles[hi++] = jobTang.Schedule(headCount, 1);
+            }
+            CopyMeshJob<Color32> jobCol = default(CopyMeshJob<Color32>);
+            if (bColor32)
+            {
+                jobCol = CopyMeshJob<Color32>.Create(pHeadArray, arrLen);
+                jobCol.CopyFromArray(_aColors32In);
+                handles[hi++] = jobCol.Schedule(headCount, 1);
+            }
+            CopyMeshJob<BoneWeight> jobBone = default(CopyMeshJob<BoneWeight>);
+            if (bBone)
+            {
+                jobBone = CopyMeshJob<BoneWeight>.Create(pHeadArray, arrLen);
+                jobBone.CopyFromArray(_aBoneWeights);
+                handles[hi++] = jobBone.Schedule(headCount, 1);
+            }
+
+            JobHandle.CompleteAll(handles);
+            jobVert.CopyToArrayAndDispose(_av3Vertices, n);
+            if (bUV1)
+            {
+                jobUV.CopyToArrayAndDispose(_av2Mapping1In, n);
+            }
+            if (bUV2)
+            {
+                jobUV2.CopyToArrayAndDispose(_av2Mapping2In, n);
+            }
+            if (bNormal)
+            {
+                jobNorm.CopyToArrayAndDispose(_av3NormalsIn, n);
+            }
+            if (bTangent)
+            {
+                jobTang.CopyToArrayAndDispose(_av4TangentsIn, n);
+            }
+            if (bColor32)
+            {
+                jobCol.CopyToArrayAndDispose(_aColors32In, n);
+            }
+            if (bBone)
+            {
+                jobBone.CopyToArrayAndDispose(_aBoneWeights, n);
+            }
+            //for (int i = 0; i < headCount; i++)
+            //{
+            //    MappingLinkedNode head = UnsafeUtility.ReadArrayElement<MappingLinkedNode>(pHeadArray, i);
+            //    MappingLinkedNode* node = head.Next;
+            //    while (node != null)
+            //    {
+            //        MappingLinkedNode* oldNode = node;
+            //        node = node->Next;
+            //        UnsafeUtility.Free(oldNode, Allocator.TempJob);
+            //    }
+            //}
+            handles.Dispose();
+            nodeArray.Dispose();
+            headArray.Dispose();
+            //for (int i = 0; i < headCount; i++)
+            //{
+            //    MappingLinkedNode head = headArray[i];
+            //    MappingLinkedNode *node = &head;
+
+            //    int idx = node->Mapping;
+            //    Vector3 tmp = _av3Vertices[idx];
+            //    if (bUV1) tmpUV = _av2Mapping1In[idx];
+            //    if (bUV2) tmpUV2 = _av2Mapping2In[idx];
+            //    if (bNormal) tmpNormal = _av3NormalsIn[idx];
+            //    if (bTangent) tmpTangent = _av4TangentsIn[idx];
+            //    if (bColor32) tmpColor = _aColors32In[idx];
+            //    if (bBone) tmpBoneWeight = _aBoneWeights[idx];
+            //    node = node->Next;
+            //    while (node != null)
+            //    {
+            //        int vidx = node->Mapping;
+            //        Vector3 tmp_ = _av3Vertices[vidx];
+            //        if (bUV1) tmpUV_ = _av2Mapping1In[vidx];
+            //        if (bUV2) tmpUV2_ = _av2Mapping2In[vidx];
+            //        if (bNormal) tmpNormal_ = _av3NormalsIn[vidx];
+            //        if (bTangent) tmpTangent_ = _av4TangentsIn[vidx];
+            //        if (bColor32) tmpColor_ = _aColors32In[vidx];
+            //        if (bBone) tmpBoneWeight_ = _aBoneWeights[vidx];
+            //        _av3Vertices[vidx] = tmp;
+            //        if (bUV1) _av2Mapping1In[vidx] = tmpUV;
+            //        if (bUV2) _av2Mapping2In[vidx] = tmpUV2;
+            //        if (bNormal) _av3NormalsIn[vidx] = tmpNormal;
+            //        if (bTangent) _av4TangentsIn[vidx] = tmpTangent;
+            //        if (bColor32) _aColors32In[vidx] = tmpColor;
+            //        if (bBone) _aBoneWeights[vidx] = tmpBoneWeight;
+            //        tmp = tmp_;
+            //        tmpUV = tmpUV_;
+            //        tmpUV2 = tmpUV2_;
+            //        tmpNormal = tmpNormal_;
+            //        tmpTangent = tmpTangent_;
+            //        tmpColor = tmpColor_;
+            //        tmpBoneWeight = tmpBoneWeight_;
+            //        MappingLinkedNode* oldNode = node;
+            //        node = node->Next;
+            //        UnsafeUtility.Free(oldNode, Allocator.TempJob);
+            //    }
+            //}
+            //headArray.Dispose();
+#else
             Vector2 tmpUV = Vector2.zero;
             Vector2 tmpUV2 = Vector2.zero;
             Vector3 tmpNormal = Vector3.zero;
@@ -502,78 +691,6 @@ namespace Chaos
             Vector4 tmpTangent_ = Vector4.zero;
             Color32 tmpColor_ = Color.black;
             BoneWeight tmpBoneWeight_ = new BoneWeight();
-#if UNITY_2018_1_OR_NEWER
-            NativeArray<MappingLinkedNode> headArray = new NativeArray<MappingLinkedNode>(_vertexMap.Length, Allocator.TempJob);
-            int headCount = 0;
-            int nodeSize = UnsafeUtility.AlignOf<MappingLinkedNode>();
-            for (int i = 0; i < _vertexMap.Length; i++)
-            {
-                int idx = i;
-                MappingLinkedNode *head = (MappingLinkedNode *) UnsafeUtility.Malloc(1, nodeSize, Allocator.TempJob);
-                head->Next = null;
-                head->Mapping = i;
-                MappingLinkedNode *node = head;
-                while (_vertexMap[idx] != -1)
-                {
-                    MappingLinkedNode *next = (MappingLinkedNode *)UnsafeUtility.Malloc(1, nodeSize, Allocator.TempJob);
-                    next->Next = null;
-                    next->Mapping = _vertexMap[idx];
-                    node->Next = next;
-                    int tmpI = _vertexMap[idx];
-                    _vertexMap[idx] = -1;
-                    idx = tmpI;
-                    node = next;
-                }
-                if (head->Next != null)
-                {
-                    headArray[headCount++] = *head;
-                }
-            }
-            for (int i = 0; i < headCount; i++)
-            {
-                MappingLinkedNode head = headArray[i];
-                MappingLinkedNode *node = &head;
-
-                int idx = node->Mapping;
-                Vector3 tmp = _av3Vertices[idx];
-                if (bUV1) tmpUV = _av2Mapping1In[idx];
-                if (bUV2) tmpUV2 = _av2Mapping2In[idx];
-                if (bNormal) tmpNormal = _av3NormalsIn[idx];
-                if (bTangent) tmpTangent = _av4TangentsIn[idx];
-                if (bColor32) tmpColor = _aColors32In[idx];
-                if (bBone) tmpBoneWeight = _aBoneWeights[idx];
-                node = node->Next;
-                while (node != null)
-                {
-                    int vidx = node->Mapping;
-                    Vector3 tmp_ = _av3Vertices[vidx];
-                    if (bUV1) tmpUV_ = _av2Mapping1In[vidx];
-                    if (bUV2) tmpUV2_ = _av2Mapping2In[vidx];
-                    if (bNormal) tmpNormal_ = _av3NormalsIn[vidx];
-                    if (bTangent) tmpTangent_ = _av4TangentsIn[vidx];
-                    if (bColor32) tmpColor_ = _aColors32In[vidx];
-                    if (bBone) tmpBoneWeight_ = _aBoneWeights[vidx];
-                    _av3Vertices[vidx] = tmp;
-                    if (bUV1) _av2Mapping1In[vidx] = tmpUV;
-                    if (bUV2) _av2Mapping2In[vidx] = tmpUV2;
-                    if (bNormal) _av3NormalsIn[vidx] = tmpNormal;
-                    if (bTangent) _av4TangentsIn[vidx] = tmpTangent;
-                    if (bColor32) _aColors32In[vidx] = tmpColor;
-                    if (bBone) _aBoneWeights[vidx] = tmpBoneWeight;
-                    tmp = tmp_;
-                    tmpUV = tmpUV_;
-                    tmpUV2 = tmpUV2_;
-                    tmpNormal = tmpNormal_;
-                    tmpTangent = tmpTangent_;
-                    tmpColor = tmpColor_;
-                    tmpBoneWeight = tmpBoneWeight_;
-                    MappingLinkedNode* oldNode = node;
-                    node = node->Next;
-                    UnsafeUtility.Free(oldNode, Allocator.TempJob);
-                }
-            }
-            headArray.Dispose();
-#else
             for (int i = 0; i < _vertexMap.Length; i++)
             {
                 int idx = i;

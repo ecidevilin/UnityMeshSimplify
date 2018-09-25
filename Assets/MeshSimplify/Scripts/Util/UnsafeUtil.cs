@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Runtime.InteropServices;
+using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 
 namespace Chaos
 {
@@ -114,6 +116,12 @@ namespace Chaos
                 }
             }
             func(array);
+        }
+
+        public unsafe static T UncheckReadArrayElement<T>(NativeArray<T> narr, int idx) where T : struct
+        {
+            void* ptr = NativeArrayUnsafeUtility.GetUnsafeBufferPointerWithoutChecks<T>(narr);
+            return UnsafeUtility.ReadArrayElement<T>(ptr, idx);
         }
     }
 
