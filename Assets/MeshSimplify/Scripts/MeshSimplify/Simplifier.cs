@@ -490,7 +490,7 @@ namespace Chaos
                     _aTriangleCount[nSubMesh] = l;
                 }
             }
-#if UNITY_2018_1_OR_NEWER
+#if false//UNITY_2018_1_OR_NEWER
             NativeArray<MappingLinkedNode> headArray = new NativeArray<MappingLinkedNode>(_vertexMap.Length, Allocator.TempJob);
             NativeArray<MappingLinkedNode> nodeArray = new NativeArray<MappingLinkedNode>(_vertexMap.Length, Allocator.TempJob);
             MappingLinkedNode *pNodeArray = (MappingLinkedNode *)nodeArray.GetUnsafeReadOnlyPtr();
