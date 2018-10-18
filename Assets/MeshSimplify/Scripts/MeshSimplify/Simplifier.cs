@@ -35,34 +35,34 @@ namespace Chaos
         public static bool Cancelled { get; set; }
         public static int CoroutineFrameMiliseconds
         {
-            get { return m_nCoroutineFrameMiliseconds; }
-            set { m_nCoroutineFrameMiliseconds = value; }
+            get { return _coroutineFrameMiliseconds; }
+            set { _coroutineFrameMiliseconds = value; }
         }
 
         public bool CoroutineEnded { get; set; }
 
         public bool UseEdgeLength
         {
-            get { return m_bUseEdgeLength; }
-            set { m_bUseEdgeLength = value; }
+            get { return _useEdgeLength; }
+            set { _useEdgeLength = value; }
         }
 
         public bool UseCurvature
         {
-            get { return m_bUseCurvature; }
-            set { m_bUseCurvature = value; }
+            get { return _useCurvature; }
+            set { _useCurvature = value; }
         }
 
         public bool ProtectTexture
         {
-            get { return m_bProtectTexture; }
-            set { m_bProtectTexture = value; }
+            get { return _protectTexture; }
+            set { _protectTexture = value; }
         }
 
         public bool LockBorder
         {
-            get { return m_bLockBorder; }
-            set { m_bLockBorder = value; }
+            get { return _lockBorder; }
+            set { _lockBorder = value; }
         }
 
         #endregion // Properties
@@ -75,7 +75,7 @@ namespace Chaos
 
         public IEnumerator ProgressiveMesh(GameObject gameObject, Mesh sourceMesh, RelevanceSphere[] aRelevanceSpheres, string strProgressDisplayObjectName = "", ProgressDelegate progress = null)
         {
-            m_meshOriginal = sourceMesh;
+            _meshOriginal = sourceMesh;
 
             //Vector3[] aVerticesWorld = GetWorldVertices(gameObject);
 
@@ -85,10 +85,10 @@ namespace Chaos
             //  yield break;
             //}
             int vertexCount = sourceMesh.vertexCount;
-            m_aVertexMap = new int[vertexCount];
-            m_aVertexPermutation = new int[vertexCount];
-            m_listVertices = new List<Vertex>();
-            m_aListTriangles = new TriangleList[m_meshOriginal.subMeshCount];
+            _vertexMapping = new int[vertexCount];
+            _vertexPermutation = new int[vertexCount];
+            _listVertices = new List<Vertex>();
+            _listTriangles = new TriangleList[_meshOriginal.subMeshCount];
 
             //                if (progress != null)
             //                {
@@ -166,44 +166,44 @@ namespace Chaos
 #endif
             }
 
-            m_nOriginalMeshVertexCount = sourceMesh.vertexCount;//m_meshUniqueVertices.ListVertices.Count;
-            m_fOriginalMeshSize = Mathf.Max(m_meshOriginal.bounds.size.x, m_meshOriginal.bounds.size.y, m_meshOriginal.bounds.size.z);
+            _originalMeshVertexCount = sourceMesh.vertexCount;//m_meshUniqueVertices.ListVertices.Count;
+            _originalMeshSize = Mathf.Max(_meshOriginal.bounds.size.x, _meshOriginal.bounds.size.y, _meshOriginal.bounds.size.z);
 
-            m_heap = Heap<Vertex>.CreateMinHeap();
+            _heap = Heap<Vertex>.CreateMinHeap();
 
-            for (int i = 0; i < m_nOriginalMeshVertexCount; i++)
+            for (int i = 0; i < _originalMeshVertexCount; i++)
             {
-                m_aVertexMap[i] = -1;
-                m_aVertexPermutation[i] = -1;
+                _vertexMapping[i] = -1;
+                _vertexPermutation[i] = -1;
             }
 
-            Vector2[] av2Mapping = m_meshOriginal.uv;
+            Vector2[] av2Mapping = _meshOriginal.uv;
 
             AddVertices(sourceMesh.vertices, worldVertices);
 
             int nTriangles = 0;
             //                ListIndices[] faceList = m_meshUniqueVertices.SubmeshesFaceList;
-            for (int nSubMesh = 0; nSubMesh < m_meshOriginal.subMeshCount; nSubMesh++)
+            for (int nSubMesh = 0; nSubMesh < _meshOriginal.subMeshCount; nSubMesh++)
             {
-                int[] anIndices = m_meshOriginal.GetTriangles(nSubMesh);
+                int[] anIndices = _meshOriginal.GetTriangles(nSubMesh);
                 //                    List<int> listIndices = faceList[nSubMesh].m_listIndices;
-                m_aListTriangles[nSubMesh] = new TriangleList(anIndices.Length / 3);
+                _listTriangles[nSubMesh] = new TriangleList(anIndices.Length / 3);
                 nTriangles = AddFaceListSubMesh(nSubMesh, anIndices, av2Mapping, nTriangles);
             }
 
             if (Application.isEditor && !Application.isPlaying)
             {
 #if UNITY_2018_1_OR_NEWER
-                float[] costs = new float[m_listVertices.Count];
-                int[] collapses = new int[m_listVertices.Count];
-                CostCompution.Compute(m_listVertices, m_aListTriangles, aRelevanceSpheres, m_bUseEdgeLength, m_bUseCurvature, m_bLockBorder, m_fOriginalMeshSize, costs, collapses);
+                float[] costs = new float[_listVertices.Count];
+                int[] collapses = new int[_listVertices.Count];
+                CostCompution.Compute(_listVertices, _listTriangles, aRelevanceSpheres, _useEdgeLength, _useCurvature, _lockBorder, _originalMeshSize, costs, collapses);
 
-                for (int i = 0; i < m_listVertices.Count; i++)
+                for (int i = 0; i < _listVertices.Count; i++)
                 {
-                    Vertex v = m_listVertices[i];
+                    Vertex v = _listVertices[i];
                     v.ObjDist = costs[i];
-                    v.CollapseVertex = collapses[i] == -1 ? null : m_listVertices[collapses[i]];
-                    m_heap.Insert(v);
+                    v.CollapseVertex = collapses[i] == -1 ? null : _listVertices[collapses[i]];
+                    _heap.Insert(v);
                 }
 #else
                     IEnumerator enumerator = ComputeAllEdgeCollapseCosts(strProgressDisplayObjectName, gameObject.transform, aRelevanceSpheres, progress);
@@ -221,16 +221,16 @@ namespace Chaos
             else
             {
 #if UNITY_2018_1_OR_NEWER
-                float[] costs = new float[m_listVertices.Count];
-                int[] collapses = new int[m_listVertices.Count];
-                CostCompution.Compute(m_listVertices, m_aListTriangles, aRelevanceSpheres, m_bUseEdgeLength, m_bUseCurvature, m_bLockBorder, m_fOriginalMeshSize, costs, collapses);
+                float[] costs = new float[_listVertices.Count];
+                int[] collapses = new int[_listVertices.Count];
+                CostCompution.Compute(_listVertices, _listTriangles, aRelevanceSpheres, _useEdgeLength, _useCurvature, _lockBorder, _originalMeshSize, costs, collapses);
 
-                for (int i = 0; i < m_listVertices.Count; i++)
+                for (int i = 0; i < _listVertices.Count; i++)
                 {
-                    Vertex v = m_listVertices[i];
+                    Vertex v = _listVertices[i];
                     v.ObjDist = costs[i];
-                    v.CollapseVertex = m_listVertices[collapses[i]];
-                    m_heap.Insert(v);
+                    v.CollapseVertex = _listVertices[collapses[i]];
+                    _heap.Insert(v);
                 }
 #else
                     yield return StartCoroutine(ComputeAllEdgeCollapseCosts(strProgressDisplayObjectName, gameObject.transform, aRelevanceSpheres, progress));
@@ -242,7 +242,7 @@ namespace Chaos
 
             //Stopwatch sw = Stopwatch.StartNew();
 
-            int vertexNum = m_listVertices.Count;
+            int vertexNum = _listVertices.Count;
             while (vertexNum-- > 0)
             {
                 //               if (progress != null && ((vertexNum & 0xFF) == 0))
@@ -261,11 +261,11 @@ namespace Chaos
                 //                   yield return null;
                 //                   sw = Stopwatch.StartNew();
                 //}
-                Vertex mn = m_heap.ExtractTop();
+                Vertex mn = _heap.ExtractTop();
 
                 //                    m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
-                m_aVertexPermutation[mn.ID] = vertexNum;
-                m_aVertexMap[mn.ID] = mn.CollapseVertex != null ? mn.CollapseVertex.ID : -1;
+                _vertexPermutation[mn.ID] = vertexNum;
+                _vertexMapping[mn.ID] = mn.CollapseVertex != null ? mn.CollapseVertex.ID : -1;
                 Collapse(mn, mn.CollapseVertex, gameObject.transform, aRelevanceSpheres);
             }
 
@@ -289,21 +289,21 @@ namespace Chaos
                 return;
             }
 
-            _av3VerticesOriginal = _av3VerticesOriginal ?? m_meshOriginal.vertices;
-            _av3NormalsOriginal = _av3NormalsOriginal ?? m_meshOriginal.normals;
-            _av4TangentsOriginal = _av4TangentsOriginal ?? m_meshOriginal.tangents;
-            _av2Mapping1Original = _av2Mapping1Original ?? m_meshOriginal.uv;
-            _av2Mapping2Original = _av2Mapping2Original ?? m_meshOriginal.uv2;
-            _aColors32Original = _aColors32Original ?? m_meshOriginal.colors32;
-            _aBoneWeightsOriginal = _aBoneWeightsOriginal ?? m_meshOriginal.boneWeights;
-            _aBindPoses = _aBindPoses ?? m_meshOriginal.bindposes;
-            int subMeshCount = m_meshOriginal.subMeshCount;
-            if (null == _aSubMeshesOriginal)
+            _verticesOriginal = _verticesOriginal ?? _meshOriginal.vertices;
+            _normalsOriginal = _normalsOriginal ?? _meshOriginal.normals;
+            _tangentsOriginal = _tangentsOriginal ?? _meshOriginal.tangents;
+            _texCoord1Original = _texCoord1Original ?? _meshOriginal.uv;
+            _texCoord2Original = _texCoord2Original ?? _meshOriginal.uv2;
+            _colors32Original = _colors32Original ?? _meshOriginal.colors32;
+            _boneWeightsOriginal = _boneWeightsOriginal ?? _meshOriginal.boneWeights;
+            _bindPoses = _bindPoses ?? _meshOriginal.bindposes;
+            int subMeshCount = _meshOriginal.subMeshCount;
+            if (null == _subMeshesOriginal)
             {
-                _aSubMeshesOriginal = new int[subMeshCount][];
+                _subMeshesOriginal = new int[subMeshCount][];
                 for (int nSubMesh = 0; nSubMesh < subMeshCount; nSubMesh++)
                 {
-                    _aSubMeshesOriginal[nSubMesh] = m_meshOriginal.GetTriangles(nSubMesh);
+                    _subMeshesOriginal[nSubMesh] = _meshOriginal.GetTriangles(nSubMesh);
                 }
             }
 
@@ -312,23 +312,23 @@ namespace Chaos
                 // Original vertex count requested
 
                 meshOut.triangles = new int[0];
-                meshOut.subMeshCount = m_meshOriginal.subMeshCount;
+                meshOut.subMeshCount = _meshOriginal.subMeshCount;
 
-                meshOut.vertices = _av3VerticesOriginal;
-                meshOut.normals = _av3NormalsOriginal;
-                meshOut.tangents = _av4TangentsOriginal;
-                meshOut.uv = _av2Mapping1Original;
-                meshOut.uv2 = _av2Mapping2Original;
-                meshOut.colors32 = _aColors32Original;
-                meshOut.boneWeights = _aBoneWeightsOriginal;
-                meshOut.bindposes = _aBindPoses;
+                meshOut.vertices = _verticesOriginal;
+                meshOut.normals = _normalsOriginal;
+                meshOut.tangents = _tangentsOriginal;
+                meshOut.uv = _texCoord1Original;
+                meshOut.uv2 = _texCoord2Original;
+                meshOut.colors32 = _colors32Original;
+                meshOut.boneWeights = _boneWeightsOriginal;
+                meshOut.bindposes = _bindPoses;
 
-                meshOut.triangles = m_meshOriginal.triangles;
-                meshOut.subMeshCount = m_meshOriginal.subMeshCount;
+                meshOut.triangles = _meshOriginal.triangles;
+                meshOut.subMeshCount = _meshOriginal.subMeshCount;
 
                 for (int nSubMesh = 0; nSubMesh < subMeshCount; nSubMesh++)
                 {
-                    meshOut.SetTriangles(_aSubMeshesOriginal[nSubMesh], nSubMesh);
+                    meshOut.SetTriangles(_subMeshesOriginal[nSubMesh], nSubMesh);
                 }
 
                 meshOut.name = gameObject.name + " simplified mesh";
@@ -336,17 +336,17 @@ namespace Chaos
                 return;
             }
 
-            ConsolidateMesh(gameObject, meshOut, m_aVertexPermutation, m_aVertexMap, nVertices);
+            ConsolidateMesh(gameObject, meshOut, _vertexPermutation, _vertexMapping, nVertices);
         }
 
         public int GetOriginalMeshUniqueVertexCount()
         {
-            return m_nOriginalMeshVertexCount;
+            return _originalMeshVertexCount;
         }
 
         public int GetOriginalMeshTriangleCount()
         {
-            return m_meshOriginal.triangles.Length / 3;
+            return _meshOriginal.triangles.Length / 3;
         }
         #endregion // Public methods
 
@@ -357,32 +357,32 @@ namespace Chaos
         /////////////////////////////////////////////////////////////////////////////////////////////////
         unsafe void ConsolidateMesh(GameObject gameObject, Mesh meshOut, int[] permutation, int[] collapseMap, int nVertices)
         {
-            int subMeshCount = _aSubMeshesOriginal.Length;
-            if (null == _av3Vertices) _av3Vertices = (Vector3[])_av3VerticesOriginal.Clone();
-            else _av3VerticesOriginal.CopyTo(_av3Vertices, 0);
-            if (null == _av3NormalsIn) _av3NormalsIn = (Vector3[])_av3NormalsOriginal.Clone();
-            else _av3NormalsOriginal.CopyTo(_av3NormalsIn, 0);
-            if (null == _av4TangentsIn) _av4TangentsIn = (Vector4[])_av4TangentsOriginal.Clone();
-            else _av4TangentsOriginal.CopyTo(_av4TangentsIn, 0);
-            if (null == _av2Mapping1In) _av2Mapping1In = (Vector2[])_av2Mapping1Original.Clone();
-            else _av2Mapping1Original.CopyTo(_av2Mapping1In, 0);
-            if (null == _av2Mapping2In) _av2Mapping2In = (Vector2[])_av2Mapping2Original.Clone();
-            else _av2Mapping2Original.CopyTo(_av2Mapping2In, 0);
-            if (null == _aColors32In) _aColors32In = (Color32[])_aColors32Original.Clone();
-            else _aColors32Original.CopyTo(_aColors32In, 0);
-            if (null == _aBoneWeights) _aBoneWeights = (BoneWeight[])_aBoneWeightsOriginal.Clone();
-            else _aBoneWeightsOriginal.CopyTo(_aBoneWeights, 0);
-            if (null == _aSubMeshes) _aSubMeshes = new int[subMeshCount][];
-            if (null == _aTriangleCount) _aTriangleCount = new int[subMeshCount];
+            int subMeshCount = _subMeshesOriginal.Length;
+            if (null == _vertices) _vertices = (Vector3[])_verticesOriginal.Clone();
+            else _verticesOriginal.CopyTo(_vertices, 0);
+            if (null == _normalsIn) _normalsIn = (Vector3[])_normalsOriginal.Clone();
+            else _normalsOriginal.CopyTo(_normalsIn, 0);
+            if (null == _tangentsIn) _tangentsIn = (Vector4[])_tangentsOriginal.Clone();
+            else _tangentsOriginal.CopyTo(_tangentsIn, 0);
+            if (null == _texCoord1In) _texCoord1In = (Vector2[])_texCoord1Original.Clone();
+            else _texCoord1Original.CopyTo(_texCoord1In, 0);
+            if (null == _texCoord2In) _texCoord2In = (Vector2[])_texCoord2Original.Clone();
+            else _texCoord2Original.CopyTo(_texCoord2In, 0);
+            if (null == _colors32In) _colors32In = (Color32[])_colors32Original.Clone();
+            else _colors32Original.CopyTo(_colors32In, 0);
+            if (null == _boneWeights) _boneWeights = (BoneWeight[])_boneWeightsOriginal.Clone();
+            else _boneWeightsOriginal.CopyTo(_boneWeights, 0);
+            if (null == _subMeshes) _subMeshes = new int[subMeshCount][];
+            if (null == _triangleCount) _triangleCount = new int[subMeshCount];
 
-            bool bUV1 = _av2Mapping1In != null && _av2Mapping1In.Length > 0;
-            bool bUV2 = _av2Mapping2In != null && _av2Mapping2In.Length > 0;
-            bool bNormal = _av3NormalsIn != null && _av3NormalsIn.Length > 0;
-            bool bTangent = _av4TangentsIn != null && _av4TangentsIn.Length > 0;
-            bool bColor32 = (_aColors32In != null && _aColors32In.Length > 0);
-            bool bBone = _aBoneWeights != null && _aBoneWeights.Length > 0;
+            bool bUV1 = _texCoord1In != null && _texCoord1In.Length > 0;
+            bool bUV2 = _texCoord2In != null && _texCoord2In.Length > 0;
+            bool bNormal = _normalsIn != null && _normalsIn.Length > 0;
+            bool bTangent = _tangentsIn != null && _tangentsIn.Length > 0;
+            bool bColor32 = (_colors32In != null && _colors32In.Length > 0);
+            bool bBone = _boneWeights != null && _boneWeights.Length > 0;
 
-            _vertexMap = _vertexMap ?? new int[_av3Vertices.Length];
+            _vertexMap = _vertexMap ?? new int[_vertices.Length];
             for (int i = 0, imax = _vertexMap.Length; i < imax; i++)
             {
                 _vertexMap[i] = -1;
@@ -390,9 +390,9 @@ namespace Chaos
             int n = 0;
             for (int nSubMesh = 0; nSubMesh < subMeshCount; nSubMesh++)
             {
-                if (null == _aSubMeshes[nSubMesh]) _aSubMeshes[nSubMesh] = (int[])_aSubMeshesOriginal[nSubMesh].Clone();
-                else _aSubMeshesOriginal[nSubMesh].CopyTo(_aSubMeshes[nSubMesh], 0);
-                int[] triangles = _aSubMeshes[nSubMesh];
+                if (null == _subMeshes[nSubMesh]) _subMeshes[nSubMesh] = (int[])_subMeshesOriginal[nSubMesh].Clone();
+                else _subMeshesOriginal[nSubMesh].CopyTo(_subMeshes[nSubMesh], 0);
+                int[] triangles = _subMeshes[nSubMesh];
                 for (int i = 0; i < triangles.Length; i += 3)
                 {
                     int idx0 = triangles[i];
@@ -477,7 +477,7 @@ namespace Chaos
                 }
                 if (t < l - 1)
                 {
-                    _aTriangleCount[nSubMesh] = t + 1;
+                    _triangleCount[nSubMesh] = t + 1;
                     //#if DEBUG
                     //                        if (t >= 0 && triangles[t] == -1)
                     //                        {
@@ -487,198 +487,9 @@ namespace Chaos
                 }
                 else
                 {
-                    _aTriangleCount[nSubMesh] = l;
+                    _triangleCount[nSubMesh] = l;
                 }
             }
-#if false//UNITY_2018_1_OR_NEWER
-            NativeArray<MappingLinkedNode> headArray = new NativeArray<MappingLinkedNode>(_vertexMap.Length, Allocator.TempJob);
-            NativeArray<MappingLinkedNode> nodeArray = new NativeArray<MappingLinkedNode>(_vertexMap.Length, Allocator.TempJob);
-            MappingLinkedNode *pNodeArray = (MappingLinkedNode *)nodeArray.GetUnsafeReadOnlyPtr();
-            MappingLinkedNode *pHeadArray = (MappingLinkedNode *)headArray.GetUnsafeReadOnlyPtr();
-            int headCount = 0;
-            for (int i = _vertexMap.Length - 1; i >= 0; i--)
-            {
-                if (_vertexMap[i] == -1)
-                {
-                    continue;
-                }
-                int idx = i;
-                MappingLinkedNode *head = pNodeArray + i;
-                head->Next = null;
-                head->Mapping = i;
-                MappingLinkedNode *node = head;
-                while (_vertexMap[idx] != -1)
-                {
-                    int vidx = _vertexMap[idx];
-                    MappingLinkedNode *next = pNodeArray + vidx;
-                    next->Next = null;
-                    next->Mapping = vidx;
-                    node->Next = next;
-                    _vertexMap[idx] = -1;
-                    idx = vidx;
-                    node = next;
-                }
-                //if (headHash[idx].Next != null)
-                //{
-                //    MappingLinkedNode h = headHash[idx];
-                //    node->Next = h.Next;
-                //    headHash[idx] = default(MappingLinkedNode);
-                //}
-                if (head->Next != null)
-                {
-                    UnsafeUtility.WriteArrayElement(pHeadArray, headCount++, new MappingLinkedNode() {Mapping = -1, Next = head});
-                    //headArray[headCount++] = new MappingLinkedNode()
-                    //{
-                    //    Mapping = -1,
-                    //    Next = head,
-                    //};
-                }
-            }
-
-            //for (int i = 0; i < _vertexMap.Length; i++)
-            //{
-            //    if (headHash[i].Next != null)
-            //    {
-            //        headArray[headCount++] = headHash[i];
-            //        headHash[i] = default(MappingLinkedNode);
-            //    }
-            //}
-            
-            int hi = 0;
-            NativeArray<JobHandle> handles = new NativeArray<JobHandle>(7, Allocator.TempJob);
-            int arrLen = _av3Vertices.Length;
-            CopyMeshJob<Vector3> jobVert = CopyMeshJob<Vector3>.Create(pHeadArray, arrLen);
-            jobVert.CopyFromArray(_av3Vertices);
-            handles[hi++] = jobVert.Schedule(headCount, 1);
-
-            CopyMeshJob<Vector2> jobUV = default(CopyMeshJob<Vector2>);
-            if (bUV1)
-            {
-                jobUV = CopyMeshJob<Vector2>.Create(pHeadArray, arrLen);
-                jobUV.CopyFromArray(_av2Mapping1In);
-                handles[hi++] = jobUV.Schedule(headCount, 1);
-            }
-            CopyMeshJob<Vector2> jobUV2 = default(CopyMeshJob<Vector2>);
-            if (bUV2)
-            {
-                jobUV2 = CopyMeshJob<Vector2>.Create(pHeadArray, arrLen);
-                jobUV2.CopyFromArray(_av2Mapping2In);
-                handles[hi++] = jobUV2.Schedule(headCount, 1);
-            }
-            CopyMeshJob<Vector3> jobNorm = default(CopyMeshJob<Vector3>);
-            if (bNormal)
-            {
-                jobNorm = CopyMeshJob<Vector3>.Create(pHeadArray, arrLen);
-                jobNorm.CopyFromArray(_av3NormalsIn);
-                handles[hi++] = jobNorm.Schedule(headCount, 1);
-            }
-            CopyMeshJob<Vector4> jobTang = default(CopyMeshJob<Vector4>);
-            if (bTangent)
-            {
-                jobTang = CopyMeshJob<Vector4>.Create(pHeadArray, arrLen);
-                jobTang.CopyFromArray(_av4TangentsIn);
-                handles[hi++] = jobTang.Schedule(headCount, 1);
-            }
-            CopyMeshJob<Color32> jobCol = default(CopyMeshJob<Color32>);
-            if (bColor32)
-            {
-                jobCol = CopyMeshJob<Color32>.Create(pHeadArray, arrLen);
-                jobCol.CopyFromArray(_aColors32In);
-                handles[hi++] = jobCol.Schedule(headCount, 1);
-            }
-            CopyMeshJob<BoneWeight> jobBone = default(CopyMeshJob<BoneWeight>);
-            if (bBone)
-            {
-                jobBone = CopyMeshJob<BoneWeight>.Create(pHeadArray, arrLen);
-                jobBone.CopyFromArray(_aBoneWeights);
-                handles[hi++] = jobBone.Schedule(headCount, 1);
-            }
-
-            JobHandle.CompleteAll(handles);
-            jobVert.CopyToArrayAndDispose(_av3Vertices, n);
-            if (bUV1)
-            {
-                jobUV.CopyToArrayAndDispose(_av2Mapping1In, n);
-            }
-            if (bUV2)
-            {
-                jobUV2.CopyToArrayAndDispose(_av2Mapping2In, n);
-            }
-            if (bNormal)
-            {
-                jobNorm.CopyToArrayAndDispose(_av3NormalsIn, n);
-            }
-            if (bTangent)
-            {
-                jobTang.CopyToArrayAndDispose(_av4TangentsIn, n);
-            }
-            if (bColor32)
-            {
-                jobCol.CopyToArrayAndDispose(_aColors32In, n);
-            }
-            if (bBone)
-            {
-                jobBone.CopyToArrayAndDispose(_aBoneWeights, n);
-            }
-            //for (int i = 0; i < headCount; i++)
-            //{
-            //    MappingLinkedNode head = UnsafeUtility.ReadArrayElement<MappingLinkedNode>(pHeadArray, i);
-            //    MappingLinkedNode* node = head.Next;
-            //    while (node != null)
-            //    {
-            //        MappingLinkedNode* oldNode = node;
-            //        node = node->Next;
-            //        UnsafeUtility.Free(oldNode, Allocator.TempJob);
-            //    }
-            //}
-            handles.Dispose();
-            nodeArray.Dispose();
-            headArray.Dispose();
-            //for (int i = 0; i < headCount; i++)
-            //{
-            //    MappingLinkedNode head = headArray[i];
-            //    MappingLinkedNode *node = &head;
-
-            //    int idx = node->Mapping;
-            //    Vector3 tmp = _av3Vertices[idx];
-            //    if (bUV1) tmpUV = _av2Mapping1In[idx];
-            //    if (bUV2) tmpUV2 = _av2Mapping2In[idx];
-            //    if (bNormal) tmpNormal = _av3NormalsIn[idx];
-            //    if (bTangent) tmpTangent = _av4TangentsIn[idx];
-            //    if (bColor32) tmpColor = _aColors32In[idx];
-            //    if (bBone) tmpBoneWeight = _aBoneWeights[idx];
-            //    node = node->Next;
-            //    while (node != null)
-            //    {
-            //        int vidx = node->Mapping;
-            //        Vector3 tmp_ = _av3Vertices[vidx];
-            //        if (bUV1) tmpUV_ = _av2Mapping1In[vidx];
-            //        if (bUV2) tmpUV2_ = _av2Mapping2In[vidx];
-            //        if (bNormal) tmpNormal_ = _av3NormalsIn[vidx];
-            //        if (bTangent) tmpTangent_ = _av4TangentsIn[vidx];
-            //        if (bColor32) tmpColor_ = _aColors32In[vidx];
-            //        if (bBone) tmpBoneWeight_ = _aBoneWeights[vidx];
-            //        _av3Vertices[vidx] = tmp;
-            //        if (bUV1) _av2Mapping1In[vidx] = tmpUV;
-            //        if (bUV2) _av2Mapping2In[vidx] = tmpUV2;
-            //        if (bNormal) _av3NormalsIn[vidx] = tmpNormal;
-            //        if (bTangent) _av4TangentsIn[vidx] = tmpTangent;
-            //        if (bColor32) _aColors32In[vidx] = tmpColor;
-            //        if (bBone) _aBoneWeights[vidx] = tmpBoneWeight;
-            //        tmp = tmp_;
-            //        tmpUV = tmpUV_;
-            //        tmpUV2 = tmpUV2_;
-            //        tmpNormal = tmpNormal_;
-            //        tmpTangent = tmpTangent_;
-            //        tmpColor = tmpColor_;
-            //        tmpBoneWeight = tmpBoneWeight_;
-            //        MappingLinkedNode* oldNode = node;
-            //        node = node->Next;
-            //        UnsafeUtility.Free(oldNode, Allocator.TempJob);
-            //    }
-            //}
-            //headArray.Dispose();
-#else
             Vector2 tmpUV = Vector2.zero;
             Vector2 tmpUV2 = Vector2.zero;
             Vector3 tmpNormal = Vector3.zero;
@@ -694,29 +505,29 @@ namespace Chaos
             for (int i = 0; i < _vertexMap.Length; i++)
             {
                 int idx = i;
-                Vector3 tmp = _av3Vertices[idx];
-                if (bUV1) tmpUV = _av2Mapping1In[idx];
-                if (bUV2) tmpUV2 = _av2Mapping2In[idx];
-                if (bNormal) tmpNormal = _av3NormalsIn[idx];
-                if (bTangent) tmpTangent = _av4TangentsIn[idx];
-                if (bColor32) tmpColor = _aColors32In[idx];
-                if (bBone) tmpBoneWeight = _aBoneWeights[idx];
+                Vector3 tmp = _vertices[idx];
+                if (bUV1) tmpUV = _texCoord1In[idx];
+                if (bUV2) tmpUV2 = _texCoord2In[idx];
+                if (bNormal) tmpNormal = _normalsIn[idx];
+                if (bTangent) tmpTangent = _tangentsIn[idx];
+                if (bColor32) tmpColor = _colors32In[idx];
+                if (bBone) tmpBoneWeight = _boneWeights[idx];
                 while (_vertexMap[idx] != -1)
                 {
-                    Vector3 tmp_ = _av3Vertices[_vertexMap[idx]];
-                    if (bUV1) tmpUV_ = _av2Mapping1In[_vertexMap[idx]];
-                    if (bUV2) tmpUV2_ = _av2Mapping2In[_vertexMap[idx]];
-                    if (bNormal) tmpNormal_ = _av3NormalsIn[_vertexMap[idx]];
-                    if (bTangent) tmpTangent_ = _av4TangentsIn[_vertexMap[idx]];
-                    if (bColor32) tmpColor_ = _aColors32In[_vertexMap[idx]];
-                    if (bBone) tmpBoneWeight_ = _aBoneWeights[_vertexMap[idx]];
-                    _av3Vertices[_vertexMap[idx]] = tmp;
-                    if (bUV1) _av2Mapping1In[_vertexMap[idx]] = tmpUV;
-                    if (bUV2) _av2Mapping2In[_vertexMap[idx]] = tmpUV2;
-                    if (bNormal) _av3NormalsIn[_vertexMap[idx]] = tmpNormal;
-                    if (bTangent) _av4TangentsIn[_vertexMap[idx]] = tmpTangent;
-                    if (bColor32) _aColors32In[_vertexMap[idx]] = tmpColor;
-                    if (bBone) _aBoneWeights[_vertexMap[idx]] = tmpBoneWeight;
+                    Vector3 tmp_ = _vertices[_vertexMap[idx]];
+                    if (bUV1) tmpUV_ = _texCoord1In[_vertexMap[idx]];
+                    if (bUV2) tmpUV2_ = _texCoord2In[_vertexMap[idx]];
+                    if (bNormal) tmpNormal_ = _normalsIn[_vertexMap[idx]];
+                    if (bTangent) tmpTangent_ = _tangentsIn[_vertexMap[idx]];
+                    if (bColor32) tmpColor_ = _colors32In[_vertexMap[idx]];
+                    if (bBone) tmpBoneWeight_ = _boneWeights[_vertexMap[idx]];
+                    _vertices[_vertexMap[idx]] = tmp;
+                    if (bUV1) _texCoord1In[_vertexMap[idx]] = tmpUV;
+                    if (bUV2) _texCoord2In[_vertexMap[idx]] = tmpUV2;
+                    if (bNormal) _normalsIn[_vertexMap[idx]] = tmpNormal;
+                    if (bTangent) _tangentsIn[_vertexMap[idx]] = tmpTangent;
+                    if (bColor32) _colors32In[_vertexMap[idx]] = tmpColor;
+                    if (bBone) _boneWeights[_vertexMap[idx]] = tmpBoneWeight;
                     tmp = tmp_;
                     tmpUV = tmpUV_;
                     tmpUV2 = tmpUV2_;
@@ -729,17 +540,6 @@ namespace Chaos
                     idx = tmpI;
                 }
             }
-#endif
-            //#if DEBUG
-            //                // Check
-            //                for (int i = 0; i < n; i++)
-            //                {
-            //                    if (_vertexMap[i] != -1)
-            //                    {
-            //                        throw new Exception("");
-            //                    }
-            //                }
-            //#endif
 
             this._meshOut = meshOut;
 
@@ -762,19 +562,19 @@ namespace Chaos
 
             meshOut.triangles = null;
             // NOTE: 禁术
-            UnsafeUtil.Vector3HackArraySizeCall(_av3Vertices, n, _assignVertices);
-            if (bNormal) UnsafeUtil.Vector3HackArraySizeCall(_av3NormalsIn, n, _assignNormals);
-            if (bTangent) UnsafeUtil.Vector4HackArraySizeCall(_av4TangentsIn, n, _assignTangents);
-            if (bUV1) UnsafeUtil.Vector2HackArraySizeCall(_av2Mapping1In, n, _assignUV);
-            if (bUV2) UnsafeUtil.Vector2HackArraySizeCall(_av2Mapping2In, n, _assignUV2);
-            if (bColor32) UnsafeUtil.Color32HackArraySizeCall(_aColors32In, n, _assignColor32);
-            if (bBone) UnsafeUtil.BoneWeightHackArraySizeCall(_aBoneWeights, n, _assignBoneWeights);
-            if (bBone) meshOut.bindposes = _aBindPoses;
-            meshOut.subMeshCount = _aSubMeshes.Length;
+            UnsafeUtil.Vector3HackArraySizeCall(_vertices, n, _assignVertices);
+            if (bNormal) UnsafeUtil.Vector3HackArraySizeCall(_normalsIn, n, _assignNormals);
+            if (bTangent) UnsafeUtil.Vector4HackArraySizeCall(_tangentsIn, n, _assignTangents);
+            if (bUV1) UnsafeUtil.Vector2HackArraySizeCall(_texCoord1In, n, _assignUV);
+            if (bUV2) UnsafeUtil.Vector2HackArraySizeCall(_texCoord2In, n, _assignUV2);
+            if (bColor32) UnsafeUtil.Color32HackArraySizeCall(_colors32In, n, _assignColor32);
+            if (bBone) UnsafeUtil.BoneWeightHackArraySizeCall(_boneWeights, n, _assignBoneWeights);
+            if (bBone) meshOut.bindposes = _bindPoses;
+            meshOut.subMeshCount = _subMeshes.Length;
 
             for (int i = 0; i < subMeshCount; i++)
             {
-                UnsafeUtil.IntegerHackArraySizeCall(_aSubMeshes[i], _aTriangleCount[i], _setTriangles[i]);
+                UnsafeUtil.IntegerHackArraySizeCall(_subMeshes[i], _triangleCount[i], _setTriangles[i]);
             }
             meshOut.UploadMeshData(false);
             //meshOut.name = gameObject.name + " simplified mesh";
@@ -783,12 +583,12 @@ namespace Chaos
 
         float ComputeEdgeCollapseCost(Vertex u, Vertex v, float fRelevanceBias)
         {
-            bool bUseEdgeLength = m_bUseEdgeLength;
-            bool bUseCurvature = m_bUseCurvature;
-            bool bLockBorder = m_bLockBorder;
+            bool bUseEdgeLength = _useEdgeLength;
+            bool bUseCurvature = _useCurvature;
+            bool bLockBorder = _lockBorder;
 
             int i;
-            float fEdgeLength = bUseEdgeLength ? (Vector3.Magnitude(v.Position - u.Position) / m_fOriginalMeshSize) : 1.0f;
+            float fEdgeLength = bUseEdgeLength ? (Vector3.Magnitude(v.Position - u.Position) / _originalMeshSize) : 1.0f;
             float fCurvature = 0.001f;
 
             List<Triangle> sides = new List<Triangle>();
@@ -879,11 +679,11 @@ namespace Chaos
         {
             Stopwatch sw = Stopwatch.StartNew();
 
-            for (int i = 0; i < m_listVertices.Count; i++)
+            for (int i = 0; i < _listVertices.Count; i++)
             {
                 if (progress != null && ((i & 0xFF) == 0))
                 {
-                    progress("Preprocessing mesh: " + strProgressDisplayObjectName, "Computing edge collapse cost", m_listVertices.Count == 1 ? 1.0f : ((float)i / (m_listVertices.Count - 1.0f)));
+                    progress("Preprocessing mesh: " + strProgressDisplayObjectName, "Computing edge collapse cost", _listVertices.Count == 1 ? 1.0f : ((float)i / (_listVertices.Count - 1.0f)));
 
                     if (Cancelled)
                     {
@@ -897,8 +697,8 @@ namespace Chaos
                     sw = Stopwatch.StartNew();
                 }
 
-                ComputeEdgeCostAtVertex(m_listVertices[i], transform, aRelevanceSpheres);
-                m_heap.Insert(m_listVertices[i]);
+                ComputeEdgeCostAtVertex(_listVertices[i], transform, aRelevanceSpheres);
+                _heap.Insert(_listVertices[i]);
             }
         }
 
@@ -960,7 +760,7 @@ namespace Chaos
             for (i = 0; i < tmpVertices.Count; i++)
             {
                 ComputeEdgeCostAtVertex(tmpVertices[i], transform, aRelevanceSpheres);
-                m_heap.ModifyValue(tmpVertices[i].HeapIndex, tmpVertices[i]);
+                _heap.ModifyValue(tmpVertices[i].HeapIndex, tmpVertices[i]);
             }
         }
 
@@ -969,7 +769,7 @@ namespace Chaos
             for (int i = 0; i < listVertices.Length; i++)
             {
                 Vertex v = new Vertex(listVertices[i], listVerticesWorld[i], i);
-                m_listVertices.Add(v);
+                _listVertices.Add(v);
             }
         }
 
@@ -985,11 +785,11 @@ namespace Chaos
                 }
             }
 
-            List<Triangle> list = m_aListTriangles[nSubMesh].ListTriangles;
+            List<Triangle> list = _listTriangles[nSubMesh].ListTriangles;
             for (int i = 0; i < anIndices.Length; i += 3)
             {
                 Triangle tri = new Triangle(nSubMesh, nTriangles + list.Count,
-                    m_listVertices[anIndices[i]], m_listVertices[anIndices[i + 1]], m_listVertices[anIndices[i + 2]],
+                    _listVertices[anIndices[i]], _listVertices[anIndices[i + 1]], _listVertices[anIndices[i + 2]],
                                             bUVData, anIndices[i], anIndices[i + 1], anIndices[i + 2], true);
 
 
@@ -1055,26 +855,26 @@ namespace Chaos
         // Private vars
         /////////////////////////////////////////////////////////////////////////////////////////////////
 
-        private static int m_nCoroutineFrameMiliseconds = 0;
+        private static int _coroutineFrameMiliseconds = 0;
         private const float MAX_VERTEX_COLLAPSE_COST = 10000000.0f;
 
-        public List<Vertex> m_listVertices;
-        private Heap<Vertex> m_heap;
-        public TriangleList[] m_aListTriangles;
+        private List<Vertex> _listVertices;
+        private Heap<Vertex> _heap;
+        private TriangleList[] _listTriangles;
         [SerializeField, HideInInspector]
-        private int m_nOriginalMeshVertexCount = -1;
+        private int _originalMeshVertexCount = -1;
         [SerializeField, HideInInspector]
-        private float m_fOriginalMeshSize = 1.0f;
+        private float _originalMeshSize = 1.0f;
         [SerializeField, HideInInspector]
-        private int[] m_aVertexMap;
+        private int[] _vertexMapping;
         [SerializeField, HideInInspector]
-        private int[] m_aVertexPermutation;
+        private int[] _vertexPermutation;
         [SerializeField, HideInInspector]
-        private Mesh m_meshOriginal;
+        private Mesh _meshOriginal;
         [SerializeField, HideInInspector]
-        private bool m_bUseEdgeLength = true;
+        private bool _useEdgeLength = true;
         [SerializeField, HideInInspector]
-        bool m_bUseCurvature = true, m_bProtectTexture = true, m_bLockBorder = true;
+        bool _useCurvature = true, _protectTexture = true, _lockBorder = true;
 
         private Action<Vector3[]> _assignVertices;
         private Action<Vector3[]> _assignNormals;
@@ -1084,24 +884,24 @@ namespace Chaos
         private Action<Color32[]> _assignColor32;
         private Action<BoneWeight[]> _assignBoneWeights;
         private Action<int[]>[] _setTriangles;
-        Vector3[] _av3VerticesOriginal;
-        Vector3[] _av3NormalsOriginal;
-        Vector4[] _av4TangentsOriginal;
-        Vector2[] _av2Mapping1Original;
-        Vector2[] _av2Mapping2Original;
-        Color32[] _aColors32Original;
-        BoneWeight[] _aBoneWeightsOriginal;
-        int[][] _aSubMeshesOriginal;
-        Vector3[] _av3Vertices;
-        Vector3[] _av3NormalsIn;
-        Vector4[] _av4TangentsIn;
-        Vector2[] _av2Mapping1In;
-        Vector2[] _av2Mapping2In;
-        Color32[] _aColors32In;
-        BoneWeight[] _aBoneWeights;
-        Matrix4x4[] _aBindPoses;
-        int[][] _aSubMeshes;
-        int[] _aTriangleCount;
+        Vector3[] _verticesOriginal;
+        Vector3[] _normalsOriginal;
+        Vector4[] _tangentsOriginal;
+        Vector2[] _texCoord1Original;
+        Vector2[] _texCoord2Original;
+        Color32[] _colors32Original;
+        BoneWeight[] _boneWeightsOriginal;
+        int[][] _subMeshesOriginal;
+        Vector3[] _vertices;
+        Vector3[] _normalsIn;
+        Vector4[] _tangentsIn;
+        Vector2[] _texCoord1In;
+        Vector2[] _texCoord2In;
+        Color32[] _colors32In;
+        BoneWeight[] _boneWeights;
+        Matrix4x4[] _bindPoses;
+        int[][] _subMeshes;
+        int[] _triangleCount;
         Mesh _meshOut;
         int[] _vertexMap;
 

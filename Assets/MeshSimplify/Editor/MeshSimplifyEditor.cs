@@ -25,18 +25,18 @@ public class MeshSimplifyEditor : Editor
 
     void OnEnable()
     {
-        PropertyGenerateIncludeChildren = serializedObject.FindProperty("m_bGenerateIncludeChildren");
+        PropertyGenerateIncludeChildren = serializedObject.FindProperty("_generateIncludeChildren");
         //PropertyEnablePrefabUsage = serializedObject.FindProperty("m_bEnablePrefabUsage");
-        PropertyExpandRelevanceSpheres = serializedObject.FindProperty("m_bExpandRelevanceSpheres");
-        PropertyRelevanceSpheres = serializedObject.FindProperty("m_aRelevanceSpheres");
-        PropertyOverrideRootSettings = serializedObject.FindProperty("m_bOverrideRootSettings");
-        PropertyVertexAmount = serializedObject.FindProperty("m_fVertexAmount");
-        PropertyUseEdgeLength = serializedObject.FindProperty("m_bUseEdgeLength");
-        PropertyUseCurvature = serializedObject.FindProperty("m_bUseCurvature");
-        PropertyProtectTexture = serializedObject.FindProperty("m_bProtectTexture");
-        PropertyLockBorder = serializedObject.FindProperty("m_bLockBorder");
-        PropertyDataDirty = serializedObject.FindProperty("m_bDataDirty");
-        PropertyExcludedFromTree = serializedObject.FindProperty("m_bExcludedFromTree");
+        PropertyExpandRelevanceSpheres = serializedObject.FindProperty("ExpandRelevanceSpheres");
+        PropertyRelevanceSpheres = serializedObject.FindProperty("RelevanceSpheres");
+        PropertyOverrideRootSettings = serializedObject.FindProperty("_overrideRootSettings");
+        PropertyVertexAmount = serializedObject.FindProperty("VertexAmount");
+        PropertyUseEdgeLength = serializedObject.FindProperty("_useEdgeLength");
+        PropertyUseCurvature = serializedObject.FindProperty("_useCurvature");
+        PropertyProtectTexture = serializedObject.FindProperty("_protectTexture");
+        PropertyLockBorder = serializedObject.FindProperty("_lockBorder");
+        PropertyDataDirty = serializedObject.FindProperty("_dataDirty");
+        PropertyExcludedFromTree = serializedObject.FindProperty("_excludedFromTree");
 
 		m_bComputeData = false;
         m_bComputeMesh = false;
