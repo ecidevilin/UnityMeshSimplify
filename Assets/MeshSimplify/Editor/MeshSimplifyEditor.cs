@@ -312,11 +312,11 @@ public class MeshSimplifyEditor : Editor
                 {
                     SerializedProperty elementProperty = PropertyRelevanceSpheres.GetArrayElementAtIndex(i);
 
-                    SerializedProperty elementExpanded = elementProperty.FindPropertyRelative("m_bExpanded");
-                    SerializedProperty elementPosition = elementProperty.FindPropertyRelative("m_v3Position");
-                    SerializedProperty elementRotation = elementProperty.FindPropertyRelative("m_q4Rotation");
-                    SerializedProperty elementScale = elementProperty.FindPropertyRelative("m_v3Scale");
-                    SerializedProperty elementRelevance = elementProperty.FindPropertyRelative("m_fRelevance");
+                    SerializedProperty elementExpanded = elementProperty.FindPropertyRelative("Expanded");
+                    SerializedProperty elementPosition = elementProperty.FindPropertyRelative("Position");
+                    SerializedProperty elementRotation = elementProperty.FindPropertyRelative("Rotation");
+                    SerializedProperty elementScale = elementProperty.FindPropertyRelative("Scale");
+                    SerializedProperty elementRelevance = elementProperty.FindPropertyRelative("Relevance");
 
                     elementExpanded.boolValue = EditorGUILayout.Foldout(elementExpanded.boolValue, new GUIContent("Sphere"));
 
