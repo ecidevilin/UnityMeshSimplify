@@ -34,7 +34,7 @@ public partial class MeshSimplify : MonoBehaviour
     [SerializeField, HideInInspector] private bool _useEdgeLength = true;
     [SerializeField, HideInInspector] private bool _useCurvature = true;
     [SerializeField, HideInInspector] private bool _protectTexture = true;
-    [SerializeField, HideInInspector] private bool _lockBorder = true;
+    [SerializeField, HideInInspector] private float _borderCurvature = 2;
     [SerializeField, HideInInspector] private bool _dataDirty = true;
     [SerializeField, HideInInspector] private bool _excludedFromTree = false;
     public RelevanceSphere[] RelevanceSpheres = null;
@@ -45,14 +45,14 @@ public partial class MeshSimplify : MonoBehaviour
             _meshSimplifier.UseEdgeLength = MeshSimplifyRoot._useEdgeLength;
             _meshSimplifier.UseCurvature = MeshSimplifyRoot._useCurvature;
             _meshSimplifier.ProtectTexture = MeshSimplifyRoot._protectTexture;
-            _meshSimplifier.LockBorder = MeshSimplifyRoot._lockBorder;
+            _meshSimplifier.BorderCurvature = MeshSimplifyRoot._borderCurvature;
         }
         else
         {
             _meshSimplifier.UseEdgeLength = _useEdgeLength;
             _meshSimplifier.UseCurvature = _useCurvature;
             _meshSimplifier.ProtectTexture = _protectTexture;
-            _meshSimplifier.LockBorder = _lockBorder;
+            _meshSimplifier.BorderCurvature = _borderCurvature;
         }
     }
     public bool HasData()

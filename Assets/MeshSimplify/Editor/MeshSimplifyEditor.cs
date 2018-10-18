@@ -34,7 +34,7 @@ public class MeshSimplifyEditor : Editor
         PropertyUseEdgeLength = serializedObject.FindProperty("_useEdgeLength");
         PropertyUseCurvature = serializedObject.FindProperty("_useCurvature");
         PropertyProtectTexture = serializedObject.FindProperty("_protectTexture");
-        PropertyLockBorder = serializedObject.FindProperty("_lockBorder");
+        PropertyLockBorder = serializedObject.FindProperty("_borderCurvature");
         PropertyDataDirty = serializedObject.FindProperty("_dataDirty");
         PropertyExcludedFromTree = serializedObject.FindProperty("_excludedFromTree");
 
@@ -236,7 +236,7 @@ public class MeshSimplifyEditor : Editor
             }
 
             EditorGUI.BeginChangeCheck();
-            EditorGUILayout.PropertyField(PropertyLockBorder, new GUIContent("Keep Borders", "Will try to keep those vertices that form an object's border"));
+            EditorGUILayout.PropertyField(PropertyLockBorder, new GUIContent("Border Curvature", "Will use this value as curvature of the vertices on the border to compute the collapse cost"));
             if (EditorGUI.EndChangeCheck())
             {
                 PropertyDataDirty.boolValue = true;

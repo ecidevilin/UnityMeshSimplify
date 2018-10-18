@@ -59,10 +59,10 @@ namespace Chaos
             set { _protectTexture = value; }
         }
 
-        public bool LockBorder
+        public float BorderCurvature
         {
-            get { return _lockBorder; }
-            set { _lockBorder = value; }
+            get { return _borderCurvature; }
+            set { _borderCurvature = value; }
         }
 
         #endregion // Properties
@@ -196,7 +196,7 @@ namespace Chaos
 #if UNITY_2018_1_OR_NEWER
                 float[] costs = new float[_listVertices.Count];
                 int[] collapses = new int[_listVertices.Count];
-                CostCompution.Compute(_listVertices, _listTriangles, aRelevanceSpheres, _useEdgeLength, _useCurvature, _lockBorder, _originalMeshSize, costs, collapses);
+                CostCompution.Compute(_listVertices, _listTriangles, aRelevanceSpheres, _useEdgeLength, _useCurvature, _borderCurvature, _originalMeshSize, costs, collapses);
 
                 for (int i = 0; i < _listVertices.Count; i++)
                 {
@@ -223,7 +223,7 @@ namespace Chaos
 #if UNITY_2018_1_OR_NEWER
                 float[] costs = new float[_listVertices.Count];
                 int[] collapses = new int[_listVertices.Count];
-                CostCompution.Compute(_listVertices, _listTriangles, aRelevanceSpheres, _useEdgeLength, _useCurvature, _lockBorder, _originalMeshSize, costs, collapses);
+                CostCompution.Compute(_listVertices, _listTriangles, aRelevanceSpheres, _useEdgeLength, _useCurvature, _borderCurvature, _originalMeshSize, costs, collapses);
 
                 for (int i = 0; i < _listVertices.Count; i++)
                 {
@@ -585,7 +585,7 @@ namespace Chaos
         {
             bool bUseEdgeLength = _useEdgeLength;
             bool bUseCurvature = _useCurvature;
-            bool bLockBorder = _lockBorder;
+            float fBorderCurvature = _borderCurvature;
 
             int i;
             float fEdgeLength = bUseEdgeLength ? (Vector3.Magnitude(v.Position - u.Position) / _originalMeshSize) : 1.0f;
@@ -622,9 +622,9 @@ namespace Chaos
                 fCurvature = 1.0f;
             }
 
-            if (bLockBorder && isBorder)
+            if (fBorderCurvature > 1 && isBorder)
             {
-                fCurvature = MAX_VERTEX_COLLAPSE_COST;
+                fCurvature = fBorderCurvature;
             }
 
             fCurvature += fRelevanceBias;
@@ -874,7 +874,9 @@ namespace Chaos
         [SerializeField, HideInInspector]
         private bool _useEdgeLength = true;
         [SerializeField, HideInInspector]
-        bool _useCurvature = true, _protectTexture = true, _lockBorder = true;
+        bool _useCurvature = true, _protectTexture = true;
+        [SerializeField, HideInInspector]
+        float _borderCurvature = 2.0f;
 
         private Action<Vector3[]> _assignVertices;
         private Action<Vector3[]> _assignNormals;

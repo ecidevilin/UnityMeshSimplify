@@ -47,7 +47,7 @@ namespace Chaos
 
         public bool UseEdgeLength;
         public bool UseCurvature;
-        public bool LockBorder;
+        public float BorderCurvature;
         public float OriginalMeshSize;
 
         public void Execute(int index)
@@ -114,7 +114,7 @@ namespace Chaos
         {
             bool bUseEdgeLength = UseEdgeLength;
             bool bUseCurvature = UseCurvature;
-            bool bLockBorder = LockBorder;
+            float fBorderCurvature = BorderCurvature;
 
             int i;
             float fEdgeLength = bUseEdgeLength ? (Vector3.Magnitude(v.Position - u.Position) / OriginalMeshSize) : 1.0f;
@@ -152,9 +152,9 @@ namespace Chaos
                 fCurvature = 1.0f;
             }
 
-            if (bLockBorder && u.IsBorder == 1)
+            if (BorderCurvature > 1 && u.IsBorder == 1)
             {
-                fCurvature = float.MaxValue;
+                fCurvature = BorderCurvature; //float.MaxValue;
             }
 
             fCurvature += fRelevanceBias;
@@ -166,12 +166,12 @@ namespace Chaos
 
     public static class CostCompution
     {
-        public unsafe static void Compute(List<Vertex> vertices, TriangleList[] triangleLists, RelevanceSphere[] aRelevanceSpheres, bool bUseEdgeLength, bool bUseCurvature, bool bLockBorder, float fOriginalMeshSize, float[] costs, int[] collapses)
+        public unsafe static void Compute(List<Vertex> vertices, TriangleList[] triangleLists, RelevanceSphere[] aRelevanceSpheres, bool bUseEdgeLength, bool bUseCurvature, float fBorderCurvature, float fOriginalMeshSize, float[] costs, int[] collapses)
         {
             ComputeCostJob job = new ComputeCostJob();
             job.UseEdgeLength = bUseEdgeLength;
             job.UseCurvature = bUseCurvature;
-            job.LockBorder = bLockBorder;
+            job.BorderCurvature = fBorderCurvature;
             job.OriginalMeshSize = fOriginalMeshSize;
             List<StructTriangle> structTriangles = new List<StructTriangle>();
             int intAlignment = UnsafeUtility.SizeOf<int>();
