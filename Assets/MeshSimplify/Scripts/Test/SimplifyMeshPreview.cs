@@ -142,6 +142,14 @@ public class SimplifyMeshPreview : MonoBehaviour
 
             GUILayout.Label("Triangle count: " + nSimplifiedVertices + "/" + nTotalVertices + " " + (Mathf.RoundToInt(((float)nSimplifiedVertices / (float)nTotalVertices) * 100.0f).ToString() + "% from original"));
 
+            if (nTotalVertices == 0)
+            {
+                GUILayout.Space(10);
+                GUI.color = Color.red;
+                GUILayout.Label("You should delete and reCompute the data on the prefab!!!");
+                GUI.color = Color.white;
+            }
+
             GUILayout.Space(20);
 
             if (!string.IsNullOrEmpty(m_strLastTitle) && !string.IsNullOrEmpty(m_strLastMessage))
