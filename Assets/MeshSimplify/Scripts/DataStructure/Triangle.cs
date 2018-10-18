@@ -12,86 +12,80 @@ namespace Chaos
     {
         public Vertex[] Vertices
         {
-            get { return m_aVertices; }
+            get { return _vertices; }
         }
 
         public bool HasUVData
         {
-            get { return m_bUVData; }
-        }
-
-        public int[] IndicesUV
-        {
-            get { return m_aUV; }
+            get { return _uvData; }
         }
 
         public Vector3 Normal
         {
-            get { return m_v3Normal; }
+            get { return _normal; }
         }
 
         public int[] Indices
         {
-            get { return m_aIndices; }
+            get { return _indices; }
         }
         public int SubMeshIndex
         {
-            get { return m_nSubMesh; }
+            get { return _subMeshIndex; }
         }
 
         public int Index
         {
-            get { return m_nIndex; }
+            get { return _index; }
         }
 
-        private Vertex[] m_aVertices;
-        private bool m_bUVData;
-        private int[] m_aUV;
-        private int[] m_aIndices;
-        private Vector3 m_v3Normal;
-        private int m_nSubMesh;
-        private int m_nIndex;
-        public bool DestructedRuntime = false;
-        public int[] FaceIndex;
+        private Vertex[] _vertices;
+        private bool _uvData;
+        private int[] _uvs;
+        private int[] _indices;
+        private Vector3 _normal;
+        private int _subMeshIndex;
+        private int _index;
+        private int[] _faceIndex;
 
-        public Triangle(int nSubMesh, int nIndex, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
+        public Triangle(int nSubMeshIndex, int nIndex, Vertex v0, Vertex v1, Vertex v2, bool bUVData,
             int nIndex1, int nIndex2, int nIndex3, bool compute)
         {
-            m_aVertices = new Vertex[3];
-            m_aUV = new int[3];
-            m_aIndices = new int[3];
+            _vertices = new Vertex[3];
+            _uvs = new int[3];
+            _indices = new int[3];
 
-            m_aVertices[0] = v0;
-            m_aVertices[1] = v1;
-            m_aVertices[2] = v2;
+            _vertices[0] = v0;
+            _vertices[1] = v1;
+            _vertices[2] = v2;
 
-            m_nSubMesh = nSubMesh;
-            m_nIndex = nIndex;
+            _subMeshIndex = nSubMeshIndex;
+            _index = nIndex;
 
-            m_bUVData = bUVData;
+            _uvData = bUVData;
 
-            if (m_bUVData)
+            if (_uvData)
             {
-                m_aUV[0] = nIndex1;
-                m_aUV[1] = nIndex2;
-                m_aUV[2] = nIndex3;
+                _uvs[0] = nIndex1;
+                _uvs[1] = nIndex2;
+                _uvs[2] = nIndex3;
             }
 
-            m_aIndices[0] = nIndex1;
-            m_aIndices[1] = nIndex2;
-            m_aIndices[2] = nIndex3;
+            _indices[0] = nIndex1;
+            _indices[1] = nIndex2;
+            _indices[2] = nIndex3;
 
             if (compute)
             {
                 ComputeNormal();
             }
 
-            FaceIndex = new int[3];
+            _faceIndex = new int[3];
 
             for (int i = 0; i < 3; i++)
             {
-                FaceIndex[i] = m_aVertices[i].m_listFaces.Count;
-                m_aVertices[i].m_listFaces.Add(this);
+                _faceIndex[i] = _vertices[i].ListFaces.Count;
+                _vertices[i].ListFaces.Add(this);
                 if (!compute)
                 {
                     continue;
@@ -100,9 +94,9 @@ namespace Chaos
                 {
                     if (i != j)
                     {
-                        if (m_aVertices[i].m_listNeighbors.Contains(m_aVertices[j]) == false)
+                        if (_vertices[i].ListNeighbors.Contains(_vertices[j]) == false)
                         {
-                            m_aVertices[i].m_listNeighbors.Add(m_aVertices[j]);
+                            _vertices[i].ListNeighbors.Add(_vertices[j]);
                         }
                     }
                 }
@@ -115,12 +109,12 @@ namespace Chaos
 
             for (i = 0; i < 3; i++)
             {
-                if (m_aVertices[i] != null)
+                if (_vertices[i] != null)
                 {
-                    List<Triangle> list = m_aVertices[i].m_listFaces;
+                    List<Triangle> list = _vertices[i].ListFaces;
                     Triangle t = list[list.Count - 1];
-                    list[FaceIndex[i]] = t;
-                    t.FaceIndex[t.IndexOf(m_aVertices[i])] = FaceIndex[i];
+                    list[_faceIndex[i]] = t;
+                    t._faceIndex[t.IndexOf(_vertices[i])] = _faceIndex[i];
                     list.RemoveAt(list.Count - 1);
                     //m_aVertices[i].m_listFaces.Remove(this);
                 }
@@ -130,24 +124,12 @@ namespace Chaos
             {
                 int i2 = (i + 1) % 3;
 
-                if (m_aVertices[i] == null || m_aVertices[i2] == null) continue;
+                if (_vertices[i] == null || _vertices[i2] == null) continue;
 
-                m_aVertices[i].RemoveIfNonNeighbor(m_aVertices[i2]);
-                m_aVertices[i2].RemoveIfNonNeighbor(m_aVertices[i]);
+                _vertices[i].RemoveIfNonNeighbor(_vertices[i2]);
+                _vertices[i2].RemoveIfNonNeighbor(_vertices[i]);
             }
         }
-        //public void DestructorRuntime()
-        //{
-        //    int i;
-
-        //    for (i = 0; i < 3; i++)
-        //    {
-        //        if (m_aVertices[i] != null)
-        //        {
-        //            m_aVertices[i].m_listFaces.Remove(this);
-        //        }
-        //    }
-        //}
 
         public bool HasVertex(Vertex v)
         {
@@ -158,7 +140,7 @@ namespace Chaos
         {
             for (int i = 0; i < 3; i++)
             {
-                if (v == m_aVertices[i])
+                if (v == _vertices[i])
                 {
                     return i;
                 }
@@ -168,24 +150,24 @@ namespace Chaos
 
         public void ComputeNormal()
         {
-            Vector3 v0 = m_aVertices[0].m_v3Position;
-            Vector3 v1 = m_aVertices[1].m_v3Position;
-            Vector3 v2 = m_aVertices[2].m_v3Position;
+            Vector3 v0 = _vertices[0].Position;
+            Vector3 v1 = _vertices[1].Position;
+            Vector3 v2 = _vertices[2].Position;
 
-            m_v3Normal = Vector3.Cross((v1 - v0), (v2 - v1));
+            _normal = Vector3.Cross((v1 - v0), (v2 - v1));
 
-            if (m_v3Normal.magnitude == 0.0f) return;
+            if (_normal.magnitude == 0.0f) return;
 
-            m_v3Normal = m_v3Normal / m_v3Normal.magnitude;
+            _normal = _normal / _normal.magnitude;
         }
 
         public int TexAt(Vertex vertex)
         {
             for (int i = 0; i < 3; i++)
             {
-                if (m_aVertices[i] == vertex)
+                if (_vertices[i] == vertex)
                 {
-                    return m_aUV[i];
+                    return _uvs[i];
                 }
             }
 
@@ -195,26 +177,12 @@ namespace Chaos
 
         public int TexAt(int i)
         {
-            return m_aUV[i];
-        }
-
-        public void SetTexAt(Vertex vertex, int uv)
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                if (m_aVertices[i] == vertex)
-                {
-                    m_aUV[i] = uv;
-                    return;
-                }
-            }
-
-            UnityEngine.Debug.LogError("SetTexAt(): Vertex not found");
+            return _uvs[i];
         }
 
         public void SetTexAt(int i, int uv)
         {
-            m_aUV[i] = uv;
+            _uvs[i] = uv;
         }
 
         public void ReplaceVertex(Vertex vold, Vertex vnew)
@@ -222,23 +190,23 @@ namespace Chaos
             int idx;
             for (idx = 0; idx < 3; idx++)
             {
-                if (vold == m_aVertices[idx])
+                if (vold == _vertices[idx])
                 {
-                    m_aVertices[idx] = vnew;
+                    _vertices[idx] = vnew;
                     for (int i = 0; i < 3; i++)
                     {
                         if (i == idx)
                         {
                             continue;
                         }
-                        Vertex n = m_aVertices[i];
-                        List<Vertex> nn = n.m_listNeighbors;
+                        Vertex n = _vertices[i];
+                        List<Vertex> nn = n.ListNeighbors;
                         nn.Remove(vold);
                         if (!nn.Contains(vnew))
                         {
                             nn.Add(vnew);
                         }
-                        List<Vertex> vn = vnew.m_listNeighbors;
+                        List<Vertex> vn = vnew.ListNeighbors;
                         if (!vn.Contains(n))
                         {
                             vn.Add(n);
@@ -248,27 +216,10 @@ namespace Chaos
                 }
             }
             //vold.m_listFaces.Remove(this);
-            FaceIndex[idx] = vnew.m_listFaces.Count;
-            vnew.m_listFaces.Add(this);
+            _faceIndex[idx] = vnew.ListFaces.Count;
+            vnew.ListFaces.Add(this);
 
             ComputeNormal();
         }
-        //public void ReplaceVertexRuntime(Vertex vold, Vertex vnew)
-        //{
-        //    if (vold == m_aVertices[0])
-        //    {
-        //        m_aVertices[0] = vnew;
-        //    }
-        //    else if (vold == m_aVertices[1])
-        //    {
-        //        m_aVertices[1] = vnew;
-        //    }
-        //    else
-        //    {
-        //        m_aVertices[2] = vnew;
-        //    }
-        //    //vold.m_listFaces.Remove(this);
-        //    vnew.m_listFaces.Add(this);
-        //}
     };
 }

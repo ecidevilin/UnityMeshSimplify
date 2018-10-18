@@ -11,22 +11,22 @@ namespace Chaos
     {
         public RelevanceSphere()
         {
-            m_v3Scale = Vector3.one;
+            Scale = Vector3.one;
         }
 
         public void SetDefault(Transform target, float fRelevance)
         {
-            m_bExpanded = true;
-            m_v3Position = target.position + Vector3.up;
-            m_q4Rotation = target.rotation;
-            m_v3Scale = Vector3.one;
-            m_fRelevance = fRelevance;
+            Expanded = true;
+            Position = target.position + Vector3.up;
+            Rotation = target.rotation;
+            Scale = Vector3.one;
+            Relevance = fRelevance;
         }
 
-        public bool m_bExpanded;
-        public Vector3 m_v3Position;
-        public Quaternion m_q4Rotation;
-        public Vector3 m_v3Scale;
-        public float m_fRelevance;
+        public bool Expanded;
+        public Vector3 Position;
+        public Quaternion Rotation;
+        public Vector3 Scale;
+        public float Relevance;
     }
 }

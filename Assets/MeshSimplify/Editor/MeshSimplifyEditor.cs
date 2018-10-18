@@ -70,40 +70,40 @@ public class MeshSimplifyEditor : Editor
 
         bool bDrawSpheres = true;
 
-        if (meshSimplify.m_meshSimplifyRoot != null)
+        if (meshSimplify.MeshSimplifyRoot != null)
         {
-            if (meshSimplify.m_meshSimplifyRoot.m_bExpandRelevanceSpheres == false)
+            if (meshSimplify.MeshSimplifyRoot.ExpandRelevanceSpheres == false)
             {
                 bDrawSpheres = false;
             }
         }
         else
         {
-            if (meshSimplify.m_bExpandRelevanceSpheres == false)
+            if (meshSimplify.ExpandRelevanceSpheres == false)
             {
                 bDrawSpheres = false;
             }
         }
 
-        if (meshSimplify.m_aRelevanceSpheres != null && bDrawSpheres)
+        if (meshSimplify.RelevanceSpheres != null && bDrawSpheres)
         {
-            for (int nSphere = 0; nSphere < meshSimplify.m_aRelevanceSpheres.Length; nSphere++)
+            for (int nSphere = 0; nSphere < meshSimplify.RelevanceSpheres.Length; nSphere++)
             {
-                if (meshSimplify.m_aRelevanceSpheres[nSphere].m_bExpanded == false)
+                if (meshSimplify.RelevanceSpheres[nSphere].Expanded == false)
                 {
                     continue;
                 }
 
-                RelevanceSphere relevanceSphere = meshSimplify.m_aRelevanceSpheres[nSphere];
+                RelevanceSphere relevanceSphere = meshSimplify.RelevanceSpheres[nSphere];
 
                 if (Tools.current == Tool.Move)
                 {
                     EditorGUI.BeginChangeCheck();
-                    Vector3 v3Position = Handles.PositionHandle(relevanceSphere.m_v3Position, relevanceSphere.m_q4Rotation);
+                    Vector3 v3Position = Handles.PositionHandle(relevanceSphere.Position, relevanceSphere.Rotation);
                     if (EditorGUI.EndChangeCheck())
                     {
                         Undo.RecordObject(meshSimplify, "Move Relevance Sphere");
-                        relevanceSphere.m_v3Position = v3Position;
+                        relevanceSphere.Position = v3Position;
                         meshSimplify.RestoreOriginalMesh(false, true);
                         meshSimplify.DataDirty = true;
                         EditorUtility.SetDirty(target);
@@ -112,11 +112,11 @@ public class MeshSimplifyEditor : Editor
                 else if (Tools.current == Tool.Rotate)
                 {
                     EditorGUI.BeginChangeCheck();
-                    Quaternion qRotation = Handles.RotationHandle(relevanceSphere.m_q4Rotation, relevanceSphere.m_v3Position);
+                    Quaternion qRotation = Handles.RotationHandle(relevanceSphere.Rotation, relevanceSphere.Position);
                     if (EditorGUI.EndChangeCheck())
                     {
                         Undo.RecordObject(meshSimplify, "Rotate Relevance Sphere");
-                        relevanceSphere.m_q4Rotation = qRotation;
+                        relevanceSphere.Rotation = qRotation;
                         meshSimplify.RestoreOriginalMesh(false, true);
                         meshSimplify.DataDirty = true;
                         EditorUtility.SetDirty(target);
@@ -125,11 +125,11 @@ public class MeshSimplifyEditor : Editor
                 else if (Tools.current == Tool.Scale)
                 {
                     EditorGUI.BeginChangeCheck();
-                    Vector3 v3Scale = Handles.ScaleHandle(relevanceSphere.m_v3Scale, relevanceSphere.m_v3Position, relevanceSphere.m_q4Rotation, HandleUtility.GetHandleSize(relevanceSphere.m_v3Position) * 1.0f);
+                    Vector3 v3Scale = Handles.ScaleHandle(relevanceSphere.Scale, relevanceSphere.Position, relevanceSphere.Rotation, HandleUtility.GetHandleSize(relevanceSphere.Position) * 1.0f);
                     if (EditorGUI.EndChangeCheck())
                     {
                         Undo.RecordObject(meshSimplify, "Scale Relevance Sphere");
-                        relevanceSphere.m_v3Scale = v3Scale;
+                        relevanceSphere.Scale = v3Scale;
                         meshSimplify.RestoreOriginalMesh(false, true);
                         meshSimplify.DataDirty = true;
                         EditorUtility.SetDirty(target);
@@ -139,7 +139,7 @@ public class MeshSimplifyEditor : Editor
                 if (Event.current.type == EventType.Repaint)
                 {
                     Matrix4x4 mtxHandles = Handles.matrix;
-                    Handles.matrix = Matrix4x4.TRS(relevanceSphere.m_v3Position, relevanceSphere.m_q4Rotation, relevanceSphere.m_v3Scale);
+                    Handles.matrix = Matrix4x4.TRS(relevanceSphere.Position, relevanceSphere.Rotation, relevanceSphere.Scale);
                     Handles.color = new Color(0.0f, 0.0f, 1.0f, 0.5f);
                     Handles.SphereHandleCap(0, Vector3.zero, Quaternion.identity, 1.0f, EventType.Repaint);
                     Handles.matrix = mtxHandles;
@@ -160,7 +160,7 @@ public class MeshSimplifyEditor : Editor
         {
             meshSimplify = targetObject as MeshSimplify;
 
-            if (meshSimplify.m_meshSimplifyRoot != null && targets.Length > 1)
+            if (meshSimplify.MeshSimplifyRoot != null && targets.Length > 1)
             {
                 EditorGUILayout.HelpBox("One or more GameObjects of the selection is not a root MeshSimplify GameObject. Only root MeshSimplify GameObjects can be edited at the same time.", MessageType.Warning);
                 return;
@@ -178,7 +178,7 @@ public class MeshSimplifyEditor : Editor
 
         meshSimplify = target as MeshSimplify;
 
-        if (meshSimplify.m_meshSimplifyRoot == null)
+        if (meshSimplify.MeshSimplifyRoot == null)
         {
             EditorGUILayout.PropertyField(PropertyGenerateIncludeChildren, new GUIContent(strIncludeChildrenLabel, "If checked, we will traverse the whole GameObject's hierarchy looking for meshes"));
 
@@ -205,12 +205,12 @@ public class MeshSimplifyEditor : Editor
             }
             else
             {
-                GUILayout.Label("Child MeshSimplify GameObject depending on " + meshSimplify.m_meshSimplifyRoot.name);
-                EditorGUILayout.PropertyField(PropertyOverrideRootSettings, new GUIContent("Override " + meshSimplify.m_meshSimplifyRoot.name + " settings", "Will allow to edit this object's own parameters, instead of inheriting those of the root Automatic LOD GameObject"));
+                GUILayout.Label("Child MeshSimplify GameObject depending on " + meshSimplify.MeshSimplifyRoot.name);
+                EditorGUILayout.PropertyField(PropertyOverrideRootSettings, new GUIContent("Override " + meshSimplify.MeshSimplifyRoot.name + " settings", "Will allow to edit this object's own parameters, instead of inheriting those of the root Automatic LOD GameObject"));
             }
         }
 
-        if (meshSimplify.m_meshSimplifyRoot == null || (PropertyOverrideRootSettings.boolValue == true && PropertyExcludedFromTree.boolValue == false))
+        if (meshSimplify.MeshSimplifyRoot == null || (PropertyOverrideRootSettings.boolValue == true && PropertyExcludedFromTree.boolValue == false))
         {
             bool bIsOverriden = PropertyOverrideRootSettings.boolValue == true;
 
@@ -279,7 +279,7 @@ public class MeshSimplifyEditor : Editor
             EditorGUILayout.Space();
         }
 
-        if (meshSimplify.m_meshSimplifyRoot == null)
+        if (meshSimplify.MeshSimplifyRoot == null)
         {
             PropertyExpandRelevanceSpheres.boolValue = EditorGUILayout.Foldout(PropertyExpandRelevanceSpheres.boolValue, new GUIContent("Vertex Relevance Modifiers:"));
 
@@ -381,7 +381,7 @@ public class MeshSimplifyEditor : Editor
             EditorGUILayout.Space();
         }
 
-        if (meshSimplify.m_meshSimplifyRoot == null || (PropertyOverrideRootSettings.boolValue == true && PropertyExcludedFromTree.boolValue == false))
+        if (meshSimplify.MeshSimplifyRoot == null || (PropertyOverrideRootSettings.boolValue == true && PropertyExcludedFromTree.boolValue == false))
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
@@ -420,7 +420,7 @@ public class MeshSimplifyEditor : Editor
             GUILayout.EndHorizontal();
         }
 
-        if (meshSimplify.m_meshSimplifyRoot != null && PropertyExcludedFromTree.boolValue == false)
+        if (meshSimplify.MeshSimplifyRoot != null && PropertyExcludedFromTree.boolValue == false)
         {
             EditorGUILayout.Space();
 
@@ -491,8 +491,8 @@ public class MeshSimplifyEditor : Editor
                 {
                     if (meshSimplify.DataDirty || meshSimplify.HasData() == false || meshSimplify.HasNonMeshSimplifyGameObjectsInTree())
                     {
-                        meshSimplify.RestoreOriginalMesh(true, meshSimplify.m_meshSimplifyRoot == null);
-                        meshSimplify.ComputeData(meshSimplify.m_meshSimplifyRoot == null, Progress);
+                        meshSimplify.RestoreOriginalMesh(true, meshSimplify.MeshSimplifyRoot == null);
+                        meshSimplify.ComputeData(meshSimplify.MeshSimplifyRoot == null, Progress);
 
                         EditorUtility.DisplayDialog("Done", "Done", "Done");
                         //if (Simplifier.Cancelled)
@@ -504,7 +504,7 @@ public class MeshSimplifyEditor : Editor
 					if (saveMesh)
 					{
 
-						meshSimplify.ComputeMesh(meshSimplify.m_meshSimplifyRoot == null, Progress);
+						meshSimplify.ComputeMesh(meshSimplify.MeshSimplifyRoot == null, Progress);
 
 						if (Simplifier.Cancelled)
 						{
@@ -539,7 +539,7 @@ public class MeshSimplifyEditor : Editor
             foreach (Object targetObject in targets)
             {
                 meshSimplify = targetObject as MeshSimplify;
-                meshSimplify.RestoreOriginalMesh(true, meshSimplify.m_meshSimplifyRoot == null);
+                meshSimplify.RestoreOriginalMesh(true, meshSimplify.MeshSimplifyRoot == null);
                 RemoveChildMeshSimplifyComponents(meshSimplify);
             }
 
@@ -572,9 +572,9 @@ public class MeshSimplifyEditor : Editor
             {
                 meshSimplify = targetObject as MeshSimplify;
 
-                if (meshSimplify.m_aRelevanceSpheres != null && meshSimplify.m_aRelevanceSpheres.Length > 0)
+                if (meshSimplify.RelevanceSpheres != null && meshSimplify.RelevanceSpheres.Length > 0)
                 {
-                    meshSimplify.m_aRelevanceSpheres[0].SetDefault(meshSimplify.transform, 0.0f);
+                    meshSimplify.RelevanceSpheres[0].SetDefault(meshSimplify.transform, 0.0f);
                 }
             }
         }
@@ -594,7 +594,7 @@ public class MeshSimplifyEditor : Editor
     {
         MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
 
-        if (meshSimplify != null && meshSimplify.m_meshSimplifyRoot != null)
+        if (meshSimplify != null && meshSimplify.MeshSimplifyRoot != null)
         {
             if (Application.isEditor && Application.isPlaying == false)
             {
@@ -624,9 +624,9 @@ public class MeshSimplifyEditor : Editor
                 MeshSimplify meshSimplify = targetObject as MeshSimplify;
                 GameObject gameObject = meshSimplify.gameObject;
 
-                if (meshSimplify.m_meshSimplifyRoot == null/* && meshSimplify.m_bEnablePrefabUsage*/)
+                if (meshSimplify.MeshSimplifyRoot == null/* && meshSimplify.m_bEnablePrefabUsage*/)
                 {
-                    string strMeshAssetPath = meshSimplify.m_strAssetPath;
+                    string strMeshAssetPath = meshSimplify.AssetPath;
 
                     //if (string.IsNullOrEmpty(strMeshAssetPath))
                     {
@@ -664,7 +664,7 @@ public class MeshSimplifyEditor : Editor
 
                         //Debug.Log("User selected " + strMeshAssetPath + " using panel.");
 
-                        meshSimplify.m_strAssetPath = strMeshAssetPath;
+                        meshSimplify.AssetPath = strMeshAssetPath;
                     }
 
                     int nCounter = 0;
@@ -695,11 +695,11 @@ public class MeshSimplifyEditor : Editor
 
         MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
 
-        if (meshSimplify != null && meshSimplify.HasData() && (meshSimplify.m_meshSimplifyRoot == null || meshSimplify.m_meshSimplifyRoot.gameObject == root))
+        if (meshSimplify != null && meshSimplify.HasData() && (meshSimplify.MeshSimplifyRoot == null || meshSimplify.MeshSimplifyRoot.gameObject == root))
         {
-            int nTotalProgressElements = meshSimplify.m_meshSimplifyRoot != null ? (meshSimplify.m_meshSimplifyRoot.m_listDependentChildren.Count + 1) : 1;
+            int nTotalProgressElements = meshSimplify.MeshSimplifyRoot != null ? (meshSimplify.MeshSimplifyRoot.ListDependentChildren.Count + 1) : 1;
 
-            if (meshSimplify.m_simplifiedMesh != null && MeshUtil.HasValidMeshData(meshSimplify.gameObject))
+            if (meshSimplify.SimplifiedMesh != null && MeshUtil.HasValidMeshData(meshSimplify.gameObject))
             {
                 float fT = (float)nProgressElementsCounter / (float)nTotalProgressElements;
                 Progress("Saving meshes to asset file", meshSimplify.name, fT);
@@ -713,9 +713,9 @@ public class MeshSimplifyEditor : Editor
                 {
                     //Debug.Log("Creating asset " + meshSimplify.m_simplifiedMesh.name);
 
-                    UnityEditor.AssetDatabase.CreateAsset(meshSimplify.m_simplifiedMesh, strFile);
-                    Resources.UnloadAsset(meshSimplify.m_simplifiedMesh);
-                    meshSimplify.m_simplifiedMesh = null;
+                    UnityEditor.AssetDatabase.CreateAsset(meshSimplify.SimplifiedMesh, strFile);
+                    Resources.UnloadAsset(meshSimplify.SimplifiedMesh);
+                    meshSimplify.SimplifiedMesh = null;
                     bAssetAlreadyCreated = true;
                 }
                 else
@@ -724,8 +724,8 @@ public class MeshSimplifyEditor : Editor
                     {
                         //Debug.Log("Adding asset " + meshSimplify.m_simplifiedMesh.name);
 
-                        UnityEditor.AssetDatabase.AddObjectToAsset(meshSimplify.m_simplifiedMesh, strFile);
-                        UnityEditor.AssetDatabase.ImportAsset(UnityEditor.AssetDatabase.GetAssetPath(meshSimplify.m_simplifiedMesh));
+                        UnityEditor.AssetDatabase.AddObjectToAsset(meshSimplify.SimplifiedMesh, strFile);
+                        UnityEditor.AssetDatabase.ImportAsset(UnityEditor.AssetDatabase.GetAssetPath(meshSimplify.SimplifiedMesh));
                     }
                 }
 
@@ -750,7 +750,7 @@ public class MeshSimplifyEditor : Editor
         {
             MeshSimplify meshSimplify = targetObject as MeshSimplify;
 
-            if (meshSimplify.m_meshSimplifyRoot == null)
+            if (meshSimplify.MeshSimplifyRoot == null)
             {
                 SetHideFlagsRecursive(meshSimplify.gameObject, meshSimplify.gameObject, true);
             }

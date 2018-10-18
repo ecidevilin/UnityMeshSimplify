@@ -177,7 +177,7 @@ namespace Chaos
             int intAlignment = UnsafeUtility.SizeOf<int>();
             for (int n = 0; n < triangleLists.Length; n++)
             {
-                List<Triangle> triangles = triangleLists[n].m_listTriangles;
+                List<Triangle> triangles = triangleLists[n].ListTriangles;
                 for (int i = 0; i < triangles.Count; i++)
                 {
                     Triangle t = triangles[i];
@@ -201,22 +201,22 @@ namespace Chaos
                 Vertex v = vertices[i];
                 StructVertex sv = new StructVertex()
                 {
-                    Position = v.m_v3Position,
-                    PositionWorld = v.m_v3PositionWorld,
-                    ID = v.m_nID,
-                    Neighbors = v.m_listNeighbors.Count == 0 ? null : (int*)UnsafeUtility.Malloc(v.m_listNeighbors.Count * intAlignment, intAlignment, Allocator.TempJob),
-                    NeighborCount = v.m_listNeighbors.Count,
-                    Faces = (int*)UnsafeUtility.Malloc(v.m_listFaces.Count * intAlignment, intAlignment, Allocator.TempJob),
-                    FaceCount = v.m_listFaces.Count,
+                    Position = v.Position,
+                    PositionWorld = v.PositionWorld,
+                    ID = v.ID,
+                    Neighbors = v.ListNeighbors.Count == 0 ? null : (int*)UnsafeUtility.Malloc(v.ListNeighbors.Count * intAlignment, intAlignment, Allocator.TempJob),
+                    NeighborCount = v.ListNeighbors.Count,
+                    Faces = (int*)UnsafeUtility.Malloc(v.ListFaces.Count * intAlignment, intAlignment, Allocator.TempJob),
+                    FaceCount = v.ListFaces.Count,
                     IsBorder = v.IsBorder() ? 1 : 0,
                 };
-                for (int j = 0; j < v.m_listNeighbors.Count; j++)
+                for (int j = 0; j < v.ListNeighbors.Count; j++)
                 {
-                    sv.Neighbors[j] = v.m_listNeighbors[j].m_nID;
+                    sv.Neighbors[j] = v.ListNeighbors[j].ID;
                 }
-                for (int j = 0; j < v.m_listFaces.Count; j++)
+                for (int j = 0; j < v.ListFaces.Count; j++)
                 {
-                    sv.Faces[j] = v.m_listFaces[j].Index;
+                    sv.Faces[j] = v.ListFaces[j].Index;
                 }
                 job.Vertices[i] = sv;
             }
@@ -226,8 +226,8 @@ namespace Chaos
                 RelevanceSphere rs = aRelevanceSpheres[i];
                 StructRelevanceSphere srs = new StructRelevanceSphere()
                 {
-                    Transformation = Matrix4x4.TRS(rs.m_v3Position, rs.m_q4Rotation, rs.m_v3Scale),
-                    Relevance = rs.m_fRelevance,
+                    Transformation = Matrix4x4.TRS(rs.Position, rs.Rotation, rs.Scale),
+                    Relevance = rs.Relevance,
                 };
                 job.Spheres[i] = srs;
             }

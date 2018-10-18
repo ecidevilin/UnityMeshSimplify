@@ -271,7 +271,7 @@ public class SimplifyMeshPreview : MonoBehaviour
                         meshFilter.mesh = newMesh;
                     }
 
-                    meshSimplify.m_simplifiedMesh = newMesh;
+                    meshSimplify.SimplifiedMesh = newMesh;
                 }
             }
         }

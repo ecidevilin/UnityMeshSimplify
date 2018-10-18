@@ -201,8 +201,8 @@ namespace Chaos
                 for (int i = 0; i < m_listVertices.Count; i++)
                 {
                     Vertex v = m_listVertices[i];
-                    v.m_fObjDist = costs[i];
-                    v.m_collapse = collapses[i] == -1 ? null : m_listVertices[collapses[i]];
+                    v.ObjDist = costs[i];
+                    v.CollapseVertex = collapses[i] == -1 ? null : m_listVertices[collapses[i]];
                     m_heap.Insert(v);
                 }
 #else
@@ -228,8 +228,8 @@ namespace Chaos
                 for (int i = 0; i < m_listVertices.Count; i++)
                 {
                     Vertex v = m_listVertices[i];
-                    v.m_fObjDist = costs[i];
-                    v.m_collapse = m_listVertices[collapses[i]];
+                    v.ObjDist = costs[i];
+                    v.CollapseVertex = m_listVertices[collapses[i]];
                     m_heap.Insert(v);
                 }
 #else
@@ -264,9 +264,9 @@ namespace Chaos
                 Vertex mn = m_heap.ExtractTop();
 
                 //                    m_listVertexPermutationBack[m_listVertices.Count - 1] = mn.m_nID;
-                m_aVertexPermutation[mn.m_nID] = vertexNum;
-                m_aVertexMap[mn.m_nID] = mn.m_collapse != null ? mn.m_collapse.m_nID : -1;
-                Collapse(mn, mn.m_collapse, gameObject.transform, aRelevanceSpheres);
+                m_aVertexPermutation[mn.ID] = vertexNum;
+                m_aVertexMap[mn.ID] = mn.CollapseVertex != null ? mn.CollapseVertex.ID : -1;
+                Collapse(mn, mn.CollapseVertex, gameObject.transform, aRelevanceSpheres);
             }
 
             //for (int nSubMesh = 0; nSubMesh < m_aListTriangles.Length; nSubMesh++)
@@ -788,28 +788,28 @@ namespace Chaos
             bool bLockBorder = m_bLockBorder;
 
             int i;
-            float fEdgeLength = bUseEdgeLength ? (Vector3.Magnitude(v.m_v3Position - u.m_v3Position) / m_fOriginalMeshSize) : 1.0f;
+            float fEdgeLength = bUseEdgeLength ? (Vector3.Magnitude(v.Position - u.Position) / m_fOriginalMeshSize) : 1.0f;
             float fCurvature = 0.001f;
 
             List<Triangle> sides = new List<Triangle>();
 
-            for (i = 0; i < u.m_listFaces.Count; i++)
+            for (i = 0; i < u.ListFaces.Count; i++)
             {
-                if (u.m_listFaces[i].HasVertex(v))
+                if (u.ListFaces[i].HasVertex(v))
                 {
-                    sides.Add(u.m_listFaces[i]);
+                    sides.Add(u.ListFaces[i]);
                 }
             }
 
             if (bUseCurvature)
             {
-                for (i = 0; i < u.m_listFaces.Count; i++)
+                for (i = 0; i < u.ListFaces.Count; i++)
                 {
                     float fMinCurv = 1.0f;
 
                     for (int j = 0; j < sides.Count; j++)
                     {
-                        float dotprod = Vector3.Dot(u.m_listFaces[i].Normal, sides[j].Normal);
+                        float dotprod = Vector3.Dot(u.ListFaces[i].Normal, sides[j].Normal);
                         fMinCurv = Mathf.Min(fMinCurv, (1.0f - dotprod) / 2.0f);
                     }
 
@@ -834,15 +834,15 @@ namespace Chaos
 
         void ComputeEdgeCostAtVertex(Vertex v, Transform transform, RelevanceSphere[] aRelevanceSpheres)
         {
-            if (v.m_listNeighbors.Count == 0)
+            if (v.ListNeighbors.Count == 0)
             {
-                v.m_collapse = null;
-                v.m_fObjDist = -0.01f;
+                v.CollapseVertex = null;
+                v.ObjDist = -0.01f;
                 return;
             }
 
-            v.m_fObjDist = MAX_VERTEX_COLLAPSE_COST;
-            v.m_collapse = null;
+            v.ObjDist = MAX_VERTEX_COLLAPSE_COST;
+            v.CollapseVertex = null;
 
             float fRelevanceBias = 0.0f;
 
@@ -850,27 +850,27 @@ namespace Chaos
             {
                 for (int nSphere = 0; nSphere < aRelevanceSpheres.Length; nSphere++)
                 {
-                    Matrix4x4 mtxSphere = Matrix4x4.TRS(aRelevanceSpheres[nSphere].m_v3Position, aRelevanceSpheres[nSphere].m_q4Rotation, aRelevanceSpheres[nSphere].m_v3Scale);
+                    Matrix4x4 mtxSphere = Matrix4x4.TRS(aRelevanceSpheres[nSphere].Position, aRelevanceSpheres[nSphere].Rotation, aRelevanceSpheres[nSphere].Scale);
 
-                    Vector3 v3World = v.m_v3PositionWorld;
+                    Vector3 v3World = v.PositionWorld;
                     Vector3 v3Local = mtxSphere.inverse.MultiplyPoint(v3World);
 
                     if (v3Local.magnitude <= 0.5f)
                     {
                         // Inside
-                        fRelevanceBias = aRelevanceSpheres[nSphere].m_fRelevance;
+                        fRelevanceBias = aRelevanceSpheres[nSphere].Relevance;
                     }
                 }
             }
 
-            for (int i = 0; i < v.m_listNeighbors.Count; i++)
+            for (int i = 0; i < v.ListNeighbors.Count; i++)
             {
-                float dist = ComputeEdgeCollapseCost(v, v.m_listNeighbors[i], fRelevanceBias);
+                float dist = ComputeEdgeCollapseCost(v, v.ListNeighbors[i], fRelevanceBias);
 
-                if (v.m_collapse == null || dist < v.m_fObjDist)
+                if (v.CollapseVertex == null || dist < v.ObjDist)
                 {
-                    v.m_collapse = v.m_listNeighbors[i];
-                    v.m_fObjDist = dist;
+                    v.CollapseVertex = v.ListNeighbors[i];
+                    v.ObjDist = dist;
                 }
             }
         }
@@ -918,9 +918,9 @@ namespace Chaos
             int i;
             tmpVertices.Clear();
 
-            for (i = 0; i < u.m_listNeighbors.Count; i++)
+            for (i = 0; i < u.ListNeighbors.Count; i++)
             {
-                Vertex nb = u.m_listNeighbors[i];
+                Vertex nb = u.ListNeighbors[i];
                 if (nb != u)
                 {
                     tmpVertices.Add(nb);
@@ -929,11 +929,11 @@ namespace Chaos
 
             tmpTriangles.Clear();
 
-            for (i = 0; i < u.m_listFaces.Count; i++)
+            for (i = 0; i < u.ListFaces.Count; i++)
             {
-                if (u.m_listFaces[i].HasVertex(v))
+                if (u.ListFaces[i].HasVertex(v))
                 {
-                    tmpTriangles.Add(u.m_listFaces[i]);
+                    tmpTriangles.Add(u.ListFaces[i]);
                 }
             }
 
@@ -948,9 +948,9 @@ namespace Chaos
 
             // Update remaining triangles to have v instead of u
 
-            for (i = u.m_listFaces.Count - 1; i >= 0; i--)
+            for (i = u.ListFaces.Count - 1; i >= 0; i--)
             {
-                u.m_listFaces[i].ReplaceVertex(u, v);
+                u.ListFaces[i].ReplaceVertex(u, v);
             }
             //m_listVertices.Remove(u);
             u.Destructor();
@@ -985,7 +985,7 @@ namespace Chaos
                 }
             }
 
-            List<Triangle> list = m_aListTriangles[nSubMesh].m_listTriangles;
+            List<Triangle> list = m_aListTriangles[nSubMesh].ListTriangles;
             for (int i = 0; i < anIndices.Length; i += 3)
             {
                 Triangle tri = new Triangle(nSubMesh, nTriangles + list.Count,
@@ -1019,9 +1019,9 @@ namespace Chaos
             {
                 int nCurrentVert = i;
 
-                for (int j = 0; j < t.Vertices[nCurrentVert].m_listFaces.Count; j++)
+                for (int j = 0; j < t.Vertices[nCurrentVert].ListFaces.Count; j++)
                 {
-                    Triangle n = t.Vertices[nCurrentVert].m_listFaces[j];
+                    Triangle n = t.Vertices[nCurrentVert].ListFaces[j];
 
                     if (t == n)
                     {

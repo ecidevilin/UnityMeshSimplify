@@ -15,33 +15,56 @@ namespace Chaos
 
         public int CompareTo(Vertex other)
         {
-            return this.m_fObjDist > other.m_fObjDist ? 1 : this.m_fObjDist < other.m_fObjDist ? -1 : 0;
+            return this.ObjDist > other.ObjDist ? 1 : this.ObjDist < other.ObjDist ? -1 : 0;
         }
 
-        public Vector3 m_v3Position;
-        public Vector3 m_v3PositionWorld;
-        public int m_nID; // Place of vertex in original list
-        public List<Vertex> m_listNeighbors; // Adjacent vertices
-        public List<Triangle> m_listFaces; // Adjacent triangles
-        public float m_fObjDist; // Cached cost of collapsing edge
-        public Vertex m_collapse; // Candidate vertex for collapse
-        public bool m_bRuntimeCollapsed;
+        public Vector3 Position {
+            get { return _position;}
+        }
+
+        public Vector3 PositionWorld
+        {
+            get { return _positionWorld; }
+        }
+
+        public int ID
+        {
+            get { return _id; }
+        }
+
+        public List<Vertex> ListNeighbors
+        {
+            get { return _listNeighbors; }
+        }
+
+        public List<Triangle> ListFaces
+        {
+            get { return _listFaces; }
+        } 
+
+        private Vector3 _position;
+        private Vector3 _positionWorld;
+        private int _id; // Place of vertex in original list
+        private List<Vertex> _listNeighbors; // Adjacent vertices
+        private List<Triangle> _listFaces; // Adjacent triangles
+        public float ObjDist; // Cached cost of collapsing edge
+        public Vertex CollapseVertex; // Candidate vertex for collapse
 
         public Vertex(Vector3 v, Vector3 v3World, int nID)
         {
-            m_v3Position = v;
-            m_v3PositionWorld = v3World;
-            this.m_nID = nID;
+            _position = v;
+            _positionWorld = v3World;
+            this._id = nID;
 
-            m_listNeighbors = new List<Vertex>();
-            m_listFaces = new List<Triangle>();
+            _listNeighbors = new List<Vertex>();
+            _listFaces = new List<Triangle>();
         }
 
         public void Destructor()
         {
-            for (int i = 0, imax = m_listNeighbors.Count; i < imax; i++)
+            for (int i = 0, imax = _listNeighbors.Count; i < imax; i++)
             {
-                m_listNeighbors[i].m_listNeighbors.Remove(this);
+                _listNeighbors[i]._listNeighbors.Remove(this);
             }
             //while (m_listNeighbors.Count > 0)
             //{
@@ -56,34 +79,34 @@ namespace Chaos
 
         public void RemoveIfNonNeighbor(Vertex n)
         {
-            int idx = m_listNeighbors.IndexOf(n);
+            int idx = _listNeighbors.IndexOf(n);
             if (idx < 0)
             {
                 return;
             }
 
-            for (int i = 0; i < m_listFaces.Count; i++)
+            for (int i = 0; i < _listFaces.Count; i++)
             {
-                if (m_listFaces[i].HasVertex(n))
+                if (_listFaces[i].HasVertex(n))
                 {
                     return;
                 }
             }
 
-            m_listNeighbors.RemoveAt(idx);
+            _listNeighbors.RemoveAt(idx);
         }
 
         public bool IsBorder()
         {
             int i, j;
 
-            for (i = 0; i < m_listNeighbors.Count; i++)
+            for (i = 0; i < _listNeighbors.Count; i++)
             {
                 int nCount = 0;
 
-                for (j = 0; j < m_listFaces.Count; j++)
+                for (j = 0; j < _listFaces.Count; j++)
                 {
-                    if (m_listFaces[j].HasVertex(m_listNeighbors[i]))
+                    if (_listFaces[j].HasVertex(_listNeighbors[i]))
                     {
                         nCount++;
                     }

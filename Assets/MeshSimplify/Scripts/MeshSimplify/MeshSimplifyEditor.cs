@@ -8,16 +8,16 @@ public partial class MeshSimplify : MonoBehaviour
 
     public void OnDrawGizmos()
     {
-        if (m_meshSimplifyRoot != null)
+        if (MeshSimplifyRoot != null)
         {
-            if (m_meshSimplifyRoot.m_bExpandRelevanceSpheres == false)
+            if (MeshSimplifyRoot.ExpandRelevanceSpheres == false)
             {
                 return;
             }
         }
         else
         {
-            if (m_bExpandRelevanceSpheres == false)
+            if (ExpandRelevanceSpheres == false)
             {
                 return;
             }
@@ -25,7 +25,7 @@ public partial class MeshSimplify : MonoBehaviour
 
         Gizmos.color = Color.red;
 
-        RelevanceSphere[] aRelevanceSpheres = m_meshSimplifyRoot != null ? m_meshSimplifyRoot.m_aRelevanceSpheres : m_aRelevanceSpheres;
+        RelevanceSphere[] aRelevanceSpheres = MeshSimplifyRoot != null ? MeshSimplifyRoot.RelevanceSpheres : RelevanceSpheres;
 
         if (aRelevanceSpheres == null)
         {
@@ -36,7 +36,7 @@ public partial class MeshSimplify : MonoBehaviour
 
         for (int i = 0; i < UnityEditor.Selection.gameObjects.Length; i++)
         {
-            if (((UnityEditor.Selection.gameObjects[i] == this.gameObject) && m_meshSimplifyRoot == null) || ((m_meshSimplifyRoot != null) && (UnityEditor.Selection.gameObjects[i] == m_meshSimplifyRoot.gameObject)))
+            if (((UnityEditor.Selection.gameObjects[i] == this.gameObject) && MeshSimplifyRoot == null) || ((MeshSimplifyRoot != null) && (UnityEditor.Selection.gameObjects[i] == MeshSimplifyRoot.gameObject)))
             {
                 bDrawVertices = true;
             }
@@ -58,14 +58,14 @@ public partial class MeshSimplify : MonoBehaviour
 
         for (int nSphere = 0; nSphere < aRelevanceSpheres.Length; nSphere++)
         {
-            aSphereMatrices[nSphere] = Matrix4x4.TRS(aRelevanceSpheres[nSphere].m_v3Position, aRelevanceSpheres[nSphere].m_q4Rotation, aRelevanceSpheres[nSphere].m_v3Scale).inverse;
+            aSphereMatrices[nSphere] = Matrix4x4.TRS(aRelevanceSpheres[nSphere].Position, aRelevanceSpheres[nSphere].Rotation, aRelevanceSpheres[nSphere].Scale).inverse;
         }
 
         for (int nVertex = 0; nVertex < aVerticesWorld.Length; nVertex++)
         {
             for (int nSphere = 0; nSphere < aRelevanceSpheres.Length; nSphere++)
             {
-                if (aRelevanceSpheres[nSphere].m_bExpanded)
+                if (aRelevanceSpheres[nSphere].Expanded)
                 {
                     Vector3 v3VertexSphereLocal = aSphereMatrices[nSphere].MultiplyPoint(aVerticesWorld[nVertex]);
 
@@ -93,16 +93,16 @@ public partial class MeshSimplify : MonoBehaviour
         {
             if (IsRootOrBelongsToTree(meshSimplify, root))
             {
-                if (meshSimplify.m_simplifiedMesh)
+                if (meshSimplify.SimplifiedMesh)
                 {
-                    if (UnityEditor.AssetDatabase.IsMainAsset(meshSimplify.m_simplifiedMesh) || UnityEditor.AssetDatabase.IsSubAsset(meshSimplify.m_simplifiedMesh))
+                    if (UnityEditor.AssetDatabase.IsMainAsset(meshSimplify.SimplifiedMesh) || UnityEditor.AssetDatabase.IsSubAsset(meshSimplify.SimplifiedMesh))
                     {
-                        Mesh newMesh = Instantiate(meshSimplify.m_simplifiedMesh) as Mesh;
-                        meshSimplify.m_simplifiedMesh = newMesh;
+                        Mesh newMesh = Instantiate(meshSimplify.SimplifiedMesh) as Mesh;
+                        meshSimplify.SimplifiedMesh = newMesh;
                     }
                 }
 
-                meshSimplify.m_strAssetPath = null;
+                meshSimplify.AssetPath = null;
             }
         }
 

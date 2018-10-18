@@ -6,59 +6,58 @@ public partial class MeshSimplify : MonoBehaviour
 {
     public bool RecurseIntoChildren
     {
-        get { return m_bGenerateIncludeChildren; }
+        get { return _generateIncludeChildren; }
     }
 
     public Simplifier MeshSimplifier
     {
-        get { return m_meshSimplifier; }
-        set { m_meshSimplifier = value; }
+        get { return _meshSimplifier; }
+        set { _meshSimplifier = value; }
     }
 
     public bool DataDirty
     {
-        get { return m_bDataDirty; }
-        set { m_bDataDirty = value; }
+        get { return _dataDirty; }
+        set { _dataDirty = value; }
     }
 
-    [HideInInspector] public Mesh m_originalMesh = null;
-    [HideInInspector] public Mesh m_simplifiedMesh = null;
-    [HideInInspector] public bool m_bEnablePrefabUsage = false;
-    [HideInInspector] public float m_fVertexAmount = 1.0f;
-    [HideInInspector] public string m_strAssetPath = null;
-    [HideInInspector] public MeshSimplify m_meshSimplifyRoot;
-    [HideInInspector] public List<MeshSimplify> m_listDependentChildren = new List<MeshSimplify>();
-    [HideInInspector] public bool m_bExpandRelevanceSpheres = true;
-    [SerializeField, HideInInspector] private Simplifier m_meshSimplifier = null;
-    [SerializeField, HideInInspector] private bool m_bGenerateIncludeChildren = true;
-    [SerializeField, HideInInspector] private bool m_bOverrideRootSettings = false;
-    [SerializeField, HideInInspector] private bool m_bUseEdgeLength = true;
-    [SerializeField, HideInInspector] private bool m_bUseCurvature = true;
-    [SerializeField, HideInInspector] private bool m_bProtectTexture = true;
-    [SerializeField, HideInInspector] private bool m_bLockBorder = true;
-    [SerializeField, HideInInspector] private bool m_bDataDirty = true;
-    [SerializeField, HideInInspector] private bool m_bExcludedFromTree = false;
-    public RelevanceSphere[] m_aRelevanceSpheres = null;
+    [HideInInspector] public Mesh OriginalMesh = null;
+    [HideInInspector] public Mesh SimplifiedMesh = null;
+    [HideInInspector] public float VertexAmount = 1.0f;
+    [HideInInspector] public string AssetPath = null;
+    [HideInInspector] public MeshSimplify MeshSimplifyRoot;
+    [HideInInspector] public List<MeshSimplify> ListDependentChildren = new List<MeshSimplify>();
+    [HideInInspector] public bool ExpandRelevanceSpheres = true;
+    [SerializeField, HideInInspector] private Simplifier _meshSimplifier = null;
+    [SerializeField, HideInInspector] private bool _generateIncludeChildren = true;
+    [SerializeField, HideInInspector] private bool _overrideRootSettings = false;
+    [SerializeField, HideInInspector] private bool _useEdgeLength = true;
+    [SerializeField, HideInInspector] private bool _useCurvature = true;
+    [SerializeField, HideInInspector] private bool _protectTexture = true;
+    [SerializeField, HideInInspector] private bool _lockBorder = true;
+    [SerializeField, HideInInspector] private bool _dataDirty = true;
+    [SerializeField, HideInInspector] private bool _excludedFromTree = false;
+    public RelevanceSphere[] RelevanceSpheres = null;
     public void ConfigureSimplifier()
     {
-        if (m_meshSimplifyRoot != null && m_bOverrideRootSettings == false)
+        if (MeshSimplifyRoot != null && _overrideRootSettings == false)
         {
-            m_meshSimplifier.UseEdgeLength = m_meshSimplifyRoot.m_bUseEdgeLength;
-            m_meshSimplifier.UseCurvature = m_meshSimplifyRoot.m_bUseCurvature;
-            m_meshSimplifier.ProtectTexture = m_meshSimplifyRoot.m_bProtectTexture;
-            m_meshSimplifier.LockBorder = m_meshSimplifyRoot.m_bLockBorder;
+            _meshSimplifier.UseEdgeLength = MeshSimplifyRoot._useEdgeLength;
+            _meshSimplifier.UseCurvature = MeshSimplifyRoot._useCurvature;
+            _meshSimplifier.ProtectTexture = MeshSimplifyRoot._protectTexture;
+            _meshSimplifier.LockBorder = MeshSimplifyRoot._lockBorder;
         }
         else
         {
-            m_meshSimplifier.UseEdgeLength = m_bUseEdgeLength;
-            m_meshSimplifier.UseCurvature = m_bUseCurvature;
-            m_meshSimplifier.ProtectTexture = m_bProtectTexture;
-            m_meshSimplifier.LockBorder = m_bLockBorder;
+            _meshSimplifier.UseEdgeLength = _useEdgeLength;
+            _meshSimplifier.UseCurvature = _useCurvature;
+            _meshSimplifier.ProtectTexture = _protectTexture;
+            _meshSimplifier.LockBorder = _lockBorder;
         }
     }
     public bool HasData()
     {
-        return (m_meshSimplifier != null && m_simplifiedMesh != null) || (m_listDependentChildren != null && m_listDependentChildren.Count != 0);
+        return (_meshSimplifier != null && SimplifiedMesh != null) || (ListDependentChildren != null && ListDependentChildren.Count != 0);
     }
 
     public bool HasNonMeshSimplifyGameObjectsInTree()
@@ -125,14 +124,14 @@ public partial class MeshSimplify : MonoBehaviour
 
     public void RemoveFromTree()
     {
-        if (m_meshSimplifyRoot != null)
+        if (MeshSimplifyRoot != null)
         {
-            m_meshSimplifyRoot.m_listDependentChildren.Remove(this);
+            MeshSimplifyRoot.ListDependentChildren.Remove(this);
         }
 
         RestoreOriginalMesh(true, false);
 
-        m_bExcludedFromTree = true;
+        _excludedFromTree = true;
     }
     //public bool HasVertexData(bool bRecurseIntoChildren)
     //{

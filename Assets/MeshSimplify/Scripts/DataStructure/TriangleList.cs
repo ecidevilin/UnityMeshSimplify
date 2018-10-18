@@ -10,44 +10,9 @@ namespace Chaos
     {
         public TriangleList(int capacity)
         {
-            m_listTriangles = new List<Triangle>(capacity);
+            ListTriangles = new List<Triangle>(capacity);
         }
 
-        public List<Triangle> m_listTriangles;
-
-        public void RemoveNull()
-        {
-            int l = m_listTriangles.Count;
-            int h = 0;
-            int t = l - 1;
-            while (h < t)
-            {
-                if (m_listTriangles[t] == null)
-                {
-                    t--;
-                    continue;
-                }
-                if (m_listTriangles[h] != null)
-                {
-                    h++;
-                    continue;
-                }
-                m_listTriangles[h] = m_listTriangles[t];
-                m_listTriangles[t] = null;
-                h++;
-                t--;
-            }
-            if (t < l - 1)
-            {
-                if (m_listTriangles[t] == null)
-                {
-                    m_listTriangles.RemoveRange(t, l - t);
-                }
-                else
-                {
-                    m_listTriangles.RemoveRange(t + 1, l - 1 - t);
-                }
-            }
-        }
+        public List<Triangle> ListTriangles;
     }
 }

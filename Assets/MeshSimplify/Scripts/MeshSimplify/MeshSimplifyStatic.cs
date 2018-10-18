@@ -30,19 +30,19 @@ public partial class MeshSimplify : MonoBehaviour
             return false;
         }
 
-        return (meshSimplify.m_bExcludedFromTree == false) && ((meshSimplify.m_meshSimplifyRoot == null) || (meshSimplify.m_meshSimplifyRoot == root) || (meshSimplify == root) || (meshSimplify.m_meshSimplifyRoot == root.m_meshSimplifyRoot));
+        return (meshSimplify._excludedFromTree == false) && ((meshSimplify.MeshSimplifyRoot == null) || (meshSimplify.MeshSimplifyRoot == root) || (meshSimplify == root) || (meshSimplify.MeshSimplifyRoot == root.MeshSimplifyRoot));
     }
     private static void ComputeDataRecursive(MeshSimplify root, GameObject gameObject, bool bRecurseIntoChildren, Simplifier.ProgressDelegate progress = null)
     {
         MeshSimplify meshSimplify = gameObject.GetComponent<MeshSimplify>();
 
-        if (meshSimplify == null && root.m_bGenerateIncludeChildren)
+        if (meshSimplify == null && root._generateIncludeChildren)
         {
             if (MeshUtil.HasValidMeshData(gameObject))
             {
                 meshSimplify = gameObject.AddComponent<MeshSimplify>();
-                meshSimplify.m_meshSimplifyRoot = root;
-                root.m_listDependentChildren.Add(meshSimplify);
+                meshSimplify.MeshSimplifyRoot = root;
+                root.ListDependentChildren.Add(meshSimplify);
             }
         }
 
@@ -58,9 +58,9 @@ public partial class MeshSimplify : MonoBehaviour
                 {
                     if (meshFilter.sharedMesh.vertexCount > 0)
                     {
-                        if (meshSimplify.m_originalMesh == null)
+                        if (meshSimplify.OriginalMesh == null)
                         {
-                            meshSimplify.m_originalMesh = meshFilter.sharedMesh;
+                            meshSimplify.OriginalMesh = meshFilter.sharedMesh;
                         }
 
                         Simplifier[] simplifiers = meshSimplify.GetComponents<Simplifier>();
@@ -77,11 +77,11 @@ public partial class MeshSimplify : MonoBehaviour
                             }
                         }
 
-                        meshSimplify.m_meshSimplifier = meshSimplify.gameObject.AddComponent<Simplifier>();
-                        meshSimplify.m_meshSimplifier.hideFlags = HideFlags.HideInInspector;
+                        meshSimplify._meshSimplifier = meshSimplify.gameObject.AddComponent<Simplifier>();
+                        meshSimplify._meshSimplifier.hideFlags = HideFlags.HideInInspector;
                         meshSimplify.ConfigureSimplifier();
 
-                        IEnumerator enumerator = meshSimplify.m_meshSimplifier.ProgressiveMesh(gameObject, meshSimplify.m_originalMesh, root.m_aRelevanceSpheres, meshSimplify.name, progress);
+                        IEnumerator enumerator = meshSimplify._meshSimplifier.ProgressiveMesh(gameObject, meshSimplify.OriginalMesh, root.RelevanceSpheres, meshSimplify.name, progress);
 
                         while (enumerator.MoveNext())
                         {
@@ -105,9 +105,9 @@ public partial class MeshSimplify : MonoBehaviour
                     {
                         if (skin.sharedMesh.vertexCount > 0)
                         {
-                            if (meshSimplify.m_originalMesh == null)
+                            if (meshSimplify.OriginalMesh == null)
                             {
-                                meshSimplify.m_originalMesh = skin.sharedMesh;
+                                meshSimplify.OriginalMesh = skin.sharedMesh;
                             }
 
                             Simplifier[] simplifiers = meshSimplify.GetComponents<Simplifier>();
@@ -124,11 +124,11 @@ public partial class MeshSimplify : MonoBehaviour
                                 }
                             }
 
-                            meshSimplify.m_meshSimplifier = meshSimplify.gameObject.AddComponent<Simplifier>();
-                            meshSimplify.m_meshSimplifier.hideFlags = HideFlags.HideInInspector;
+                            meshSimplify._meshSimplifier = meshSimplify.gameObject.AddComponent<Simplifier>();
+                            meshSimplify._meshSimplifier.hideFlags = HideFlags.HideInInspector;
                             meshSimplify.ConfigureSimplifier();
 
-                            IEnumerator enumerator = meshSimplify.m_meshSimplifier.ProgressiveMesh(gameObject, meshSimplify.m_originalMesh, root.m_aRelevanceSpheres, meshSimplify.name, progress);
+                            IEnumerator enumerator = meshSimplify._meshSimplifier.ProgressiveMesh(gameObject, meshSimplify.OriginalMesh, root.RelevanceSpheres, meshSimplify.name, progress);
 
                             while (enumerator.MoveNext())
                             {
@@ -146,7 +146,7 @@ public partial class MeshSimplify : MonoBehaviour
                     }
                 }
 
-                meshSimplify.m_bDataDirty = false;
+                meshSimplify._dataDirty = false;
             }
         }
 
@@ -171,28 +171,28 @@ public partial class MeshSimplify : MonoBehaviour
         {
             if (IsRootOrBelongsToTree(meshSimplify, root))
             {
-                if (meshSimplify.m_meshSimplifier != null)
+                if (meshSimplify._meshSimplifier != null)
                 {
-                    if (meshSimplify.m_simplifiedMesh)
+                    if (meshSimplify.SimplifiedMesh)
                     {
-                        meshSimplify.m_simplifiedMesh.Clear();
+                        meshSimplify.SimplifiedMesh.Clear();
                     }
 
-                    float fAmount = meshSimplify.m_fVertexAmount;
+                    float fAmount = meshSimplify.VertexAmount;
 
-                    if (meshSimplify.m_bOverrideRootSettings == false && meshSimplify.m_meshSimplifyRoot != null)
+                    if (meshSimplify._overrideRootSettings == false && meshSimplify.MeshSimplifyRoot != null)
                     {
-                        fAmount = meshSimplify.m_meshSimplifyRoot.m_fVertexAmount;
+                        fAmount = meshSimplify.MeshSimplifyRoot.VertexAmount;
                     }
 
-                    if (meshSimplify.m_simplifiedMesh == null)
+                    if (meshSimplify.SimplifiedMesh == null)
                     {
-                        meshSimplify.m_simplifiedMesh = CreateNewEmptyMesh(meshSimplify);
+                        meshSimplify.SimplifiedMesh = CreateNewEmptyMesh(meshSimplify);
                     }
 
                     meshSimplify.ConfigureSimplifier();
 
-                    meshSimplify.m_meshSimplifier.ComputeMeshWithVertexCount(gameObject, meshSimplify.m_simplifiedMesh, Mathf.RoundToInt(fAmount * meshSimplify.m_meshSimplifier.GetOriginalMeshUniqueVertexCount()));
+                    meshSimplify._meshSimplifier.ComputeMeshWithVertexCount(gameObject, meshSimplify.SimplifiedMesh, Mathf.RoundToInt(fAmount * meshSimplify._meshSimplifier.GetOriginalMeshUniqueVertexCount()));
                     
                     if (Simplifier.Cancelled)
                     {
@@ -224,13 +224,13 @@ public partial class MeshSimplify : MonoBehaviour
         {
             if (IsRootOrBelongsToTree(meshSimplify, root))
             {
-                if (meshSimplify.m_simplifiedMesh != null)
+                if (meshSimplify.SimplifiedMesh != null)
                 {
                     MeshFilter meshFilter = meshSimplify.GetComponent<MeshFilter>();
 
                     if (meshFilter != null)
                     {
-                        meshFilter.sharedMesh = meshSimplify.m_simplifiedMesh;
+                        meshFilter.sharedMesh = meshSimplify.SimplifiedMesh;
                     }
                     else
                     {
@@ -238,7 +238,7 @@ public partial class MeshSimplify : MonoBehaviour
 
                         if (skin != null)
                         {
-                            skin.sharedMesh = meshSimplify.m_simplifiedMesh;
+                            skin.sharedMesh = meshSimplify.SimplifiedMesh;
                         }
                     }
                 }
@@ -261,13 +261,13 @@ public partial class MeshSimplify : MonoBehaviour
         {
             if (IsRootOrBelongsToTree(meshSimplify, root))
             {
-                if (meshSimplify.m_originalMesh != null)
+                if (meshSimplify.OriginalMesh != null)
                 {
                     MeshFilter meshFilter = meshSimplify.GetComponent<MeshFilter>();
 
                     if (meshFilter != null)
                     {
-                        meshFilter.sharedMesh = meshSimplify.m_originalMesh;
+                        meshFilter.sharedMesh = meshSimplify.OriginalMesh;
                     }
                     else
                     {
@@ -275,7 +275,7 @@ public partial class MeshSimplify : MonoBehaviour
 
                         if (skin != null)
                         {
-                            skin.sharedMesh = meshSimplify.m_originalMesh;
+                            skin.sharedMesh = meshSimplify.OriginalMesh;
                         }
                     }
                 }
@@ -283,7 +283,7 @@ public partial class MeshSimplify : MonoBehaviour
                 if (bDeleteData)
                 {
                     meshSimplify.FreeData(false);
-                    meshSimplify.m_listDependentChildren.Clear();
+                    meshSimplify.ListDependentChildren.Clear();
                 }
             }
         }
@@ -379,9 +379,9 @@ public partial class MeshSimplify : MonoBehaviour
         {
             if (IsRootOrBelongsToTree(meshSimplify, root))
             {
-                if (meshSimplify.m_originalMesh != null)
+                if (meshSimplify.OriginalMesh != null)
                 {
-                    nVertexCount += meshSimplify.m_originalMesh.vertexCount;
+                    nVertexCount += meshSimplify.OriginalMesh.vertexCount;
                 }
             }
         }
@@ -402,9 +402,9 @@ public partial class MeshSimplify : MonoBehaviour
         {
             if (IsRootOrBelongsToTree(meshSimplify, root))
             {
-                if (meshSimplify.m_originalMesh != null)
+                if (meshSimplify.OriginalMesh != null)
                 {
-                    nTriangleCount += meshSimplify.m_originalMesh.triangles.Length / 3;
+                    nTriangleCount += meshSimplify.OriginalMesh.triangles.Length / 3;
                 }
             }
         }
@@ -425,9 +425,9 @@ public partial class MeshSimplify : MonoBehaviour
         {
             if (IsRootOrBelongsToTree(meshSimplify, root))
             {
-                if (meshSimplify.m_simplifiedMesh != null)
+                if (meshSimplify.SimplifiedMesh != null)
                 {
-                    nVertexCount += meshSimplify.m_simplifiedMesh.vertexCount;
+                    nVertexCount += meshSimplify.SimplifiedMesh.vertexCount;
                 }
             }
         }
@@ -448,9 +448,9 @@ public partial class MeshSimplify : MonoBehaviour
         {
             if (IsRootOrBelongsToTree(meshSimplify, root))
             {
-                if (meshSimplify.m_simplifiedMesh != null)
+                if (meshSimplify.SimplifiedMesh != null)
                 {
-                    nTriangleCount += meshSimplify.m_simplifiedMesh.triangles.Length / 3;
+                    nTriangleCount += meshSimplify.SimplifiedMesh.triangles.Length / 3;
                 }
             }
         }
@@ -471,9 +471,9 @@ public partial class MeshSimplify : MonoBehaviour
         {
             if (IsRootOrBelongsToTree(meshSimplify, root))
             {
-                if (meshSimplify.m_simplifiedMesh)
+                if (meshSimplify.SimplifiedMesh)
                 {
-                    meshSimplify.m_simplifiedMesh.Clear();
+                    meshSimplify.SimplifiedMesh.Clear();
                 }
 
                 Simplifier[] simplifiers = gameObject.GetComponents<Simplifier>();
@@ -490,7 +490,7 @@ public partial class MeshSimplify : MonoBehaviour
                     }
                 }
 
-                meshSimplify.m_bDataDirty = true;
+                meshSimplify._dataDirty = true;
             }
         }
 
@@ -508,12 +508,12 @@ public partial class MeshSimplify : MonoBehaviour
 
     private static Mesh CreateNewEmptyMesh(MeshSimplify meshSimplify)
     {
-        if (meshSimplify.m_originalMesh == null)
+        if (meshSimplify.OriginalMesh == null)
         {
             return new Mesh();
         }
 
-        Mesh meshOut = Mesh.Instantiate(meshSimplify.m_originalMesh);
+        Mesh meshOut = Mesh.Instantiate(meshSimplify.OriginalMesh);
         meshOut.Clear();
         return meshOut;
     }
