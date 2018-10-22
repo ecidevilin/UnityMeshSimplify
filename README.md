@@ -3,6 +3,12 @@
 ![Runtime](Screenshots/RuntimeRecord.gif)
 
 
+# Usage
+
+1. Add MeshSimplify to the prefab. 
+2. Click "Compute data" for offline baking. 
+3. Simplify the mesh at runtime.
+
 # Demo
 
 01 - Simplify Mesh Preview
