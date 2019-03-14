@@ -109,11 +109,11 @@ public class Heap<T> where T : IComparable<T>, IHeapNode
 
     public virtual void ModifyValue(int i, T val)
     {
-        if (_compareFunc(_A[i], val))
+        _A[i] = val;
+        val.HeapIndex = i;
+        Heapify(i);
+        if (i != val.HeapIndex)
         {
-            _A[i] = val;
-            val.HeapIndex = i;
-            Heapify(i);
             return;
         }
         _A[i] = val;
