@@ -42,6 +42,16 @@ namespace Chaos
             get { return _listFaces; }
         } 
 
+        public Vector2 UV
+        {
+            get { return _uv; }
+        }
+
+        public Vector3 Normal
+        {
+            get { return _normal; }
+        }
+
         private Vector3 _position;
         private Vector3 _positionWorld;
         private int _id; // Place of vertex in original list
@@ -50,11 +60,16 @@ namespace Chaos
         public float ObjDist; // Cached cost of collapsing edge
         public Vertex CollapseVertex; // Candidate vertex for collapse
 
-        public Vertex(Vector3 v, Vector3 v3World, int nID)
+        private Vector2 _uv;
+        private Vector3 _normal;
+
+        public Vertex(Vector3 v, Vector3 v3World, int nID, Vector2 uv, Vector3 normal)
         {
             _position = v;
             _positionWorld = v3World;
             this._id = nID;
+            _uv = uv;
+            _normal = normal;
 
             _listNeighbors = new List<Vertex>();
             _listFaces = new List<Triangle>();

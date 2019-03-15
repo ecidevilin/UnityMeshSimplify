@@ -119,45 +119,52 @@ namespace Chaos
             int i;
             float fEdgeLength = bUseEdgeLength ? (Vector3.Magnitude(v.Position - u.Position) / OriginalMeshSize) : 1.0f;
             float fCurvature = 0.001f;
-
-            List<StructTriangle> sides = new List<StructTriangle>();
-
-            for (i = 0; i < u.FaceCount; i++)
+            if (fEdgeLength < float.Epsilon)
             {
-                StructTriangle ut = Triangles[u.Faces[i]];
-                if (HasVertex(ut, v.ID))
-                {
-                    sides.Add(ut);
-                }
+                return BorderCurvature;
             }
-
-            if (bUseCurvature)
+            else
             {
+
+                List<StructTriangle> sides = new List<StructTriangle>();
+
                 for (i = 0; i < u.FaceCount; i++)
                 {
-                    float fMinCurv = 1.0f;
-
-                    for (int j = 0; j < sides.Count; j++)
+                    StructTriangle ut = Triangles[u.Faces[i]];
+                    if (HasVertex(ut, v.ID))
                     {
-                        float dotprod = Vector3.Dot(Triangles[u.Faces[i]].Normal, sides[j].Normal);
-                        fMinCurv = Mathf.Min(fMinCurv, (1.0f - dotprod) / 2.0f);
+                        sides.Add(ut);
                     }
-
-                    fCurvature = Mathf.Max(fCurvature, fMinCurv);
                 }
-            }
 
-            if (u.IsBorder == 1 && sides.Count > 1)
-            {
-                fCurvature = 1.0f;
-            }
+                if (bUseCurvature)
+                {
+                    for (i = 0; i < u.FaceCount; i++)
+                    {
+                        float fMinCurv = 1.0f;
 
-            if (BorderCurvature > 1 && u.IsBorder == 1)
-            {
-                fCurvature = BorderCurvature; //float.MaxValue;
-            }
+                        for (int j = 0; j < sides.Count; j++)
+                        {
+                            float dotprod = Vector3.Dot(Triangles[u.Faces[i]].Normal, sides[j].Normal);
+                            fMinCurv = Mathf.Min(fMinCurv, (1.0f - dotprod) / 2.0f);
+                        }
 
-            fCurvature += fRelevanceBias;
+                        fCurvature = Mathf.Max(fCurvature, fMinCurv);
+                    }
+                }
+
+                if (u.IsBorder == 1 && sides.Count > 1)
+                {
+                    fCurvature = 1.0f;
+                }
+
+                if (BorderCurvature > 1 && u.IsBorder == 1)
+                {
+                    fCurvature = BorderCurvature; //float.MaxValue;
+                }
+
+                fCurvature += fRelevanceBias;
+            }
 
             return fEdgeLength * fCurvature;
         }
