@@ -541,6 +541,41 @@ namespace Chaos
                 }
             }
 
+            if (bNormal)
+            {
+                for (int i = 0; i < n; i++)
+                {
+                    _normalsIn[i] = _normalsIn[i] * 0.1f;// Vector3.zero;
+                }
+                //int[] normalDiv = new int[n];
+                for (int i = 0; i < subMeshCount; i++)
+                {
+                    int[] triangles = _subMeshes[i];
+                    for (int j = 0; j < _triangleCount[i]; j+=3)
+                    {
+                        int i0 = triangles[j];
+                        int i1 = triangles[j + 1];
+                        int i2 = triangles[j + 2];
+                        Vector3 v0 = _vertices[i0];
+                        Vector3 v1 = _vertices[i1];
+                        Vector3 v2 = _vertices[i2];
+
+                        Vector3 normal = Vector3.Cross((v1 - v0), (v2 - v1));//.normalized;
+                        _normalsIn[i0] += normal;
+                        _normalsIn[i1] += normal;
+                        _normalsIn[i2] += normal;
+                        //normalDiv[i0]++;
+                        //normalDiv[i1]++;
+                        //normalDiv[i2]++;
+                    }
+                }
+                for (int i = 0; i < n; i++)
+                {
+                    //_normalsIn[i] /= normalDiv[i];
+                    _normalsIn[i] = _normalsIn[i].normalized;
+                }
+            }
+
             this._meshOut = meshOut;
 
             _assignVertices = _assignVertices ?? (arr => this._meshOut.vertices = arr);

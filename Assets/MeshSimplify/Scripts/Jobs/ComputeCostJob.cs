@@ -194,7 +194,7 @@ namespace Chaos
                     structTriangles.Add(st);
                 }
             }
-            job.Triangles = new NativeArray<StructTriangle>(structTriangles.ToArray(), Allocator.Temp);
+            job.Triangles = new NativeArray<StructTriangle>(structTriangles.ToArray(), Allocator.TempJob);
             job.Vertices = new NativeArray<StructVertex>(vertices.Count, Allocator.TempJob);
             for (int i = 0; i < vertices.Count; i++)
             {
