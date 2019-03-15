@@ -37,7 +37,7 @@ public partial class MeshSimplify : MonoBehaviour
     [SerializeField, HideInInspector] private float _borderCurvature = 2;
     [SerializeField, HideInInspector] private bool _dataDirty = true;
     [SerializeField, HideInInspector] private bool _excludedFromTree = false;
-    public RelevanceSphere[] RelevanceSpheres = null;
+    public RelevanceSphere[] RelevanceSpheres = new RelevanceSphere[0];
     public void ConfigureSimplifier()
     {
         if (MeshSimplifyRoot != null && _overrideRootSettings == false)

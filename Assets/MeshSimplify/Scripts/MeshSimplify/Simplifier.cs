@@ -561,6 +561,12 @@ namespace Chaos
                         Vector3 v2 = _vertices[i2];
 
                         Vector3 normal = Vector3.Cross((v1 - v0), (v2 - v1));//.normalized;
+                        if (Vector3.Dot(normal, _normalsIn[i0]) < 0 && Vector3.Dot(normal, _normalsIn[i1]) < 0 && Vector3.Dot(normal, _normalsIn[i2]) < 0)
+                        {
+                            normal = -normal;
+                            triangles[j] = i2;
+                            triangles[j + 2] = i0;
+                        }
                         _normalsIn[i0] += normal;
                         _normalsIn[i1] += normal;
                         _normalsIn[i2] += normal;
